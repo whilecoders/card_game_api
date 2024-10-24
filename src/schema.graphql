@@ -1,0 +1,69 @@
+# ------------------------------------------------------
+# THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
+# ------------------------------------------------------
+
+type Auth {
+  """Example field (placeholder)"""
+  exampleField: Int!
+}
+
+input CreateAuthInput {
+  """Example field (placeholder)"""
+  exampleField: Int!
+}
+
+input CreateTransactionInput {
+  """Example field (placeholder)"""
+  exampleField: Int!
+}
+
+input CreateUserInput {
+  """Example field (placeholder)"""
+  exampleField: Int!
+}
+
+type Mutation {
+  createAuth(createAuthInput: CreateAuthInput!): Auth!
+  createTransaction(createTransactionInput: CreateTransactionInput!): Transaction!
+  createUser(createUserInput: CreateUserInput!): User!
+  removeAuth(id: Int!): Auth!
+  removeTransaction(id: Int!): Transaction!
+  removeUser(id: Int!): User!
+  updateAuth(updateAuthInput: UpdateAuthInput!): Auth!
+  updateTransaction(updateTransactionInput: UpdateTransactionInput!): Transaction!
+  updateUser(updateUserInput: UpdateUserInput!): User!
+}
+
+type Query {
+  auth(id: Int!): Auth!
+  transaction(id: Int!): Transaction!
+  user(id: Int!): User!
+}
+
+type Transaction {
+  """Example field (placeholder)"""
+  exampleField: Int!
+}
+
+input UpdateAuthInput {
+  """Example field (placeholder)"""
+  exampleField: Int
+  id: Int!
+}
+
+input UpdateTransactionInput {
+  """Example field (placeholder)"""
+  exampleField: Int
+  id: Int!
+}
+
+input UpdateUserInput {
+  """Example field (placeholder)"""
+  exampleField: Int
+  id: Int!
+}
+
+type User {
+  """Example field (placeholder)"""
+  exampleField: Int!
+}
