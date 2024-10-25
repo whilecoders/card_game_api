@@ -2,68 +2,92 @@
 # THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
 # ------------------------------------------------------
 
-type Auth {
-  """Example field (placeholder)"""
-  exampleField: Int!
-}
-
-input CreateAuthInput {
-  """Example field (placeholder)"""
-  exampleField: Int!
-}
-
-input CreateTransactionInput {
-  """Example field (placeholder)"""
-  exampleField: Int!
-}
-
-input CreateUserInput {
-  """Example field (placeholder)"""
-  exampleField: Int!
-}
+"""
+A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date-time format.
+"""
+scalar DateTime
 
 type Mutation {
-  createAuth(createAuthInput: CreateAuthInput!): Auth!
-  createTransaction(createTransactionInput: CreateTransactionInput!): Transaction!
-  createUser(createUserInput: CreateUserInput!): User!
-  removeAuth(id: Int!): Auth!
-  removeTransaction(id: Int!): Transaction!
-  removeUser(id: Int!): User!
-  updateAuth(updateAuthInput: UpdateAuthInput!): Auth!
-  updateTransaction(updateTransactionInput: UpdateTransactionInput!): Transaction!
-  updateUser(updateUserInput: UpdateUserInput!): User!
+  refreshAccessToken(refreshToken: String!, token: String!): Token!
+  signUp(signUpCredential: SignUpCredential!): User!
 }
 
 type Query {
-  auth(id: Int!): Auth!
-  transaction(id: Int!): Transaction!
-  user(id: Int!): User!
+  signIn(signInCredential: SignInCredential!): UserToken!
+}
+
+enum Role {
+  ADMIN
+  MASTER
+  SUPERADMIN
+  SYSTEM
+  USER
+}
+
+input SignInCredential {
+  password: String!
+  username: String!
+}
+
+input SignUpCredential {
+  email: String!
+  password: String!
+  role: Role!
+  username: String!
+}
+
+enum Status {
+  ACTIVE
+  INACTIVE
+}
+
+type Token {
+  access_token: String!
+  refresh_token: String!
 }
 
 type Transaction {
-  """Example field (placeholder)"""
-  exampleField: Int!
+  admin: User!
+  amount: Float!
+  createdAt: DateTime!
+  deletedAt: DateTime!
+  id: String!
+  status: Status!
+  transactionDate: DateTime!
+  type: TransactionType!
+  updatedAt: DateTime!
+  user: User!
 }
 
-input UpdateAuthInput {
-  """Example field (placeholder)"""
-  exampleField: Int
-  id: Int!
-}
-
-input UpdateTransactionInput {
-  """Example field (placeholder)"""
-  exampleField: Int
-  id: Int!
-}
-
-input UpdateUserInput {
-  """Example field (placeholder)"""
-  exampleField: Int
-  id: Int!
+enum TransactionType {
+  CREDIT
+  DEBIT
 }
 
 type User {
-  """Example field (placeholder)"""
-  exampleField: Int!
+  adminTransactions: Transaction!
+  createdAt: DateTime!
+  deletedAt: DateTime!
+  email: String!
+  id: String!
+  name: String!
+  password: String!
+  profile: String!
+  role: Role!
+  status: UserStatus!
+  transactions: Transaction!
+  updatedAt: DateTime!
+  username: String!
+  wallet: Float!
+}
+
+enum UserStatus {
+  ACTIVE
+  INACTIVE
+}
+
+type UserToken {
+  access_token: String!
+  refresh_token: String!
+  user: User!
 }

@@ -15,3 +15,8 @@ export enum TransactionType {
     CREDIT,
     DEBIT
 }
+
+export enum Status {
+    ACTIVE,
+    INACTIVE,
+}

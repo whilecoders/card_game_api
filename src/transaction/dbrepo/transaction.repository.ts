@@ -1,38 +1,74 @@
-import { Role, TransactionType, UserStatus } from "src/common/enums";
-import { User } from "src/user/dbrepo/user.repository";
-import { Column, CreateDateColumn, DeleteDateColumn, Entity, ManyToOne, OneToMany, PrimaryGeneratedColumn, UpdateDateColumn } from "typeorm";
+import { Field, ObjectType, registerEnumType } from '@nestjs/graphql';
+import { Status, TransactionType } from 'src/common/constants/enums';
+import { User } from 'src/user/dbrepo/user.repository';
+import {
+  Column,
+  CreateDateColumn,
+  DeleteDateColumn,
+  Entity,
+  ManyToOne,
+  PrimaryGeneratedColumn,
+  UpdateDateColumn,
+} from 'typeorm';
 
-
-
+registerEnumType(Status, { name: 'Status' });
+registerEnumType(TransactionType, { name: 'TransactionType' });
+@ObjectType('Transaction')
 @Entity()
 export class Transaction {
-    @PrimaryGeneratedColumn()
-    id: number;
+  @Field(() => String)
+  @PrimaryGeneratedColumn()
+  id: string;
 
-    @Column({ type: "decimal", precision: 10, scale: 2, default: 0, nullable: false })
-    amount: number;
+  @Field(() => Number)
+  @Column({ type: 'int', default: 0 })
+  amount: number;
 
-    @Column({ type: 'enum', enum: TransactionType, default: TransactionType.CREDIT, nullable: false })
-    type: TransactionType;
+  @Field(() => TransactionType)
+  @Column({
+    type: 'enum',
+    enum: TransactionType,
+    default: TransactionType.CREDIT,
+    nullable: false,
+  })
+  type: TransactionType;
 
-    @ManyToOne(() => User, (user) => user.transactions, { nullable: false, onDelete: "CASCADE" })
-    user: User;
+  @Field(() => User)
+  @ManyToOne(() => User, (user) => user.transactions, {
+    nullable: false,
+    onDelete: 'CASCADE',
+  })
+  user: User;
 
-    @ManyToOne(() => User, (user) => user.transactions, { nullable: false, onDelete: "CASCADE" })
-    admin: User;
+  @Field(() => User)
+  @ManyToOne(() => User, (user) => user.transactions, {
+    nullable: false,
+    onDelete: 'CASCADE',
+  })
+  admin: User;
 
-    @CreateDateColumn({ type: 'timestamp', nullable: false })
-    transactionDate: Date;
+  @Field(() => Date)
+  @CreateDateColumn({ type: 'timestamp', nullable: false })
+  transactionDate: Date;
 
-    @Column({ type: 'enum', enum: UserStatus, default: UserStatus.ACTIVE, nullable: false })
-    status: UserStatus;
+  @Field(() => Status)
+  @Column({
+    type: 'enum',
+    enum: Status,
+    default: Status.ACTIVE,
+    nullable: false,
+  })
+  status: Status;
 
-    @CreateDateColumn({ type: 'timestamp' })
-    createdAt: Date;
+  @Field(() => Date)
+  @CreateDateColumn({ type: 'timestamp' })
+  createdAt: Date;
 
-    @UpdateDateColumn({ type: 'timestamp' })
-    updatedAt: Date;
+  @Field(() => Date)
+  @UpdateDateColumn({ type: 'timestamp' })
+  updatedAt: Date;
 
-    @DeleteDateColumn({ type: 'timestamp', nullable: true })
-    deletedAt: Date;
+  @Field(() => Date)
+  @DeleteDateColumn({ type: 'timestamp', nullable: true })
+  deletedAt: Date;
 }
