@@ -5,7 +5,6 @@ import { UserProviders } from './dbrepo/user.provider';
 
 @Module({
   providers: [UserResolver, UserService, ...UserProviders],
-  imports: [],
   exports: [...UserProviders]
 })
 export class UserModule { }

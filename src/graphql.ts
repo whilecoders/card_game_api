@@ -8,61 +8,90 @@
 /* tslint:disable */
 /* eslint-disable */
 
-export interface CreateAuthInput {
-    exampleField: number;
+export enum Role {
+    ADMIN = "ADMIN",
+    MASTER = "MASTER",
+    SUPERADMIN = "SUPERADMIN",
+    SYSTEM = "SYSTEM",
+    USER = "USER"
 }
 
-export interface CreateTransactionInput {
-    exampleField: number;
+export enum Status {
+    ACTIVE = "ACTIVE",
+    INACTIVE = "INACTIVE"
 }
 
-export interface CreateUserInput {
-    exampleField: number;
+export enum TransactionType {
+    CREDIT = "CREDIT",
+    DEBIT = "DEBIT"
 }
 
-export interface UpdateAuthInput {
-    exampleField?: Nullable<number>;
-    id: number;
+export enum UserStatus {
+    ACTIVE = "ACTIVE",
+    INACTIVE = "INACTIVE"
 }
 
-export interface UpdateTransactionInput {
-    exampleField?: Nullable<number>;
-    id: number;
+export interface SignInCredential {
+    password: string;
+    username: string;
 }
 
-export interface UpdateUserInput {
-    exampleField?: Nullable<number>;
-    id: number;
-}
-
-export interface Auth {
-    exampleField: number;
+export interface SignUpCredential {
+    email: string;
+    password: string;
+    role: Role;
+    username: string;
 }
 
 export interface IMutation {
-    createAuth(createAuthInput: CreateAuthInput): Auth | Promise<Auth>;
-    createTransaction(createTransactionInput: CreateTransactionInput): Transaction | Promise<Transaction>;
-    createUser(createUserInput: CreateUserInput): User | Promise<User>;
-    removeAuth(id: number): Auth | Promise<Auth>;
-    removeTransaction(id: number): Transaction | Promise<Transaction>;
-    removeUser(id: number): User | Promise<User>;
-    updateAuth(updateAuthInput: UpdateAuthInput): Auth | Promise<Auth>;
-    updateTransaction(updateTransactionInput: UpdateTransactionInput): Transaction | Promise<Transaction>;
-    updateUser(updateUserInput: UpdateUserInput): User | Promise<User>;
+    refreshAccessToken(refreshToken: string, token: string): Token | Promise<Token>;
+    signUp(signUpCredential: SignUpCredential): User | Promise<User>;
 }
 
 export interface IQuery {
-    auth(id: number): Auth | Promise<Auth>;
-    transaction(id: number): Transaction | Promise<Transaction>;
-    user(id: number): User | Promise<User>;
+    signIn(signInCredential: SignInCredential): UserToken | Promise<UserToken>;
+}
+
+export interface Token {
+    access_token: string;
+    refresh_token: string;
 }
 
 export interface Transaction {
-    exampleField: number;
+    admin: User;
+    amount: number;
+    createdAt: DateTime;
+    deletedAt: DateTime;
+    id: string;
+    status: Status;
+    transactionDate: DateTime;
+    type: TransactionType;
+    updatedAt: DateTime;
+    user: User;
 }
 
 export interface User {
-    exampleField: number;
+    adminTransactions: Transaction;
+    createdAt: DateTime;
+    deletedAt: DateTime;
+    email: string;
+    id: string;
+    name: string;
+    password: string;
+    profile: string;
+    role: Role;
+    status: UserStatus;
+    transactions: Transaction;
+    updatedAt: DateTime;
+    username: string;
+    wallet: number;
 }
 
+export interface UserToken {
+    access_token: string;
+    refresh_token: string;
+    user: User;
+}
+
+export type DateTime = any;
 type Nullable<T> = T | null;
