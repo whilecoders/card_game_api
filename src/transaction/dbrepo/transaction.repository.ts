@@ -1,25 +1,19 @@
 import { Field, ObjectType, registerEnumType } from '@nestjs/graphql';
 import { Status, TransactionType } from 'src/common/constants/enums';
+import { BaseEntity } from 'src/common/repository/base.repository';
 import { User } from 'src/user/dbrepo/user.repository';
 import {
   Column,
   CreateDateColumn,
-  DeleteDateColumn,
   Entity,
   ManyToOne,
-  PrimaryGeneratedColumn,
-  UpdateDateColumn,
 } from 'typeorm';
 
 registerEnumType(Status, { name: 'Status' });
 registerEnumType(TransactionType, { name: 'TransactionType' });
 @ObjectType('Transaction')
-@Entity()
-export class Transaction {
-  @Field(() => String)
-  @PrimaryGeneratedColumn()
-  id: string;
-
+@Entity({name:"transaction"})
+export class Transaction extends BaseEntity {
   @Field(() => Number)
   @Column({ type: 'int', default: 0 })
   amount: number;
@@ -34,14 +28,14 @@ export class Transaction {
   type: TransactionType;
 
   @Field(() => User)
-  @ManyToOne(() => User, (user) => user.transactions, {
+  @ManyToOne(() => User, (user) => user.userTransactions, {
     nullable: false,
     onDelete: 'CASCADE',
   })
   user: User;
 
   @Field(() => User)
-  @ManyToOne(() => User, (user) => user.transactions, {
+  @ManyToOne(() => User, (user) => user.userTransactions, {
     nullable: false,
     onDelete: 'CASCADE',
   })
@@ -50,25 +44,4 @@ export class Transaction {
   @Field(() => Date)
   @CreateDateColumn({ type: 'timestamp', nullable: false })
   transactionDate: Date;
-
-  @Field(() => Status)
-  @Column({
-    type: 'enum',
-    enum: Status,
-    default: Status.ACTIVE,
-    nullable: false,
-  })
-  status: Status;
-
-  @Field(() => Date)
-  @CreateDateColumn({ type: 'timestamp' })
-  createdAt: Date;
-
-  @Field(() => Date)
-  @UpdateDateColumn({ type: 'timestamp' })
-  updatedAt: Date;
-
-  @Field(() => Date)
-  @DeleteDateColumn({ type: 'timestamp', nullable: true })
-  deletedAt: Date;
 }

@@ -2,8 +2,10 @@ import { Module } from '@nestjs/common';
 import { TransactionService } from './transaction.service';
 import { TransactionResolver } from './transaction.resolver';
 import { TransactionProviders } from './dbrepo/transaction.provider';
+import { UserModule } from 'src/user/user.module';
 
 @Module({
+  imports:[UserModule],
   providers: [TransactionResolver, TransactionService, ...TransactionProviders],
   exports: [...TransactionProviders]
 })
