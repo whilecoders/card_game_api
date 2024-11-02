@@ -42,6 +42,5 @@ export class SignUpCredential {
 
   @Field(() => Role)
   @IsNotEmpty()
-  @IsString()
   role: Role;
 }
