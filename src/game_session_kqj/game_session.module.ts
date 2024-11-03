@@ -5,7 +5,7 @@ import { GameSessionKqjResolver } from './game_session.resolver';
 import { GameSessionKqjService } from './game_session.service';
 
 @Module({
-  imports:[GameLaunchModule],
+  imports:[],
   providers: [GameSessionKqjResolver, GameSessionKqjService,...GameSessionKqjProviders],
   exports:[GameSessionKqjService,...GameSessionKqjProviders]
 })

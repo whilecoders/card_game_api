@@ -1,14 +1,14 @@
 import { InputType, Field } from '@nestjs/graphql';
 import { IsEnum, IsNumber } from 'class-validator';
-import { TransactionType } from 'src/common/constants';
+import { TokenValues, TransactionType } from 'src/common/constants';
 
-@InputType() 
+@InputType()
 export class WalletDto {
-  @Field(()=>Number) 
+  @Field(() => TokenValues)
   @IsNumber()
-  amount: number;
+  token: TokenValues;
 
-  @Field(()=>TransactionType) 
+  @Field(() => TransactionType)
   @IsEnum([TransactionType], { message: "Type must be 'credit' or 'debit'" })
   type: TransactionType;
 }

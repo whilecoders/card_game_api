@@ -1,5 +1,4 @@
-import { Resolver, Query, Mutation, Args, ID } from '@nestjs/graphql';
-import { CreateGameSessionDto } from './dto/create-game_session.input';
+import { Resolver, Query, Mutation, Args } from '@nestjs/graphql';
 import { UpdateGameSessionDto } from './dto/update-game_session.input';
 import { GameSessionKqj } from './dbrepo/game_session.repository';
 import { GameSessionKqjService } from './game_session.service';
@@ -7,15 +6,6 @@ import { GameSessionKqjService } from './game_session.service';
 @Resolver(() => GameSessionKqj)
 export class GameSessionKqjResolver {
   constructor(private readonly gameSessionService: GameSessionKqjService) {}
-
-  @Mutation(() => GameSessionKqj)
-  async createGameSession(
-    @Args('createGameSessionDto') createGameSessionDto: CreateGameSessionDto,
-  ): Promise<GameSessionKqj> {
-    return await this.gameSessionService.createGameSession(
-      createGameSessionDto,
-    );
-  }
 
   @Mutation(() => GameSessionKqj)
   async updateGameSession(
@@ -29,9 +19,7 @@ export class GameSessionKqjResolver {
   }
 
   @Query(() => GameSessionKqj, { name: 'getGameSessionById' })
-  async getGameSessionById(
-    @Args('id') id: string,
-  ): Promise<GameSessionKqj> {
+  async getGameSessionById(@Args('id') id: string): Promise<GameSessionKqj> {
     return await this.gameSessionService.getGameSessionById(id);
   }
 
@@ -39,4 +27,17 @@ export class GameSessionKqjResolver {
   async getAllGameSessions(): Promise<GameSessionKqj[]> {
     return await this.gameSessionService.getAllGameSessions();
   }
+
+  @Query(() => [GameSessionKqj], { name: 'getLiveGameSessions' })
+  async getLiveGameSessions(): Promise<GameSessionKqj[]> {
+    return await this.gameSessionService.getLiveGameSessions();
+  }
+
+  @Query(() => [GameSessionKqj], { name: 'getGameSessionsByDate' })
+  async getGameSessionsByDate(
+    @Args('date') date: string,
+  ): Promise<GameSessionKqj[]> {
+    return await this.gameSessionService.getGameSessionsByDate(date);
+  }
+
 }

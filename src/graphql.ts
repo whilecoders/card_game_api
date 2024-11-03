@@ -75,9 +75,9 @@ export enum GameLaunchStatus {
 }
 
 export enum GameSessionStatus {
-    COMPLETED = "COMPLETED",
+    END = "END",
     INACTIVE = "INACTIVE",
-    IN_PROGRESS = "IN_PROGRESS",
+    LIVE = "LIVE",
     UPCOMING = "UPCOMING"
 }
 
@@ -124,14 +124,6 @@ export interface CreateGameLaunchDto {
     start_time: string;
 }
 
-export interface CreateGameSessionDto {
-    game_launch_id: string;
-    game_result_card?: Nullable<GameKqjCards>;
-    session_end_time: string;
-    session_start_time: string;
-    session_status?: Nullable<GameSessionStatus>;
-}
-
 export interface CreateRecordSessionKqjDto {
     choosen_card: GameKqjCards;
     gameSessionId: string;
@@ -143,7 +135,7 @@ export interface CreateRecordSessionKqjDto {
 export interface CreateTransactionSessionDto {
     recordSessionId: string;
     token: TokenValues;
-    type?: Nullable<TransactionType>;
+    type: TransactionType;
 }
 
 export interface SignInCredential {
@@ -159,27 +151,16 @@ export interface SignUpCredential {
 }
 
 export interface UpdateGameLaunchDto {
-    end_time?: Nullable<string>;
-    game_duration?: Nullable<string>;
-    game_in_day?: Nullable<number>;
-    game_launch_status?: Nullable<GameLaunchStatus>;
-    start_time?: Nullable<string>;
+    end_time: string;
+    game_duration: string;
+    game_in_day: number;
+    game_launch_status: GameLaunchStatus;
+    start_time: string;
 }
 
 export interface UpdateGameSessionDto {
-    game_result_card?: Nullable<GameKqjCards>;
-    session_end_time?: Nullable<string>;
-    session_start_time?: Nullable<string>;
+    game_result_card: GameKqjCards;
     session_status?: Nullable<GameSessionStatus>;
-}
-
-export interface UpdateRecordSessionKqjDto {
-    choosen_card?: Nullable<GameKqjCards>;
-    gameSessionId?: Nullable<string>;
-    id: string;
-    record_status?: Nullable<RecordSessionStatus>;
-    token?: Nullable<TokenValues>;
-    userId?: Nullable<string>;
 }
 
 export interface UpdateTransactionSessionDto {
@@ -190,7 +171,7 @@ export interface UpdateTransactionSessionDto {
 }
 
 export interface WalletDto {
-    amount: number;
+    token: TokenValues;
     type: TransactionType;
 }
 
@@ -229,16 +210,15 @@ export interface GameSession {
 }
 
 export interface IMutation {
+    DeleteGameLaunch(id: string): boolean | Promise<boolean>;
     createGameLaunch(adminId: string, createGameLaunchDto: CreateGameLaunchDto): GameLaunch | Promise<GameLaunch>;
-    createGameSession(createGameSessionDto: CreateGameSessionDto): GameSession | Promise<GameSession>;
     createRecordSession(createRecordSessionKqjDto: CreateRecordSessionKqjDto): RecordSessionKqj | Promise<RecordSessionKqj>;
     createTransactionSession(createTransactionSessionDto: CreateTransactionSessionDto): TransactionSession | Promise<TransactionSession>;
     refreshAccessToken(refreshToken: string, token: string): Token | Promise<Token>;
     signUp(signUpCredential: SignUpCredential): User | Promise<User>;
-    softDeleteGameLaunch(id: string): boolean | Promise<boolean>;
+    undeleteGameLaunch(id: string): boolean | Promise<boolean>;
     updateGameLaunch(id: string, updateGameLaunchDto: UpdateGameLaunchDto): GameLaunch | Promise<GameLaunch>;
     updateGameSession(id: string, updateGameSessionDto: UpdateGameSessionDto): GameSession | Promise<GameSession>;
-    updateRecordSession(id: string, updateRecordSessionKqjDto: UpdateRecordSessionKqjDto): RecordSessionKqj | Promise<RecordSessionKqj>;
     updateTransactionSession(id: string, updateTransactionSessionDto: UpdateTransactionSessionDto): TransactionSession | Promise<TransactionSession>;
     updateWallet(adminId: string, userId: string, walletData: WalletDto): Transaction | Promise<Transaction>;
 }
@@ -247,10 +227,16 @@ export interface IQuery {
     getAllGameLaunches(): GameLaunch[] | Promise<GameLaunch[]>;
     getAllGameSessions(): GameSession[] | Promise<GameSession[]>;
     getAllRecordSessions(): RecordSessionKqj[] | Promise<RecordSessionKqj[]>;
+    getAllRecordsBySessionId(sessionId: string): RecordSessionKqj[] | Promise<RecordSessionKqj[]>;
     getAllTransactionSessions(): TransactionSession[] | Promise<TransactionSession[]>;
+    getGameLaunchByDate(endDate: string, startDate: string): GameLaunch[] | Promise<GameLaunch[]>;
     getGameLaunchById(id: string): GameLaunch | Promise<GameLaunch>;
     getGameSessionById(id: string): GameSession | Promise<GameSession>;
+    getGameSessionsByDate(date: string): GameSession[] | Promise<GameSession[]>;
+    getLiveGameSessions(): GameSession[] | Promise<GameSession[]>;
+    getRecordBySessionId(sessionId: string): RecordSessionKqj | Promise<RecordSessionKqj>;
     getRecordSessionById(id: string): RecordSessionKqj | Promise<RecordSessionKqj>;
+    getRecordsByUserId(userId: string): RecordSessionKqj[] | Promise<RecordSessionKqj[]>;
     getTransactionSessionById(id: string): TransactionSession | Promise<TransactionSession>;
     signIn(signInCredential: SignInCredential): UserToken | Promise<UserToken>;
 }

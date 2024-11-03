@@ -11,9 +11,12 @@ export class GameLaunchResolver {
   @Mutation(() => GameLaunch)
   async createGameLaunch(
     @Args('createGameLaunchDto') createGameLaunchDto: CreateGameLaunchDto,
-    @Args('adminId')adminId: string,
+    @Args('adminId') adminId: string,
   ): Promise<GameLaunch> {
-    return await this.gameLaunchService.createGameLauncher(createGameLaunchDto,adminId);
+    return await this.gameLaunchService.createGameLauncher(
+      createGameLaunchDto,
+      adminId,
+    );
   }
 
   @Mutation(() => GameLaunch)
@@ -21,17 +24,21 @@ export class GameLaunchResolver {
     @Args('id') id: string,
     @Args('updateGameLaunchDto') updateGameLaunchDto: UpdateGameLaunchDto,
   ): Promise<GameLaunch> {
-    return await this.gameLaunchService.updateGameLauncher(
+    return await this.gameLaunchService.updateGameLaunch(
       id,
       updateGameLaunchDto,
     );
   }
 
   @Mutation(() => Boolean)
-  async softDeleteGameLaunch(
-    @Args('id') id: string,
-  ): Promise<boolean> {
-    await this.gameLaunchService.softDeleteGameLauncher(id);
+  async DeleteGameLaunch(@Args('id') id: string): Promise<boolean> {
+    await this.gameLaunchService.deleteGameLauncher(id);
+    return true;
+  }
+
+  @Mutation(() => Boolean)
+  async undeleteGameLaunch(@Args('id') id: string): Promise<boolean> {
+    await this.gameLaunchService.undeleteGameLaunch(id);
     return true;
   }
 
@@ -41,9 +48,16 @@ export class GameLaunchResolver {
   }
 
   @Query(() => GameLaunch, { name: 'getGameLaunchById' })
-  async getGameLaunchById(
-    @Args('id') id: string,
-  ): Promise<GameLaunch> {
+  async getGameLaunchById(@Args('id') id: string): Promise<GameLaunch> {
     return await this.gameLaunchService.getGameLaunchById(id);
   }
+
+  @Query(() => [GameLaunch], { name: 'getGameLaunchByDate' })
+  async getGameLaunchByDate(
+    @Args('startDate') startDate: string,
+    @Args('endDate') endDate: string,
+  ): Promise<GameLaunch[]> {
+    return await this.gameLaunchService.getGameLaunchByDate(startDate, endDate);
+  }
+  
 }

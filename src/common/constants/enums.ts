@@ -30,8 +30,8 @@ export enum GameLaunchStatus {
 }
 
 export enum GameSessionStatus {
-    IN_PROGRESS,
-    COMPLETED,
+    LIVE,
+    END,
     UPCOMING,
     INACTIVE ,
 }

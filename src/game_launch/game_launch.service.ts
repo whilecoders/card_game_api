@@ -3,8 +3,9 @@ import {
   NotFoundException,
   Inject,
   InternalServerErrorException,
+  BadRequestException,
 } from '@nestjs/common';
-import { Repository } from 'typeorm';
+import { Between, Repository } from 'typeorm';
 import { GameLaunch } from './dbrepo/game_launch.repository';
 import { CreateGameLaunchDto } from './dto/create-game_launch.input';
 import { UpdateGameLaunchDto } from './dto/update-game_launch.input';
@@ -54,7 +55,6 @@ export class GameLaunchService {
         );
       }
 
-
       await this.createGameSessions(
         game_created,
         createGameLaunchDto.start_time,
@@ -75,7 +75,6 @@ export class GameLaunchService {
     game_duration: string,
     gameInDay: number,
   ) {
-
     if (!gameLaunch) {
       throw new Error(
         'gameLaunch is required and cannot be null or undefined.',
@@ -91,7 +90,7 @@ export class GameLaunchService {
     }
 
     if (gameInDay === undefined) {
-      throw new Error('gameInDay is required and cannot be empty .');
+      throw new Error('gameInDay is required and cannot be empty.');
     }
 
     // Convert start_time from string to Date
@@ -104,25 +103,48 @@ export class GameLaunchService {
       );
     }
 
+    // Log the initial values
+    console.log('Initial start_time:', sessionStartTime.toISOString());
+    console.log('Game duration:', game_duration);
+
     const sessionsToCreate = [];
-    console.log(start_time)
+
     for (let i = 0; i < gameInDay; i++) {
+      const durationInMs = parseGameDuration(game_duration);
+      console.log(`Parsed game duration in ms: ${durationInMs}`);
+
+      // Ensure durationInMs is valid
+      if (isNaN(durationInMs) || durationInMs <= 0) {
+        throw new Error(
+          'Parsed duration is invalid. Please check the game_duration format.',
+        );
+      }
+
       const sessionEndTime = calculateSessionEndTime(
         sessionStartTime,
         game_duration,
       );
-      console.log(`Session ${i + 1}: Start Time = ${sessionStartTime}, End Time = ${sessionEndTime}`);
+
+      // Ensure sessionEndTime is valid
+      if (isNaN(sessionEndTime.getTime())) {
+        throw new Error('Calculated end time is invalid.');
+      }
+
+      console.log(
+        `Session ${i + 1}: Start Time = ${sessionStartTime.toISOString()}, End Time = ${sessionEndTime.toISOString()}`,
+      );
 
       const session = this.gameSessionRepository.create({
         game_launch: gameLaunch,
         session_start_time: new Date(sessionStartTime),
         session_end_time: new Date(sessionEndTime),
       });
+
       console.log(`Created Session:`, session);
       sessionsToCreate.push(session);
-      sessionStartTime.setTime(
-        sessionStartTime.getTime() + parseGameDuration(game_duration),
-      );
+
+      // Update the start time for the next session
+      sessionStartTime.setTime(sessionStartTime.getTime() + durationInMs);
     }
 
     try {
@@ -134,59 +156,43 @@ export class GameLaunchService {
     }
   }
 
-  async updateGameLauncher(
+  async updateGameLaunch(
     id: string,
     updateGameLaunchDto: UpdateGameLaunchDto,
   ): Promise<GameLaunch> {
-    const gameLaunch = await this.gameLaunchRepository.findOne({
-      where: { id },
-      relations: ['sessions'],
-    });
+    const gameLaunch = await this.gameLaunchRepository.findOne({ where: { id } });
   
     if (!gameLaunch) {
       throw new NotFoundException(`GameLaunch with ID ${id} not found`);
     }
   
-    // Update only the provided fields
-    if (updateGameLaunchDto.start_time) {
-      gameLaunch.start_time = new Date(updateGameLaunchDto.start_time);
-    }
-    if (updateGameLaunchDto.end_time) {
-      gameLaunch.end_time = new Date(updateGameLaunchDto.end_time);
-    }
-    if (updateGameLaunchDto.game_duration) {
-      gameLaunch.game_duration = updateGameLaunchDto.game_duration;
-    }
-    if (updateGameLaunchDto.game_in_day) {
-      gameLaunch.game_in_day = updateGameLaunchDto.game_in_day;
-    }
+    const startTime = new Date(updateGameLaunchDto.start_time);
+    const endTime = new Date(updateGameLaunchDto.end_time);
+
+    gameLaunch.start_time = startTime;
+    gameLaunch.end_time = endTime;
+    gameLaunch.game_duration = updateGameLaunchDto.game_duration;
+    gameLaunch.game_in_day = updateGameLaunchDto.game_in_day;
+
     if (updateGameLaunchDto.game_launch_status) {
       gameLaunch.game_launch_status = updateGameLaunchDto.game_launch_status;
-    }
-  
-    // Update sessions if related fields are modified
-    if (
-      updateGameLaunchDto.start_time ||
-      updateGameLaunchDto.game_duration ||
-      updateGameLaunchDto.game_in_day
-    ) {
-      await this.updateGameSessions(
-        gameLaunch,
-        updateGameLaunchDto.start_time,
-        updateGameLaunchDto.game_duration || gameLaunch.game_duration,
-        updateGameLaunchDto.game_in_day || gameLaunch.game_in_day,
-      );
-    }
+    }  
+
+    await this.updateGameSessions(
+      gameLaunch,
+      updateGameLaunchDto.start_time,
+      updateGameLaunchDto.game_duration,
+      updateGameLaunchDto.game_in_day,
+    );
   
     try {
       return await this.gameLaunchRepository.save(gameLaunch);
     } catch (error) {
-      throw new InternalServerErrorException(
-        'Failed to update GameLaunch. Please try again.',
-      );
+      throw new InternalServerErrorException('Failed to update GameLaunch.');
     }
   }
   
+
   private async updateGameSessions(
     gameLaunch: GameLaunch,
     start_time: string,
@@ -198,17 +204,30 @@ export class GameLaunchService {
     const existingSessions = await this.gameSessionRepository.find({
       where: { game_launch: gameLaunch },
     });
-  
+
+    // Validate sessionStartTime
+    if (isNaN(sessionStartTime.getTime())) {
+      throw new Error(
+        'Invalid start_time format. Must be a valid date string.',
+      );
+    }
+
     const sessionsToCreate = [];
     const sessionsToUpdate = [];
-  
+    const durationInMs = parseGameDuration(game_duration);
+
+    // Log the initial values
+    console.log('Initial start_time:', sessionStartTime.toISOString());
+    console.log('Game duration (ms):', durationInMs);
+
     for (let i = 0; i < game_in_day; i++) {
       const sessionEndTime = calculateSessionEndTime(
         sessionStartTime,
         game_duration,
       );
-  
+
       if (i < existingSessions.length) {
+        // Update existing session
         const session = existingSessions[i];
         session.session_start_time = sessionStartTime;
         session.session_end_time = sessionEndTime;
@@ -222,13 +241,14 @@ export class GameLaunchService {
         });
         sessionsToCreate.push(session);
       }
-  
+
       // Update session start time for the next iteration
-      sessionStartTime.setTime(sessionStartTime.getTime() + parseGameDuration(game_duration));
+      sessionStartTime.setTime(sessionStartTime.getTime() + durationInMs);
     }
-  
+
+    // Remove extra sessions if game_in_day is decreased
     const sessionsToRemove = existingSessions.slice(game_in_day);
-  
+
     try {
       await this.gameSessionRepository.remove(sessionsToRemove);
       await this.gameSessionRepository.save([
@@ -241,16 +261,16 @@ export class GameLaunchService {
       );
     }
   }
-  
 
   async getAllGameLaunches(): Promise<GameLaunch[]> {
     try {
-     const allGameLaunch=await this.gameLaunchRepository.find({
-        relations: ['admin'],
+      const allGameLaunch = await this.gameLaunchRepository.find({
+        where: { deletedBy: null },
+        relations: ['admin', 'gameSession'],
       });
-      if (!allGameLaunch)
-        throw new NotFoundException(`GameLaunch not found`);
-      return allGameLaunch
+      if (!allGameLaunch.length)
+        throw new NotFoundException(`No GameLaunches found`);
+      return allGameLaunch;
     } catch (error) {
       throw new InternalServerErrorException(
         'Failed to retrieve GameLaunches.',
@@ -260,15 +280,15 @@ export class GameLaunchService {
 
   async getGameLaunchById(id: string): Promise<GameLaunch> {
     const gameLaunch = await this.gameLaunchRepository.findOne({
-      where: { id },
-      relations: ['admin'],
+      where: { id, deletedBy: null },
+      relations: ['admin', 'gameSession'],
     });
     if (!gameLaunch)
       throw new NotFoundException(`GameLaunch with ID ${id} not found`);
     return gameLaunch;
   }
 
-  async softDeleteGameLauncher(id: string): Promise<void> {
+  async deleteGameLauncher(id: string): Promise<void> {
     const gameLaunch = await this.gameLaunchRepository.findOne({
       where: { id },
     });
@@ -284,6 +304,43 @@ export class GameLaunchService {
       throw new InternalServerErrorException(
         'Failed to soft delete GameLaunch.',
       );
+    }
+  }
+
+
+  async getGameLaunchByDate(startDate: string, endDate: string): Promise<GameLaunch[]> {
+    const start = new Date(startDate);
+    const end = new Date(endDate);
+
+    if (isNaN(start.getTime()) || isNaN(end.getTime())) {
+      throw new BadRequestException('Invalid date format. Please provide valid ISO dates.');
+    }
+
+    return await this.gameLaunchRepository.find({
+      where: {
+        start_time: Between(start, end),
+      },
+    });
+  }
+
+  async undeleteGameLaunch(id: string): Promise<void> {
+    const gameLaunch = await this.gameLaunchRepository.findOne({
+      where: { id },
+    });
+    if (!gameLaunch)
+      throw new NotFoundException(`GameLaunch with ID ${id} not found`);
+
+    if (gameLaunch.deletedBy === null) {
+      throw new BadRequestException(`GameLaunch with ID ${id} is not deleted`);
+    }
+
+    gameLaunch.deletedBy = null;
+    gameLaunch.deletedAt = null;
+
+    try {
+      await this.gameLaunchRepository.save(gameLaunch);
+    } catch (error) {
+      throw new InternalServerErrorException('Failed to undelete GameLaunch.');
     }
   }
 }

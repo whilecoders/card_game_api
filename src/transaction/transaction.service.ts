@@ -23,12 +23,12 @@ export class TransactionService {
         if (!admin) throw new NotFoundException('Admin not found');
     
         if (walletDto.type === TransactionType.CREDIT) {
-          user.wallet += walletDto.amount;
+          user.wallet += walletDto.token;
         } else if (walletDto.type === TransactionType.DEBIT) {
-          if (user.wallet < walletDto.amount) {
+          if (user.wallet < walletDto.token) {
             throw new BadRequestException('Insufficient funds');
           }
-          user.wallet -= walletDto.amount;
+          user.wallet -= walletDto.token;
         }
     
         await this.userRepository.save(user);
@@ -36,7 +36,7 @@ export class TransactionService {
         const transaction = this.transactionRepository.create({
           user:{ id: user.id },
           admin:{ id: admin.id },
-          amount: walletDto.amount,
+          amount: walletDto.token,
           type: walletDto.type,
         });
     

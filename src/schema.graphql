@@ -11,14 +11,6 @@ input CreateGameLaunchDto {
   start_time: String!
 }
 
-input CreateGameSessionDto {
-  game_launch_id: String!
-  game_result_card: GameKqjCards
-  session_end_time: String!
-  session_start_time: String!
-  session_status: GameSessionStatus
-}
-
 input CreateRecordSessionKqjDto {
   choosen_card: GameKqjCards!
   gameSessionId: String!
@@ -30,7 +22,7 @@ input CreateRecordSessionKqjDto {
 input CreateTransactionSessionDto {
   recordSessionId: String!
   token: TokenValues!
-  type: TransactionType
+  type: TransactionType!
 }
 
 """
@@ -139,23 +131,22 @@ type GameSession {
 }
 
 enum GameSessionStatus {
-  COMPLETED
+  END
   INACTIVE
-  IN_PROGRESS
+  LIVE
   UPCOMING
 }
 
 type Mutation {
+  DeleteGameLaunch(id: String!): Boolean!
   createGameLaunch(adminId: String!, createGameLaunchDto: CreateGameLaunchDto!): GameLaunch!
-  createGameSession(createGameSessionDto: CreateGameSessionDto!): GameSession!
   createRecordSession(createRecordSessionKqjDto: CreateRecordSessionKqjDto!): RecordSessionKqj!
   createTransactionSession(createTransactionSessionDto: CreateTransactionSessionDto!): TransactionSession!
   refreshAccessToken(refreshToken: String!, token: String!): Token!
   signUp(signUpCredential: SignUpCredential!): User!
-  softDeleteGameLaunch(id: String!): Boolean!
+  undeleteGameLaunch(id: String!): Boolean!
   updateGameLaunch(id: String!, updateGameLaunchDto: UpdateGameLaunchDto!): GameLaunch!
   updateGameSession(id: String!, updateGameSessionDto: UpdateGameSessionDto!): GameSession!
-  updateRecordSession(id: String!, updateRecordSessionKqjDto: UpdateRecordSessionKqjDto!): RecordSessionKqj!
   updateTransactionSession(id: ID!, updateTransactionSessionDto: UpdateTransactionSessionDto!): TransactionSession!
   updateWallet(adminId: String!, userId: String!, walletData: WalletDto!): Transaction!
 }
@@ -164,10 +155,16 @@ type Query {
   getAllGameLaunches: [GameLaunch!]!
   getAllGameSessions: [GameSession!]!
   getAllRecordSessions: [RecordSessionKqj!]!
+  getAllRecordsBySessionId(sessionId: String!): [RecordSessionKqj!]!
   getAllTransactionSessions: [TransactionSession!]!
+  getGameLaunchByDate(endDate: String!, startDate: String!): [GameLaunch!]!
   getGameLaunchById(id: String!): GameLaunch!
   getGameSessionById(id: String!): GameSession!
+  getGameSessionsByDate(date: String!): [GameSession!]!
+  getLiveGameSessions: [GameSession!]!
+  getRecordBySessionId(sessionId: String!): RecordSessionKqj!
   getRecordSessionById(id: String!): RecordSessionKqj!
+  getRecordsByUserId(userId: String!): [RecordSessionKqj!]!
   getTransactionSessionById(id: ID!): TransactionSession!
   signIn(signInCredential: SignInCredential!): UserToken!
 }
@@ -262,27 +259,16 @@ enum TransactionType {
 }
 
 input UpdateGameLaunchDto {
-  end_time: String
-  game_duration: String
-  game_in_day: Float
-  game_launch_status: GameLaunchStatus
-  start_time: String
+  end_time: String!
+  game_duration: String!
+  game_in_day: Float!
+  game_launch_status: GameLaunchStatus!
+  start_time: String!
 }
 
 input UpdateGameSessionDto {
-  game_result_card: GameKqjCards
-  session_end_time: String
-  session_start_time: String
+  game_result_card: GameKqjCards!
   session_status: GameSessionStatus
-}
-
-input UpdateRecordSessionKqjDto {
-  choosen_card: GameKqjCards
-  gameSessionId: String
-  id: String!
-  record_status: RecordSessionStatus
-  token: TokenValues
-  userId: String
 }
 
 input UpdateTransactionSessionDto {
@@ -326,6 +312,6 @@ type UserToken {
 }
 
 input WalletDto {
-  amount: Float!
+  token: TokenValues!
   type: TransactionType!
 }

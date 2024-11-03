@@ -6,9 +6,9 @@ export class CreateTransactionSessionDto {
   @Field(() => TokenValues)
   token: TokenValues;
 
-  @Field(() => TransactionType, { nullable: true })
-  type?: TransactionType; // Optional, default to CREDIT
+  @Field(() => TransactionType)
+  type: TransactionType;
 
-  @Field(() => String) // Assuming the Record Session ID is passed as a string
+  @Field(() => String)
   recordSessionId: string;
 }

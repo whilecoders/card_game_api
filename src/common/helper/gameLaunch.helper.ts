@@ -55,15 +55,33 @@
 
 
 //helper For GameSession
-
-// Helper function to format Date as HH:MM:SS
-export const calculateSessionEndTime = (start_time: Date,game_duration: string,): Date => {
+export const calculateSessionEndTime = (start_time: Date, game_duration: string): Date => {
   const durationInMs = parseGameDuration(game_duration);
+  // console.log(`Calculating end time from start time ${start_time.toISOString()} with duration ${durationInMs} ms`);
   return new Date(start_time.getTime() + durationInMs);
 };
 
+// Parse the game duration string in "HH:MM" format or single hour input to milliseconds
 export const parseGameDuration = (game_duration: string): number => {
-  // Assuming game_duration is in format "HH:MM"
-  const [hours, minutes] = game_duration.split(':').map(Number);
+  let hours: number;
+  let minutes: number;
+
+  if (game_duration.includes(':')) {
+    // Handle "HH:MM" format
+    const [h, m] = game_duration.split(':').map(Number);
+    hours = h || 0; // Default to 0 if hours are NaN
+    minutes = m || 0; // Default to 0 if minutes are NaN
+  } else {
+    // Handle single hour input, e.g., "1" should be treated as "1:00"
+    hours = Number(game_duration);
+    minutes = 0; // Default to 0 minutes
+  }
+
+  // Validate hours and minutes
+  if (isNaN(hours) || isNaN(minutes)) {
+    throw new Error('Invalid game duration format. Must be in "HH:MM" format or a single hour value.');
+  }
+
+  // Convert to milliseconds
   return (hours * 60 + minutes) * 60 * 1000; // Convert to milliseconds
 };
