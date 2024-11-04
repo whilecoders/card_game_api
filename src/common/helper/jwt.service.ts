@@ -7,7 +7,7 @@ export class JWTService {
   constructor(private jwtService: JwtService) {}
 
   // Generate Access Token
-  async generateAccessToken(userId: string): Promise<string> {
+  async generateAccessToken(userId: number): Promise<string> {
     return this.jwtService.signAsync(
       { sub: userId },
       { secret: EnvKeyConstants.JWT_SECRET, expiresIn: '1h' },
@@ -15,7 +15,7 @@ export class JWTService {
   }
 
   // Generate Refresh Token
-  async generateRefreshToken(userId: string): Promise<string> {
+  async generateRefreshToken(userId: number): Promise<string> {
     return this.jwtService.signAsync(
       { sub: userId },
       { secret: EnvKeyConstants.JWT_REFRESH_SECRET, expiresIn: '1d' },

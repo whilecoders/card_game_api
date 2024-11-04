@@ -10,8 +10,8 @@ export class TransactionResolver {
   ){}  
   @Mutation(() => Transaction)
   updateWallet(
-    @Args('userId') userId: string,
-    @Args('adminId') adminId: string,
+    @Args('userId') userId: number,
+    @Args('adminId') adminId: number,
     @Args('walletData') walletData: WalletDto
   ) {
     return this.transaction.updateWallet(userId, adminId, walletData);

@@ -8,27 +8,7 @@
 /* tslint:disable */
 /* eslint-disable */
 
-export enum Game {
-    KQJ = "KQJ"
-}
-
 export enum GameKqjCards {
-    ACE_OF_CLUBS = "ACE_OF_CLUBS",
-    ACE_OF_DIAMONDS = "ACE_OF_DIAMONDS",
-    ACE_OF_HEARTS = "ACE_OF_HEARTS",
-    ACE_OF_SPADES = "ACE_OF_SPADES",
-    EIGHT_OF_CLUBS = "EIGHT_OF_CLUBS",
-    EIGHT_OF_DIAMONDS = "EIGHT_OF_DIAMONDS",
-    EIGHT_OF_HEARTS = "EIGHT_OF_HEARTS",
-    EIGHT_OF_SPADES = "EIGHT_OF_SPADES",
-    FIVE_OF_CLUBS = "FIVE_OF_CLUBS",
-    FIVE_OF_DIAMONDS = "FIVE_OF_DIAMONDS",
-    FIVE_OF_HEARTS = "FIVE_OF_HEARTS",
-    FIVE_OF_SPADES = "FIVE_OF_SPADES",
-    FOUR_OF_CLUBS = "FOUR_OF_CLUBS",
-    FOUR_OF_DIAMONDS = "FOUR_OF_DIAMONDS",
-    FOUR_OF_HEARTS = "FOUR_OF_HEARTS",
-    FOUR_OF_SPADES = "FOUR_OF_SPADES",
     JACK_OF_CLUBS = "JACK_OF_CLUBS",
     JACK_OF_DIAMONDS = "JACK_OF_DIAMONDS",
     JACK_OF_HEARTS = "JACK_OF_HEARTS",
@@ -37,48 +17,28 @@ export enum GameKqjCards {
     KING_OF_DIAMONDS = "KING_OF_DIAMONDS",
     KING_OF_HEARTS = "KING_OF_HEARTS",
     KING_OF_SPADES = "KING_OF_SPADES",
-    NINE_OF_CLUBS = "NINE_OF_CLUBS",
-    NINE_OF_DIAMONDS = "NINE_OF_DIAMONDS",
-    NINE_OF_HEARTS = "NINE_OF_HEARTS",
-    NINE_OF_SPADES = "NINE_OF_SPADES",
     QUEEN_OF_CLUBS = "QUEEN_OF_CLUBS",
     QUEEN_OF_DIAMONDS = "QUEEN_OF_DIAMONDS",
     QUEEN_OF_HEARTS = "QUEEN_OF_HEARTS",
-    QUEEN_OF_SPADES = "QUEEN_OF_SPADES",
-    SEVEN_OF_CLUBS = "SEVEN_OF_CLUBS",
-    SEVEN_OF_DIAMONDS = "SEVEN_OF_DIAMONDS",
-    SEVEN_OF_HEARTS = "SEVEN_OF_HEARTS",
-    SEVEN_OF_SPADES = "SEVEN_OF_SPADES",
-    SIX_OF_CLUBS = "SIX_OF_CLUBS",
-    SIX_OF_DIAMONDS = "SIX_OF_DIAMONDS",
-    SIX_OF_HEARTS = "SIX_OF_HEARTS",
-    SIX_OF_SPADES = "SIX_OF_SPADES",
-    TEN_OF_CLUBS = "TEN_OF_CLUBS",
-    TEN_OF_DIAMONDS = "TEN_OF_DIAMONDS",
-    TEN_OF_HEARTS = "TEN_OF_HEARTS",
-    TEN_OF_SPADES = "TEN_OF_SPADES",
-    THREE_OF_CLUBS = "THREE_OF_CLUBS",
-    THREE_OF_DIAMONDS = "THREE_OF_DIAMONDS",
-    THREE_OF_HEARTS = "THREE_OF_HEARTS",
-    THREE_OF_SPADES = "THREE_OF_SPADES",
-    TWO_OF_CLUBS = "TWO_OF_CLUBS",
-    TWO_OF_DIAMONDS = "TWO_OF_DIAMONDS",
-    TWO_OF_HEARTS = "TWO_OF_HEARTS",
-    TWO_OF_SPADES = "TWO_OF_SPADES"
+    QUEEN_OF_SPADES = "QUEEN_OF_SPADES"
 }
 
-export enum GameLaunchStatus {
+export enum GameSessionStatus {
+    END = "END",
+    INACTIVE = "INACTIVE",
+    LIVE = "LIVE",
+    UPCOMING = "UPCOMING"
+}
+
+export enum GameStatus {
     AVAILABLE = "AVAILABLE",
     FINISHED = "FINISHED",
     UNAVAILABLE = "UNAVAILABLE",
     UPCOMING = "UPCOMING"
 }
 
-export enum GameSessionStatus {
-    COMPLETED = "COMPLETED",
-    INACTIVE = "INACTIVE",
-    IN_PROGRESS = "IN_PROGRESS",
-    UPCOMING = "UPCOMING"
+export enum GameType {
+    KQJ = "KQJ"
 }
 
 export enum RecordSessionStatus {
@@ -115,33 +75,26 @@ export enum UserStatus {
     SUSPENDED = "SUSPENDED"
 }
 
-export interface CreateGameLaunchDto {
-    end_time: string;
-    game: Game;
-    game_duration: string;
+export interface CreateGamesDto {
+    end_time: DateTime;
+    game_duration: number;
     game_in_day: number;
-    game_launch_status: GameLaunchStatus;
-    start_time: string;
-}
-
-export interface CreateGameSessionDto {
-    game_launch_id: string;
-    game_result_card?: Nullable<GameKqjCards>;
-    session_end_time: string;
-    session_start_time: string;
-    session_status?: Nullable<GameSessionStatus>;
+    game_status: GameStatus;
+    game_type: GameType;
+    start_time: DateTime;
+    user_id: number;
 }
 
 export interface CreateRecordSessionKqjDto {
     choosen_card: GameKqjCards;
-    gameSessionId: string;
+    gameSessionId: number;
     record_status: RecordSessionStatus;
     token: TokenValues;
-    userId: string;
+    userId: number;
 }
 
 export interface CreateTransactionSessionDto {
-    recordSessionId: string;
+    recordSessionId: number;
     token: TokenValues;
     type?: Nullable<TransactionType>;
 }
@@ -158,14 +111,6 @@ export interface SignUpCredential {
     username: string;
 }
 
-export interface UpdateGameLaunchDto {
-    end_time?: Nullable<string>;
-    game_duration?: Nullable<string>;
-    game_in_day?: Nullable<number>;
-    game_launch_status?: Nullable<GameLaunchStatus>;
-    start_time?: Nullable<string>;
-}
-
 export interface UpdateGameSessionDto {
     game_result_card?: Nullable<GameKqjCards>;
     session_end_time?: Nullable<string>;
@@ -173,20 +118,12 @@ export interface UpdateGameSessionDto {
     session_status?: Nullable<GameSessionStatus>;
 }
 
-export interface UpdateRecordSessionKqjDto {
-    choosen_card?: Nullable<GameKqjCards>;
-    gameSessionId?: Nullable<string>;
-    id: string;
-    record_status?: Nullable<RecordSessionStatus>;
-    token?: Nullable<TokenValues>;
-    userId?: Nullable<string>;
-}
-
-export interface UpdateTransactionSessionDto {
-    id: string;
-    recordSessionId?: Nullable<string>;
-    token?: Nullable<TokenValues>;
-    type?: Nullable<TransactionType>;
+export interface UpdateGamesDto {
+    end_time: DateTime;
+    game_duration: number;
+    game_in_day: number;
+    game_status: GameStatus;
+    start_time: DateTime;
 }
 
 export interface WalletDto {
@@ -194,64 +131,66 @@ export interface WalletDto {
     type: TransactionType;
 }
 
-export interface GameLaunch {
+export interface GameSession {
+    createdAt: DateTime;
+    createdBy: string;
+    deletedAt: DateTime;
+    deletedBy: string;
+    game: Games;
+    game_result_card?: Nullable<GameKqjCards>;
+    id: number;
+    record_session_kqj?: Nullable<RecordSessionKqj>;
+    session_end_time?: Nullable<DateTime>;
+    session_start_time?: Nullable<DateTime>;
+    session_status: GameKqjCards;
+    updatedAt: DateTime;
+    updatedBy: string;
+}
+
+export interface Games {
     admin: User;
     createdAt: DateTime;
     createdBy: string;
     deletedAt: DateTime;
     deletedBy: string;
     end_time: DateTime;
-    game: Game;
     gameSession?: Nullable<GameSession[]>;
-    game_duration: string;
+    game_duration: number;
     game_in_day: number;
-    game_launch_status: GameLaunchStatus;
-    id: string;
+    game_status: GameStatus;
+    game_type: GameType;
+    id: number;
     start_time: DateTime;
     updatedAt: DateTime;
     updatedBy: string;
 }
 
-export interface GameSession {
-    createdAt: DateTime;
-    createdBy: string;
-    deletedAt: DateTime;
-    deletedBy: string;
-    game_launch: GameLaunch;
-    game_result_card: GameKqjCards;
-    id: string;
-    record_session_kqj: RecordSessionKqj;
-    session_end_time: DateTime;
-    session_start_time: DateTime;
-    session_status: GameKqjCards;
-    updatedAt: DateTime;
-    updatedBy: string;
-}
-
 export interface IMutation {
-    createGameLaunch(adminId: string, createGameLaunchDto: CreateGameLaunchDto): GameLaunch | Promise<GameLaunch>;
-    createGameSession(createGameSessionDto: CreateGameSessionDto): GameSession | Promise<GameSession>;
+    DeleteGames(id: number): boolean | Promise<boolean>;
+    createGames(createGamesDto: CreateGamesDto): Games | Promise<Games>;
     createRecordSession(createRecordSessionKqjDto: CreateRecordSessionKqjDto): RecordSessionKqj | Promise<RecordSessionKqj>;
     createTransactionSession(createTransactionSessionDto: CreateTransactionSessionDto): TransactionSession | Promise<TransactionSession>;
     refreshAccessToken(refreshToken: string, token: string): Token | Promise<Token>;
     signUp(signUpCredential: SignUpCredential): User | Promise<User>;
-    softDeleteGameLaunch(id: string): boolean | Promise<boolean>;
-    updateGameLaunch(id: string, updateGameLaunchDto: UpdateGameLaunchDto): GameLaunch | Promise<GameLaunch>;
-    updateGameSession(id: string, updateGameSessionDto: UpdateGameSessionDto): GameSession | Promise<GameSession>;
-    updateRecordSession(id: string, updateRecordSessionKqjDto: UpdateRecordSessionKqjDto): RecordSessionKqj | Promise<RecordSessionKqj>;
-    updateTransactionSession(id: string, updateTransactionSessionDto: UpdateTransactionSessionDto): TransactionSession | Promise<TransactionSession>;
-    updateWallet(adminId: string, userId: string, walletData: WalletDto): Transaction | Promise<Transaction>;
+    updateGameSession(id: number, updateGameSessionDto: UpdateGameSessionDto): GameSession | Promise<GameSession>;
+    updateGames(id: number, updateGamesDto: UpdateGamesDto): Games | Promise<Games>;
+    updateWallet(adminId: number, userId: number, walletData: WalletDto): Transaction | Promise<Transaction>;
 }
 
 export interface IQuery {
-    getAllGameLaunches(): GameLaunch[] | Promise<GameLaunch[]>;
     getAllGameSessions(): GameSession[] | Promise<GameSession[]>;
+    getAllGameses(): Games[] | Promise<Games[]>;
     getAllRecordSessions(): RecordSessionKqj[] | Promise<RecordSessionKqj[]>;
     getAllTransactionSessions(): TransactionSession[] | Promise<TransactionSession[]>;
-    getGameLaunchById(id: string): GameLaunch | Promise<GameLaunch>;
-    getGameSessionById(id: string): GameSession | Promise<GameSession>;
-    getRecordSessionById(id: string): RecordSessionKqj | Promise<RecordSessionKqj>;
-    getTransactionSessionById(id: string): TransactionSession | Promise<TransactionSession>;
+    getGameSessionById(id: number): GameSession | Promise<GameSession>;
+    getGameSessionsByDate(endDate: DateTime, startDate: DateTime): GameSession[] | Promise<GameSession[]>;
+    getGamesByDate(endDate: string, startDate: string): Games[] | Promise<Games[]>;
+    getGamesById(id: number): Games | Promise<Games>;
+    getLiveGameSessions(): GameSession[] | Promise<GameSession[]>;
+    getRecordBySessionId(sessionId: string): RecordSessionKqj | Promise<RecordSessionKqj>;
+    getRecordSessionById(id: number): RecordSessionKqj | Promise<RecordSessionKqj>;
+    getRecordsByUserId(userId: string): RecordSessionKqj[] | Promise<RecordSessionKqj[]>;
+    getTransactionSessionById(id: number): TransactionSession | Promise<TransactionSession>;
     signIn(signInCredential: SignInCredential): UserToken | Promise<UserToken>;
 }
 
@@ -262,10 +201,10 @@ export interface RecordSessionKqj {
     deletedAt: DateTime;
     deletedBy: string;
     game_session: GameSession;
-    id: string;
+    id: number;
     record_status: RecordSessionStatus;
     token: TokenValues;
-    transaction_session: TransactionSession;
+    transaction_session?: Nullable<TransactionSession>;
     updatedAt: DateTime;
     updatedBy: string;
     user: User;
@@ -283,7 +222,7 @@ export interface Transaction {
     createdBy: string;
     deletedAt: DateTime;
     deletedBy: string;
-    id: string;
+    id: number;
     transactionDate: DateTime;
     type: TransactionType;
     updatedAt: DateTime;
@@ -296,7 +235,7 @@ export interface TransactionSession {
     createdBy: string;
     deletedAt: DateTime;
     deletedBy: string;
-    id: string;
+    id: number;
     record_session_kqj: RecordSessionKqj;
     token: TokenValues;
     type: TransactionType;
@@ -305,13 +244,13 @@ export interface TransactionSession {
 }
 
 export interface User {
-    createGames: GameLaunch;
     createdAt: DateTime;
     createdBy: string;
+    createdGames: Games;
     deletedAt: DateTime;
     deletedBy: string;
     email: string;
-    id: string;
+    id: number;
     name?: Nullable<string>;
     password: string;
     profile?: Nullable<string>;
