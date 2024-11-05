@@ -1,7 +1,6 @@
 import { Resolver, Query, Mutation, Args } from '@nestjs/graphql';
 import { RecordSessionKqj } from './dbrepo/record_session_kqj.repository';
 import { CreateRecordSessionKqjDto } from './dto/create-record_session_kqj.input';
-import { UpdateRecordSessionKqjDto } from './dto/update-record_session_kqj.input';
 import { RecordSessionKqjService } from './record_session_kqj.service';
 
 @Resolver(() => RecordSessionKqj)
@@ -13,14 +12,6 @@ export class RecordSessionKqjResolver {
     @Args('createRecordSessionKqjDto') createRecordSessionKqjDto: CreateRecordSessionKqjDto,
   ): Promise<RecordSessionKqj> {
     return await this.recordSessionKqjService.createRecordSession(createRecordSessionKqjDto);
-  }
-
-  @Mutation(() => RecordSessionKqj)
-  async updateRecordSession(
-    @Args('id') id: string,
-    @Args('updateRecordSessionKqjDto') updateRecordSessionKqjDto: UpdateRecordSessionKqjDto,
-  ): Promise<RecordSessionKqj> {
-    return await this.recordSessionKqjService.updateRecordSession(id, updateRecordSessionKqjDto);
   }
 
   @Query(() => RecordSessionKqj, { name: 'getRecordSessionById' })

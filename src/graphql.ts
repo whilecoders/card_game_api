@@ -23,13 +23,6 @@ export enum GameKqjCards {
     QUEEN_OF_SPADES = "QUEEN_OF_SPADES"
 }
 
-export enum GameSessionStatus {
-    END = "END",
-    INACTIVE = "INACTIVE",
-    LIVE = "LIVE",
-    UPCOMING = "UPCOMING"
-}
-
 export enum GameStatus {
     AVAILABLE = "AVAILABLE",
     FINISHED = "FINISHED",
@@ -96,7 +89,7 @@ export interface CreateRecordSessionKqjDto {
 export interface CreateTransactionSessionDto {
     recordSessionId: number;
     token: TokenValues;
-    type?: Nullable<TransactionType>;
+    type: TransactionType;
 }
 
 export interface SignInCredential {
@@ -112,10 +105,7 @@ export interface SignUpCredential {
 }
 
 export interface UpdateGameSessionDto {
-    game_result_card?: Nullable<GameKqjCards>;
-    session_end_time?: Nullable<string>;
-    session_start_time?: Nullable<string>;
-    session_status?: Nullable<GameSessionStatus>;
+    game_result_card: GameKqjCards;
 }
 
 export interface UpdateGamesDto {
@@ -127,7 +117,7 @@ export interface UpdateGamesDto {
 }
 
 export interface WalletDto {
-    amount: number;
+    token: TokenValues;
     type: TransactionType;
 }
 
@@ -181,6 +171,7 @@ export interface IQuery {
     getAllGameSessions(): GameSession[] | Promise<GameSession[]>;
     getAllGameses(): Games[] | Promise<Games[]>;
     getAllRecordSessions(): RecordSessionKqj[] | Promise<RecordSessionKqj[]>;
+    getAllRecordsBySessionId(sessionId: string): RecordSessionKqj[] | Promise<RecordSessionKqj[]>;
     getAllTransactionSessions(): TransactionSession[] | Promise<TransactionSession[]>;
     getGameSessionById(id: number): GameSession | Promise<GameSession>;
     getGameSessionsByDate(endDate: DateTime, startDate: DateTime): GameSession[] | Promise<GameSession[]>;

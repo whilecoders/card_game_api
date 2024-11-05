@@ -23,7 +23,7 @@ input CreateRecordSessionKqjDto {
 input CreateTransactionSessionDto {
   recordSessionId: Float!
   token: TokenValues!
-  type: TransactionType
+  type: TransactionType!
 }
 
 """
@@ -46,12 +46,7 @@ enum GameKqjCards {
   QUEEN_OF_SPADES
 }
 
-enum GameType {
-  KQJ
-}
-
-type Games {
-  admin: User!
+type GameSession {
   createdAt: DateTime!
   createdBy: String!
   deletedAt: DateTime!
@@ -65,13 +60,6 @@ type Games {
   session_status: GameKqjCards!
   updatedAt: DateTime!
   updatedBy: String!
-}
-
-enum GameSessionStatus {
-  END
-  INACTIVE
-  LIVE
-  UPCOMING
 }
 
 enum GameStatus {
@@ -119,6 +107,7 @@ type Query {
   getAllGameSessions: [GameSession!]!
   getAllGameses: [Games!]!
   getAllRecordSessions: [RecordSessionKqj!]!
+  getAllRecordsBySessionId(sessionId: String!): [RecordSessionKqj!]!
   getAllTransactionSessions: [TransactionSession!]!
   getGameSessionById(id: Float!): GameSession!
   getGameSessionsByDate(endDate: DateTime!, startDate: DateTime!): [GameSession!]!
@@ -222,10 +211,7 @@ enum TransactionType {
 }
 
 input UpdateGameSessionDto {
-  game_result_card: GameKqjCards
-  session_end_time: String
-  session_start_time: String
-  session_status: GameSessionStatus
+  game_result_card: GameKqjCards!
 }
 
 input UpdateGamesDto {
@@ -270,6 +256,6 @@ type UserToken {
 }
 
 input WalletDto {
-  amount: Float!
+  token: TokenValues!
   type: TransactionType!
 }

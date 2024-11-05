@@ -10,20 +10,30 @@ import { TransactionSession } from './dbrepo/transaction_session.repository';
 import { CreateTransactionSessionDto } from './dto/create-transaction_session.input';
 import { RecordSessionKqj } from 'src/record_session_kqj/dbrepo/record_session_kqj.repository';
 import { TransactionType } from 'src/common/constants';
+import { User } from 'src/user/dbrepo/user.repository';
 
 @Injectable()
 export class TransactionSessionService {
   constructor(
+    @Inject('USER_REPOSITORY')
+    private readonly userRepository: Repository<User>,
     @Inject('TRANSACTION_SESSION_REPOSITORY')
     private readonly transactionSessionRepository: Repository<TransactionSession>,
     @Inject('RECORD_SESSION_KQJ_REPOSITORY')
     private readonly recordSessionRepository: Repository<RecordSessionKqj>,
   ) {}
 
-  async createTransactionSession(dto: CreateTransactionSessionDto): Promise<TransactionSession> {
-    const recordSession = await this.recordSessionRepository.findOne({ where: { id: dto.recordSessionId } });
+  async createTransactionSession(
+    dto: CreateTransactionSessionDto,
+  ): Promise<TransactionSession> {
+    const recordSession = await this.recordSessionRepository.findOne({
+      where: { id: dto.recordSessionId },
+      relations: ['user', 'game_session', 'transaction_session'],
+    });
     if (!recordSession) {
-      throw new NotFoundException(`RecordSession with ID ${dto.recordSessionId} not found`);
+      throw new NotFoundException(
+        `RecordSession with ID ${dto.recordSessionId} not found`,
+      );
     }
 
     if (!recordSession.user) {
@@ -81,7 +91,9 @@ export class TransactionSessionService {
 
   async getAllTransactionSessions(): Promise<TransactionSession[]> {
     try {
-      return await this.transactionSessionRepository.find({relations: ['record_session_kqj']});
+      return await this.transactionSessionRepository.find({
+        relations: ['record_session_kqj'],
+      });
     } catch (error) {
       throw new BadRequestException('Failed to retrieve transaction sessions');
     }
