@@ -60,8 +60,8 @@ export class RecordSessionKqjService {
     }
   }
 
-  async getRecordSessionById(id: string): Promise<RecordSessionKqj> {
-    const recordSession = await this.recordSessionRepository.findOne({ where: { id },relations: ['user',' game_session',] });
+  async getRecordSessionById(id: number): Promise<RecordSessionKqj> {
+    const recordSession = await this.recordSessionKqjRepository.findOne({ where: { id },relations: ['user','game_session',] });
     if (!recordSession) {
       throw new NotFoundException(`RecordSession with ID ${id} not found`);
     }
@@ -73,6 +73,54 @@ export class RecordSessionKqjService {
       return await this.recordSessionRepository.find({relations: ['user',' game_session',]});
     } catch (error) {
       throw new BadRequestException('Failed to retrieve record sessions');
+    }
+  }
+
+  async getRecordsByUserId(userId: number): Promise<RecordSessionKqj[]> {
+    try {
+      const records = await this.recordSessionKqjRepository.find({
+        where: { user: { id: userId } },
+        relations: ['user', 'game_session', 'transaction_session'],
+      });
+
+      if (!records.length) {
+        throw new NotFoundException(`No records found for user ID ${userId}`);
+      }
+      return records;
+    } catch (error) {
+      throw new BadRequestException('Failed to retrieve records. Please try again later.');
+    }
+  }
+
+  async getRecordBySessionId(sessionId: number): Promise<RecordSessionKqj | null> {
+    try {
+      const record = await this.recordSessionKqjRepository.findOne({
+        where: { game_session: { id: sessionId } },
+        relations: ['user', 'game_session', 'transaction_session'],
+      });
+
+      if (!record) {
+        throw new NotFoundException(`No record found for session ID ${sessionId}`);
+      }
+      return record;
+    } catch (error) {
+      throw new BadRequestException('Failed to retrieve record. Please try again later.');
+    }
+  }
+
+  async getAllRecordsBySessionId(sessionId: number): Promise<RecordSessionKqj[]> {
+    try {
+      const records = await this.recordSessionKqjRepository.find({
+        where: { game_session: { id: sessionId } },
+        relations: ['user', 'game_session', 'transaction_session'],
+      });
+
+      if (!records.length) {
+        throw new NotFoundException(`No records found for session ID ${sessionId}`);
+      }
+      return records;
+    } catch (error) {
+      throw new BadRequestException('Failed to retrieve records. Please try again later.');
     }
   }
 }

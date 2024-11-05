@@ -1,20 +1,24 @@
 import { InputType, Field } from '@nestjs/graphql';
-import { GameKqjCards, TokenValues, RecordSessionStatus } from 'src/common/constants';
+import { IsNotEmpty } from 'class-validator';
+import { GameKqjCards, TokenValues, RecordStatus } from 'src/common/constants';
 
 @InputType()
 export class CreateRecordSessionKqjDto {
   @Field(() => GameKqjCards)
   choosen_card: GameKqjCards;
 
-  @Field(() => String)
-  userId: string;
+  @IsNotEmpty()
+  @Field(() => Number)
+  userId: number;
 
   @Field(() => TokenValues)
   token: TokenValues;
 
-  @Field(() => RecordSessionStatus)
-  record_status: RecordSessionStatus;
+  @IsNotEmpty()
+  @Field(() => RecordStatus)
+  record_status: RecordStatus;
 
-  @Field(() => String) 
-  gameSessionId: string;
+  @IsNotEmpty()
+  @Field(() => Number)
+  gameSessionId: number;
 }

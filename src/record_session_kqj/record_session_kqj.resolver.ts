@@ -25,7 +25,7 @@ export class RecordSessionKqjResolver {
 
   @Query(() => RecordSessionKqj, { name: 'getRecordSessionById' })
   async getRecordSessionById(
-    @Args('id') id: string,
+    @Args('id') id: number,
   ): Promise<RecordSessionKqj> {
     return await this.recordSessionKqjService.getRecordSessionById(id);
   }
@@ -34,4 +34,19 @@ export class RecordSessionKqjResolver {
   async getAllRecordSessions(): Promise<RecordSessionKqj[]> {
     return await this.recordSessionKqjService.getAllRecordSessions();
   }
+
+    @Query(() => [RecordSessionKqj], { name: 'getRecordsByUserId' })
+    async getRecordsByUserId(@Args('userId', { type: () => String }) userId: number) {
+      return this.recordSessionKqjService.getRecordsByUserId(userId);
+    }
+  
+    @Query(() => RecordSessionKqj, { name: 'getRecordBySessionId' })
+    async getRecordBySessionId(@Args('sessionId', { type: () => String }) sessionId: number) {
+      return this.recordSessionKqjService.getRecordBySessionId(sessionId);
+    }
+  
+    @Query(() => [RecordSessionKqj], { name: 'getAllRecordsBySessionId' })
+    async getAllRecordsBySessionId(@Args('sessionId', { type: () => String }) sessionId: number) {
+      return this.recordSessionKqjService.getAllRecordsBySessionId(sessionId);
+    }
 }

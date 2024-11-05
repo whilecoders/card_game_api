@@ -14,7 +14,7 @@ import { EnvKeyConstants } from './common/constants';
 import { ConfigModule } from '@nestjs/config';
 import { JWTService } from './common/helper/jwt.service';
 import { RecordSessionKqjModule } from './record_session_kqj/record_session_kqj.module';
-import { GameLaunchModule } from './game_launch/game_launch.module';
+import { GamesModule } from './games/games.module';
 import { GameSessionKqjModule } from './game_session_kqj/game_session.module';
 import { TransactionSessionModule } from './transaction_session/transaction_session.module';
 
@@ -45,7 +45,7 @@ import { TransactionSessionModule } from './transaction_session/transaction_sess
     UserModule,
     TransactionModule,
     RecordSessionKqjModule,
-    GameLaunchModule,
+    GamesModule,
     GameSessionKqjModule,
     TransactionSessionModule,
   ],

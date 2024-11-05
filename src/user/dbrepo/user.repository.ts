@@ -1,7 +1,7 @@
 import { Field, ObjectType, registerEnumType } from '@nestjs/graphql';
 import { Role, UserStatus } from 'src/common/constants/enums';
 import { BaseEntity } from 'src/common/repository/base.repository';
-import { GameLaunch } from 'src/game_launch/dbrepo/game_launch.repository';
+import { Games } from 'src/games/dbrepo/games.repository';
 import { RecordSessionKqj } from 'src/record_session_kqj/dbrepo/record_session_kqj.repository';
 import { Transaction } from 'src/transaction/dbrepo/transaction.repository';
 import { Column, Entity, OneToMany } from 'typeorm';
@@ -11,11 +11,11 @@ registerEnumType(UserStatus, { name: 'UserStatus' });
 @ObjectType('User')
 @Entity({ name: 'user' })
 export class User extends BaseEntity {
-  @Field(() => String,{ nullable: true })
+  @Field(() => String, { nullable: true })
   @Column({ type: 'varchar', length: 60, nullable: true })
   name: string;
 
-  @Field(() => String,{ nullable: true })
+  @Field(() => String, { nullable: true })
   @Column({ type: 'varchar', length: 255, nullable: true })
   profile: string;
 
@@ -55,11 +55,14 @@ export class User extends BaseEntity {
   )
   userTransactions: Transaction[];
 
-  @Field(() => GameLaunch)
-  @OneToMany(() => GameLaunch, (game) => game.admin)
-  createGames: GameLaunch[];
+  @Field(() => Games)
+  @OneToMany(() => Games, (game) => game.admin)
+  createdGames: Games[];
 
   @Field(() => RecordSessionKqj)
-  @OneToMany(() => RecordSessionKqj, (recordSessionKqj) => recordSessionKqj.user)
+  @OneToMany(
+    () => RecordSessionKqj,
+    (recordSessionKqj) => recordSessionKqj.user,
+  )
   record_session_kqj: RecordSessionKqj[];
 }

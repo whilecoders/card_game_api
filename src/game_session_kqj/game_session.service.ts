@@ -47,7 +47,7 @@ export class GameSessionKqjService {
   }
 
   async updateGameSession(
-    id: string,
+    id: number,
     updateGameSessionDto: UpdateGameSessionDto,
   ): Promise<GameSessionKqj> {
     try {
@@ -76,8 +76,7 @@ export class GameSessionKqjService {
       );
     }
   }
-
-  async getGameSessionById(id: string): Promise<GameSessionKqj> {
+  async getGameSessionById(id: number): Promise<GameSessionKqj> {
     const gameSession = await this.gameSessionRepository.findOne({
       where: { id },
     });
@@ -91,4 +90,24 @@ export class GameSessionKqjService {
     return await this.gameSessionRepository.find();
   }
 
+  async getLiveGameSessions(): Promise<GameSessionKqj[]> {
+    return await this.gameSessionRepository.find({
+      where: { session_status: GameSessionStatus.LIVE },
+    });
+  }
+
+  async getGameSessionsByDate(startDate: Date, endDate: Date): Promise<GameSessionKqj[]> {
+    const start = new Date(startDate);
+    const end = new Date(endDate);
+
+    if (isNaN(start.getTime()) || isNaN(end.getTime())) {
+      throw new BadRequestException('Invalid date format. Please provide valid ISO dates.');
+    }
+
+    return await this.gameSessionRepository.find({
+      where: {
+        session_start_time: Between(start, end),
+      },
+    });
+  }
 }

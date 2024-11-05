@@ -1,2 +1,2 @@
-export * from './enums'
-export * from './env-key'
+export * from './enums';
+export * from './env-key';

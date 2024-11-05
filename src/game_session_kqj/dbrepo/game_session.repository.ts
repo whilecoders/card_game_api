@@ -1,7 +1,7 @@
 import { Field, ObjectType, registerEnumType } from '@nestjs/graphql';
 import { GameKqjCards, GameSessionStatus } from 'src/common/constants';
 import { BaseEntity } from 'src/common/repository/base.repository';
-import { GameLaunch } from 'src/game_launch/dbrepo/game_launch.repository';
+import { Games } from 'src/games/dbrepo/games.repository';
 import { RecordSessionKqj } from 'src/record_session_kqj/dbrepo/record_session_kqj.repository';
 import { Column, Entity, JoinColumn, ManyToOne, OneToMany } from 'typeorm';
 
@@ -13,31 +13,31 @@ registerEnumType(GameSessionStatus, { name: 'GameSessionStatus' });
   name: 'game_session_kqj',
 })
 export class GameSessionKqj extends BaseEntity {
-  @Field(() => GameLaunch)
-  @ManyToOne(() => GameLaunch, (gameLaunch) => gameLaunch.gameSession, {
+  @Field(() => Games,{nullable:false})
+  @ManyToOne(() => Games, (game) => game.gameSession, {
     nullable: false,
     onDelete: 'CASCADE',
   })
-  @JoinColumn({ name: 'game_launch_id' })
-  game_launch: GameLaunch;
+  @JoinColumn({ name: 'game' })
+  game: Games;
 
-  @Field(() => GameKqjCards)
+  @Field(() => GameKqjCards,{nullable:true})
   @Column({ type: 'enum', enum: GameKqjCards, nullable: true })
   game_result_card: GameKqjCards;
 
-  @Field(() => Date)
+  @Field(() => Date,{nullable:true})
   @Column({ type: 'timestamp', nullable: true })
   session_start_time: Date;
 
-  @Field(() => Date)
+  @Field(() => Date,{nullable:true})
   @Column({ type: 'timestamp', nullable: true })
   session_end_time: Date;
 
-  @Field(() => GameKqjCards)
-  @Column({ type: 'enum', enum: GameSessionStatus, nullable: true })
+  @Field(() => GameKqjCards,{nullable:false})
+  @Column({ type: 'enum', enum: GameSessionStatus, nullable: false})
   session_status: GameSessionStatus;
 
-  @Field(() => RecordSessionKqj)
+  @Field(() => RecordSessionKqj,{nullable:true})
   @OneToMany(
     () => RecordSessionKqj,
     (recordSessionKqj) => recordSessionKqj.game_session,

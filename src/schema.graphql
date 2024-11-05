@@ -2,33 +2,26 @@
 # THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
 # ------------------------------------------------------
 
-input CreateGameLaunchDto {
-  end_time: String!
-  game: Game!
-  game_duration: String!
+input CreateGamesDto {
+  end_time: DateTime!
+  game_duration: Float!
   game_in_day: Float!
-  game_launch_status: GameLaunchStatus!
-  start_time: String!
-}
-
-input CreateGameSessionDto {
-  game_launch_id: String!
-  game_result_card: GameKqjCards
-  session_end_time: String!
-  session_start_time: String!
-  session_status: GameSessionStatus
+  game_status: GameStatus!
+  game_type: GameType!
+  start_time: DateTime!
+  user_id: Float!
 }
 
 input CreateRecordSessionKqjDto {
   choosen_card: GameKqjCards!
-  gameSessionId: String!
+  gameSessionId: Float!
   record_status: RecordSessionStatus!
   token: TokenValues!
-  userId: String!
+  userId: Float!
 }
 
 input CreateTransactionSessionDto {
-  recordSessionId: String!
+  recordSessionId: Float!
   token: TokenValues!
   type: TransactionType
 }
@@ -38,27 +31,7 @@ A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date
 """
 scalar DateTime
 
-enum Game {
-  KQJ
-}
-
 enum GameKqjCards {
-  ACE_OF_CLUBS
-  ACE_OF_DIAMONDS
-  ACE_OF_HEARTS
-  ACE_OF_SPADES
-  EIGHT_OF_CLUBS
-  EIGHT_OF_DIAMONDS
-  EIGHT_OF_HEARTS
-  EIGHT_OF_SPADES
-  FIVE_OF_CLUBS
-  FIVE_OF_DIAMONDS
-  FIVE_OF_HEARTS
-  FIVE_OF_SPADES
-  FOUR_OF_CLUBS
-  FOUR_OF_DIAMONDS
-  FOUR_OF_HEARTS
-  FOUR_OF_SPADES
   JACK_OF_CLUBS
   JACK_OF_DIAMONDS
   JACK_OF_HEARTS
@@ -67,108 +40,95 @@ enum GameKqjCards {
   KING_OF_DIAMONDS
   KING_OF_HEARTS
   KING_OF_SPADES
-  NINE_OF_CLUBS
-  NINE_OF_DIAMONDS
-  NINE_OF_HEARTS
-  NINE_OF_SPADES
   QUEEN_OF_CLUBS
   QUEEN_OF_DIAMONDS
   QUEEN_OF_HEARTS
   QUEEN_OF_SPADES
-  SEVEN_OF_CLUBS
-  SEVEN_OF_DIAMONDS
-  SEVEN_OF_HEARTS
-  SEVEN_OF_SPADES
-  SIX_OF_CLUBS
-  SIX_OF_DIAMONDS
-  SIX_OF_HEARTS
-  SIX_OF_SPADES
-  TEN_OF_CLUBS
-  TEN_OF_DIAMONDS
-  TEN_OF_HEARTS
-  TEN_OF_SPADES
-  THREE_OF_CLUBS
-  THREE_OF_DIAMONDS
-  THREE_OF_HEARTS
-  THREE_OF_SPADES
-  TWO_OF_CLUBS
-  TWO_OF_DIAMONDS
-  TWO_OF_HEARTS
-  TWO_OF_SPADES
 }
 
-type GameLaunch {
+enum GameType {
+  KQJ
+}
+
+type Games {
   admin: User!
   createdAt: DateTime!
   createdBy: String!
   deletedAt: DateTime!
   deletedBy: String!
-  end_time: DateTime!
-  game: Game!
-  gameSession: [GameSession!]
-  game_duration: String!
-  game_in_day: Float!
-  game_launch_status: GameLaunchStatus!
-  id: String!
-  start_time: DateTime!
-  updatedAt: DateTime!
-  updatedBy: String!
-}
-
-enum GameLaunchStatus {
-  AVAILABLE
-  FINISHED
-  UNAVAILABLE
-  UPCOMING
-}
-
-type GameSession {
-  createdAt: DateTime!
-  createdBy: String!
-  deletedAt: DateTime!
-  deletedBy: String!
-  game_launch: GameLaunch!
-  game_result_card: GameKqjCards!
-  id: String!
-  record_session_kqj: RecordSessionKqj!
-  session_end_time: DateTime!
-  session_start_time: DateTime!
+  game: Games!
+  game_result_card: GameKqjCards
+  id: Float!
+  record_session_kqj: RecordSessionKqj
+  session_end_time: DateTime
+  session_start_time: DateTime
   session_status: GameKqjCards!
   updatedAt: DateTime!
   updatedBy: String!
 }
 
 enum GameSessionStatus {
-  COMPLETED
+  END
   INACTIVE
-  IN_PROGRESS
+  LIVE
   UPCOMING
 }
 
+enum GameStatus {
+  AVAILABLE
+  FINISHED
+  UNAVAILABLE
+  UPCOMING
+}
+
+enum GameType {
+  KQJ
+}
+
+type Games {
+  admin: User!
+  createdAt: DateTime!
+  createdBy: String!
+  deletedAt: DateTime!
+  deletedBy: String!
+  end_time: DateTime!
+  gameSession: [GameSession!]
+  game_duration: Float!
+  game_in_day: Float!
+  game_status: GameStatus!
+  game_type: GameType!
+  id: Float!
+  start_time: DateTime!
+  updatedAt: DateTime!
+  updatedBy: String!
+}
+
 type Mutation {
-  createGameLaunch(adminId: String!, createGameLaunchDto: CreateGameLaunchDto!): GameLaunch!
-  createGameSession(createGameSessionDto: CreateGameSessionDto!): GameSession!
+  DeleteGames(id: Float!): Boolean!
+  createGames(createGamesDto: CreateGamesDto!): Games!
   createRecordSession(createRecordSessionKqjDto: CreateRecordSessionKqjDto!): RecordSessionKqj!
   createTransactionSession(createTransactionSessionDto: CreateTransactionSessionDto!): TransactionSession!
   refreshAccessToken(refreshToken: String!, token: String!): Token!
   signUp(signUpCredential: SignUpCredential!): User!
-  softDeleteGameLaunch(id: String!): Boolean!
-  updateGameLaunch(id: String!, updateGameLaunchDto: UpdateGameLaunchDto!): GameLaunch!
-  updateGameSession(id: String!, updateGameSessionDto: UpdateGameSessionDto!): GameSession!
-  updateRecordSession(id: String!, updateRecordSessionKqjDto: UpdateRecordSessionKqjDto!): RecordSessionKqj!
-  updateTransactionSession(id: ID!, updateTransactionSessionDto: UpdateTransactionSessionDto!): TransactionSession!
-  updateWallet(adminId: String!, userId: String!, walletData: WalletDto!): Transaction!
+  updateGameSession(id: Float!, updateGameSessionDto: UpdateGameSessionDto!): GameSession!
+  updateGames(id: Float!, updateGamesDto: UpdateGamesDto!): Games!
+  updateWallet(adminId: Float!, userId: Float!, walletData: WalletDto!): Transaction!
 }
 
 type Query {
-  getAllGameLaunches: [GameLaunch!]!
   getAllGameSessions: [GameSession!]!
+  getAllGameses: [Games!]!
   getAllRecordSessions: [RecordSessionKqj!]!
   getAllTransactionSessions: [TransactionSession!]!
-  getGameLaunchById(id: String!): GameLaunch!
-  getGameSessionById(id: String!): GameSession!
-  getRecordSessionById(id: String!): RecordSessionKqj!
-  getTransactionSessionById(id: ID!): TransactionSession!
+  getGameSessionById(id: Float!): GameSession!
+  getGameSessionsByDate(endDate: DateTime!, startDate: DateTime!): [GameSession!]!
+  getGamesByDate(endDate: String!, startDate: String!): [Games!]!
+  getGamesById(id: Float!): Games!
+  getLiveGameSessions: [GameSession!]!
+  getRecordBySessionId(sessionId: String!): RecordSessionKqj!
+  getRecordSessionById(id: Float!): RecordSessionKqj!
+  getRecordsByUserId(userId: String!): [RecordSessionKqj!]!
+  getTransactionSessionById(id: Float!): TransactionSession!
   signIn(signInCredential: SignInCredential!): UserToken!
 }
 
@@ -179,10 +139,10 @@ type RecordSessionKqj {
   deletedAt: DateTime!
   deletedBy: String!
   game_session: GameSession!
-  id: String!
+  id: Float!
   record_status: RecordSessionStatus!
   token: TokenValues!
-  transaction_session: TransactionSession!
+  transaction_session: TransactionSession
   updatedAt: DateTime!
   updatedBy: String!
   user: User!
@@ -235,7 +195,7 @@ type Transaction {
   createdBy: String!
   deletedAt: DateTime!
   deletedBy: String!
-  id: String!
+  id: Float!
   transactionDate: DateTime!
   type: TransactionType!
   updatedAt: DateTime!
@@ -248,7 +208,7 @@ type TransactionSession {
   createdBy: String!
   deletedAt: DateTime!
   deletedBy: String!
-  id: String!
+  id: Float!
   record_session_kqj: RecordSessionKqj!
   token: TokenValues!
   type: TransactionType!
@@ -261,14 +221,6 @@ enum TransactionType {
   DEBIT
 }
 
-input UpdateGameLaunchDto {
-  end_time: String
-  game_duration: String
-  game_in_day: Float
-  game_launch_status: GameLaunchStatus
-  start_time: String
-}
-
 input UpdateGameSessionDto {
   game_result_card: GameKqjCards
   session_end_time: String
@@ -276,30 +228,22 @@ input UpdateGameSessionDto {
   session_status: GameSessionStatus
 }
 
-input UpdateRecordSessionKqjDto {
-  choosen_card: GameKqjCards
-  gameSessionId: String
-  id: String!
-  record_status: RecordSessionStatus
-  token: TokenValues
-  userId: String
-}
-
-input UpdateTransactionSessionDto {
-  id: String!
-  recordSessionId: String
-  token: TokenValues
-  type: TransactionType
+input UpdateGamesDto {
+  end_time: DateTime!
+  game_duration: Float!
+  game_in_day: Float!
+  game_status: GameStatus!
+  start_time: DateTime!
 }
 
 type User {
-  createGames: GameLaunch!
   createdAt: DateTime!
   createdBy: String!
+  createdGames: Games!
   deletedAt: DateTime!
   deletedBy: String!
   email: String!
-  id: String!
+  id: Float!
   name: String
   password: String!
   profile: String

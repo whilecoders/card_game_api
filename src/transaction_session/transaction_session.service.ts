@@ -1,8 +1,13 @@
-import { Injectable, NotFoundException, BadRequestException, Inject } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  BadRequestException,
+  Inject,
+  InternalServerErrorException,
+} from '@nestjs/common';
 import { Repository } from 'typeorm';
 import { TransactionSession } from './dbrepo/transaction_session.repository';
 import { CreateTransactionSessionDto } from './dto/create-transaction_session.input';
-import { UpdateTransactionSessionDto } from './dto/update-transaction_session.input';
 import { RecordSessionKqj } from 'src/record_session_kqj/dbrepo/record_session_kqj.repository';
 import { TransactionType } from 'src/common/constants';
 
@@ -21,6 +26,32 @@ export class TransactionSessionService {
       throw new NotFoundException(`RecordSession with ID ${dto.recordSessionId} not found`);
     }
 
+    if (!recordSession.user) {
+      throw new BadRequestException(
+        'Associated user not found in record session.',
+      );
+    }
+
+    if (dto.type === TransactionType.CREDIT) {
+      recordSession.user.wallet += dto.token;
+    } else if (dto.type === TransactionType.DEBIT) {
+      if (recordSession.user.wallet < dto.token) {
+        throw new BadRequestException(
+          'Insufficient funds for this transaction.',
+        );
+      }
+      recordSession.user.wallet -= dto.token;
+    }
+
+    try {
+      await this.userRepository.save(recordSession.user);
+    } catch (error) {
+      console.error('Error updating user wallet:', error);
+      throw new InternalServerErrorException(
+        'Failed to update user wallet. Please try again.',
+      );
+    }
+
     const transactionSession = this.transactionSessionRepository.create({
       token: dto.token,
       type: dto.type || TransactionType.CREDIT,
@@ -30,28 +61,18 @@ export class TransactionSessionService {
     try {
       return await this.transactionSessionRepository.save(transactionSession);
     } catch (error) {
-      throw new BadRequestException('Failed to create transaction session');
+      console.error('Error saving transaction session:', error);
+      throw new InternalServerErrorException(
+        'Failed to create transaction session.',
+      );
     }
   }
 
-  async updateTransactionSession(id: string, dto: UpdateTransactionSessionDto): Promise<TransactionSession> {
-    const transactionSession = await this.transactionSessionRepository.findOne({ where: { id } });
-    if (!transactionSession) {
-      throw new NotFoundException(`TransactionSession with ID ${id} not found`);
-    }
-
-    if (dto.token !== undefined) transactionSession.token = dto.token;
-    if (dto.type !== undefined) transactionSession.type = dto.type;
-
-    try {
-      return await this.transactionSessionRepository.save(transactionSession);
-    } catch (error) {
-      throw new BadRequestException('Failed to update transaction session');
-    }
-  }
-
-  async getTransactionSessionById(id: string): Promise<TransactionSession> {
-    const transactionSession = await this.transactionSessionRepository.findOne({ where: { id },relations: ['record_session_kqj'] });
+  async getTransactionSessionById(id: number): Promise<TransactionSession> {
+    const transactionSession = await this.transactionSessionRepository.findOne({
+      where: { id },
+      relations: ['record_session_kqj'],
+    });
     if (!transactionSession) {
       throw new NotFoundException(`TransactionSession with ID ${id} not found`);
     }
