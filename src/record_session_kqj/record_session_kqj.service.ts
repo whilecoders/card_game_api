@@ -33,6 +33,7 @@ export class RecordSessionKqjService {
     const gameSession = await this.gameSessionKqjRepository.findOne({
       where: { id: dto.gameSessionId },
     });
+
     if (!gameSession) {
       throw new NotFoundException(
         `GameSession with ID ${dto.gameSessionId} not found`,
@@ -40,11 +41,11 @@ export class RecordSessionKqjService {
     }
 
     const recordSession = this.recordSessionKqjRepository.create({
-      choosen_card: dto.choosen_card,
       user,
       token: dto.token,
-      record_status: dto.record_status,
       game_session: gameSession,
+      choosen_card: dto.choosen_card,
+      record_status: dto.record_status,
     });
 
     try {

@@ -13,7 +13,7 @@ export class UpdateGamesDto {
   @IsFullDateString({ message: 'End time must be a valid ISO date string with seconds.' })
   end_time: Date;
 
-  @Field(() => Number,{nullable:false})
+  @Field(() => Number,{nullable:false})  
   game_duration: number;
 
   @Field(() => Number,{nullable:false})

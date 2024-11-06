@@ -1,4 +1,4 @@
-import { Resolver, Query, Mutation, Args } from '@nestjs/graphql';
+import { Resolver, Query, Mutation, Args, Int } from '@nestjs/graphql';
 import { CreateGamesDto } from './dto/create-game.input';
 import { GamesService } from './games.service';
 import { Games } from './dbrepo/games.repository';
@@ -6,7 +6,7 @@ import { UpdateGamesDto } from './dto/update-game.input';
 
 @Resolver(() => Games)
 export class GamesResolver {
-  constructor(private readonly GamesService: GamesService) {}
+  constructor(private readonly GamesService: GamesService) { }
 
   @Mutation(() => Games)
   async createGames(
@@ -35,15 +35,15 @@ export class GamesResolver {
   }
 
   @Query(() => Games, { name: 'getGamesById' })
-  async getGamesById(@Args('id') id: number): Promise<Games> {
+  async getGamesById(@Args({ name: 'id', type: () => Int }) id: number): Promise<Games> {
     return await this.GamesService.getGameById(id);
   }
 
   @Query(() => [Games], { name: 'getGamesByDate' })
   async getGamesByDate(
-    @Args('startDate') startDate: string,
-    @Args('endDate') endDate: string,
+    @Args({name: 'from', type: () => Date}) from: Date,
+    @Args({name: 'to', type: () => Date}) to: Date,
   ): Promise<Games[]> {
-    return await this.GamesService.getGamesByDate(startDate, endDate);
+    return await this.GamesService.getGamesByDate(from, to);
   }
 }

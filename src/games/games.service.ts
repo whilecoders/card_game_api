@@ -57,7 +57,15 @@ export class GamesService {
         createGameDto.game_in_day,
       );
 
-      return game_created;
+      const find_game = await this.gamesRepository.findOne({
+        where: { id: game_created.id },
+        relations: {
+          gameSession: true,
+          admin: true,
+        }
+      })
+
+      return find_game;
     } catch (error) {
       console.error('Error creating GameLaunch:', error);
       throw new InternalServerErrorException('Internal Server error 400');
@@ -233,11 +241,11 @@ export class GamesService {
     }
   }
 
-  async getGamesByDate(startDate: string, endDate: string): Promise<Games[]> {
-    const start = new Date(startDate);
-    const end = new Date(endDate);
+  async getGamesByDate(from: Date, to: Date): Promise<Games[]> {
+    // const start = new Date(From);
+    // const end = new Date(to);
 
-    if (isNaN(start.getTime()) || isNaN(end.getTime())) {
+    if (isNaN(from.getTime()) || isNaN(to.getTime())) {
       throw new BadRequestException(
         'Invalid date format. Please provide valid ISO dates.',
       );
@@ -245,8 +253,9 @@ export class GamesService {
 
     return await this.gamesRepository.find({
       where: {
-        start_time: Between(start, end),
+        start_time: Between(from, to),
       },
+      relations: {admin: true, gameSession: true,}
     });
   }
 }

@@ -98,7 +98,7 @@ type Mutation {
   createTransactionSession(createTransactionSessionDto: CreateTransactionSessionDto!): TransactionSession!
   refreshAccessToken(refreshToken: String!, token: String!): Token!
   signUp(signUpCredential: SignUpCredential!): User!
-  updateGameSession(id: Float!, updateGameSessionDto: UpdateGameSessionDto!): GameSession!
+  updateGameSession(id: Int!, updateGameSessionDto: UpdateGameSessionDto!): GameSession!
   updateGames(id: Float!, updateGamesDto: UpdateGamesDto!): Games!
   updateWallet(adminId: Float!, userId: Float!, walletData: WalletDto!): Transaction!
 }
@@ -111,8 +111,8 @@ type Query {
   getAllTransactionSessions: [TransactionSession!]!
   getGameSessionById(id: Float!): GameSession!
   getGameSessionsByDate(endDate: DateTime!, startDate: DateTime!): [GameSession!]!
-  getGamesByDate(endDate: String!, startDate: String!): [Games!]!
-  getGamesById(id: Float!): Games!
+  getGamesByDate(from: DateTime!, to: DateTime!): [Games!]!
+  getGamesById(id: Int!): Games!
   getLiveGameSessions: [GameSession!]!
   getRecordBySessionId(sessionId: String!): RecordSessionKqj!
   getRecordSessionById(id: Float!): RecordSessionKqj!

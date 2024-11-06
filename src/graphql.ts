@@ -175,7 +175,7 @@ export interface IQuery {
     getAllTransactionSessions(): TransactionSession[] | Promise<TransactionSession[]>;
     getGameSessionById(id: number): GameSession | Promise<GameSession>;
     getGameSessionsByDate(endDate: DateTime, startDate: DateTime): GameSession[] | Promise<GameSession[]>;
-    getGamesByDate(endDate: string, startDate: string): Games[] | Promise<Games[]>;
+    getGamesByDate(from: DateTime, to: DateTime): Games[] | Promise<Games[]>;
     getGamesById(id: number): Games | Promise<Games>;
     getLiveGameSessions(): GameSession[] | Promise<GameSession[]>;
     getRecordBySessionId(sessionId: string): RecordSessionKqj | Promise<RecordSessionKqj>;

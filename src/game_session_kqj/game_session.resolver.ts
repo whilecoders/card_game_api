@@ -1,4 +1,4 @@
-import { Resolver, Query, Mutation, Args, ID } from '@nestjs/graphql';
+import { Resolver, Query, Mutation, Args, ID, Int } from '@nestjs/graphql';
 import { UpdateGameSessionDto } from './dto/update-game_session.input';
 import { GameSessionKqj } from './dbrepo/game_session.repository';
 import { GameSessionKqjService } from './game_session.service';
@@ -9,7 +9,7 @@ export class GameSessionKqjResolver {
 
   @Mutation(() => GameSessionKqj)
   async updateGameSession(
-    @Args('id') id: number,
+    @Args({name: 'id', type: () => Int}) id: number,
     @Args('updateGameSessionDto') updateGameSessionDto: UpdateGameSessionDto,
   ): Promise<GameSessionKqj> {
     return await this.gameSessionService.updateGameSession(
