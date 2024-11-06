@@ -8,61 +8,258 @@
 /* tslint:disable */
 /* eslint-disable */
 
-export interface CreateAuthInput {
-    exampleField: number;
+export enum GameKqjCards {
+    JACK_OF_CLUBS = "JACK_OF_CLUBS",
+    JACK_OF_DIAMONDS = "JACK_OF_DIAMONDS",
+    JACK_OF_HEARTS = "JACK_OF_HEARTS",
+    JACK_OF_SPADES = "JACK_OF_SPADES",
+    KING_OF_CLUBS = "KING_OF_CLUBS",
+    KING_OF_DIAMONDS = "KING_OF_DIAMONDS",
+    KING_OF_HEARTS = "KING_OF_HEARTS",
+    KING_OF_SPADES = "KING_OF_SPADES",
+    QUEEN_OF_CLUBS = "QUEEN_OF_CLUBS",
+    QUEEN_OF_DIAMONDS = "QUEEN_OF_DIAMONDS",
+    QUEEN_OF_HEARTS = "QUEEN_OF_HEARTS",
+    QUEEN_OF_SPADES = "QUEEN_OF_SPADES"
 }
 
-export interface CreateTransactionInput {
-    exampleField: number;
+export enum GameStatus {
+    AVAILABLE = "AVAILABLE",
+    FINISHED = "FINISHED",
+    UNAVAILABLE = "UNAVAILABLE",
+    UPCOMING = "UPCOMING"
 }
 
-export interface CreateUserInput {
-    exampleField: number;
+export enum GameType {
+    KQJ = "KQJ"
 }
 
-export interface UpdateAuthInput {
-    exampleField?: Nullable<number>;
+export enum RecordSessionStatus {
+    ACTIVE = "ACTIVE",
+    COMPLETED = "COMPLETED",
+    INACTIVE = "INACTIVE"
+}
+
+export enum Role {
+    ADMIN = "ADMIN",
+    MASTER = "MASTER",
+    SUPERADMIN = "SUPERADMIN",
+    SYSTEM = "SYSTEM",
+    USER = "USER"
+}
+
+export enum TokenValues {
+    TOKEN_11 = "TOKEN_11",
+    TOKEN_55 = "TOKEN_55",
+    TOKEN_110 = "TOKEN_110",
+    TOKEN_550 = "TOKEN_550",
+    TOKEN_1100 = "TOKEN_1100",
+    TOKEN_5500 = "TOKEN_5500"
+}
+
+export enum TransactionType {
+    CREDIT = "CREDIT",
+    DEBIT = "DEBIT"
+}
+
+export enum UserStatus {
+    ACTIVE = "ACTIVE",
+    INACTIVE = "INACTIVE",
+    SUSPENDED = "SUSPENDED"
+}
+
+export interface CreateGamesDto {
+    end_time: DateTime;
+    game_duration: number;
+    game_in_day: number;
+    game_status: GameStatus;
+    game_type: GameType;
+    start_time: DateTime;
+    user_id: number;
+}
+
+export interface CreateRecordSessionKqjDto {
+    choosen_card: GameKqjCards;
+    gameSessionId: number;
+    record_status: RecordSessionStatus;
+    token: TokenValues;
+    userId: number;
+}
+
+export interface CreateTransactionSessionDto {
+    recordSessionId: number;
+    token: TokenValues;
+    type: TransactionType;
+}
+
+export interface SignInCredential {
+    password: string;
+    username: string;
+}
+
+export interface SignUpCredential {
+    email: string;
+    password: string;
+    role: Role;
+    username: string;
+}
+
+export interface UpdateGameSessionDto {
+    game_result_card: GameKqjCards;
+}
+
+export interface UpdateGamesDto {
+    end_time: DateTime;
+    game_duration: number;
+    game_in_day: number;
+    game_status: GameStatus;
+    start_time: DateTime;
+}
+
+export interface WalletDto {
+    token: TokenValues;
+    type: TransactionType;
+}
+
+export interface GameSession {
+    createdAt: DateTime;
+    createdBy: string;
+    deletedAt: DateTime;
+    deletedBy: string;
+    game: Games;
+    game_result_card?: Nullable<GameKqjCards>;
     id: number;
+    record_session_kqj?: Nullable<RecordSessionKqj>;
+    session_end_time?: Nullable<DateTime>;
+    session_start_time?: Nullable<DateTime>;
+    session_status: GameKqjCards;
+    updatedAt: DateTime;
+    updatedBy: string;
 }
 
-export interface UpdateTransactionInput {
-    exampleField?: Nullable<number>;
+export interface Games {
+    admin: User;
+    createdAt: DateTime;
+    createdBy: string;
+    deletedAt: DateTime;
+    deletedBy: string;
+    end_time: DateTime;
+    gameSession?: Nullable<GameSession[]>;
+    game_duration: number;
+    game_in_day: number;
+    game_status: GameStatus;
+    game_type: GameType;
     id: number;
-}
-
-export interface UpdateUserInput {
-    exampleField?: Nullable<number>;
-    id: number;
-}
-
-export interface Auth {
-    exampleField: number;
+    start_time: DateTime;
+    updatedAt: DateTime;
+    updatedBy: string;
 }
 
 export interface IMutation {
-    createAuth(createAuthInput: CreateAuthInput): Auth | Promise<Auth>;
-    createTransaction(createTransactionInput: CreateTransactionInput): Transaction | Promise<Transaction>;
-    createUser(createUserInput: CreateUserInput): User | Promise<User>;
-    removeAuth(id: number): Auth | Promise<Auth>;
-    removeTransaction(id: number): Transaction | Promise<Transaction>;
-    removeUser(id: number): User | Promise<User>;
-    updateAuth(updateAuthInput: UpdateAuthInput): Auth | Promise<Auth>;
-    updateTransaction(updateTransactionInput: UpdateTransactionInput): Transaction | Promise<Transaction>;
-    updateUser(updateUserInput: UpdateUserInput): User | Promise<User>;
+    DeleteGames(id: number): boolean | Promise<boolean>;
+    createGames(createGamesDto: CreateGamesDto): Games | Promise<Games>;
+    createRecordSession(createRecordSessionKqjDto: CreateRecordSessionKqjDto): RecordSessionKqj | Promise<RecordSessionKqj>;
+    createTransactionSession(createTransactionSessionDto: CreateTransactionSessionDto): TransactionSession | Promise<TransactionSession>;
+    refreshAccessToken(refreshToken: string, token: string): Token | Promise<Token>;
+    signUp(signUpCredential: SignUpCredential): User | Promise<User>;
+    updateGameSession(id: number, updateGameSessionDto: UpdateGameSessionDto): GameSession | Promise<GameSession>;
+    updateGames(id: number, updateGamesDto: UpdateGamesDto): Games | Promise<Games>;
+    updateWallet(adminId: number, userId: number, walletData: WalletDto): Transaction | Promise<Transaction>;
 }
 
 export interface IQuery {
-    auth(id: number): Auth | Promise<Auth>;
-    transaction(id: number): Transaction | Promise<Transaction>;
-    user(id: number): User | Promise<User>;
+    getAllGameSessions(): GameSession[] | Promise<GameSession[]>;
+    getAllGameses(): Games[] | Promise<Games[]>;
+    getAllRecordSessions(): RecordSessionKqj[] | Promise<RecordSessionKqj[]>;
+    getAllRecordsBySessionId(sessionId: string): RecordSessionKqj[] | Promise<RecordSessionKqj[]>;
+    getAllTransactionSessions(): TransactionSession[] | Promise<TransactionSession[]>;
+    getGameSessionById(id: number): GameSession | Promise<GameSession>;
+    getGameSessionsByDate(endDate: DateTime, startDate: DateTime): GameSession[] | Promise<GameSession[]>;
+    getGamesByDate(endDate: string, startDate: string): Games[] | Promise<Games[]>;
+    getGamesById(id: number): Games | Promise<Games>;
+    getLiveGameSessions(): GameSession[] | Promise<GameSession[]>;
+    getRecordBySessionId(sessionId: string): RecordSessionKqj | Promise<RecordSessionKqj>;
+    getRecordSessionById(id: number): RecordSessionKqj | Promise<RecordSessionKqj>;
+    getRecordsByUserId(userId: string): RecordSessionKqj[] | Promise<RecordSessionKqj[]>;
+    getTransactionSessionById(id: number): TransactionSession | Promise<TransactionSession>;
+    signIn(signInCredential: SignInCredential): UserToken | Promise<UserToken>;
+}
+
+export interface RecordSessionKqj {
+    choosen_card: GameKqjCards;
+    createdAt: DateTime;
+    createdBy: string;
+    deletedAt: DateTime;
+    deletedBy: string;
+    game_session: GameSession;
+    id: number;
+    record_status: RecordSessionStatus;
+    token: TokenValues;
+    transaction_session?: Nullable<TransactionSession>;
+    updatedAt: DateTime;
+    updatedBy: string;
+    user: User;
+}
+
+export interface Token {
+    access_token: string;
+    refresh_token: string;
 }
 
 export interface Transaction {
-    exampleField: number;
+    admin: User;
+    amount: number;
+    createdAt: DateTime;
+    createdBy: string;
+    deletedAt: DateTime;
+    deletedBy: string;
+    id: number;
+    transactionDate: DateTime;
+    type: TransactionType;
+    updatedAt: DateTime;
+    updatedBy: string;
+    user: User;
+}
+
+export interface TransactionSession {
+    createdAt: DateTime;
+    createdBy: string;
+    deletedAt: DateTime;
+    deletedBy: string;
+    id: number;
+    record_session_kqj: RecordSessionKqj;
+    token: TokenValues;
+    type: TransactionType;
+    updatedAt: DateTime;
+    updatedBy: string;
 }
 
 export interface User {
-    exampleField: number;
+    createdAt: DateTime;
+    createdBy: string;
+    createdGames: Games;
+    deletedAt: DateTime;
+    deletedBy: string;
+    email: string;
+    id: number;
+    name?: Nullable<string>;
+    password: string;
+    profile?: Nullable<string>;
+    record_session_kqj: RecordSessionKqj;
+    role: Role;
+    status: UserStatus;
+    updatedAt: DateTime;
+    updatedBy: string;
+    userTransactions: Transaction;
+    username: string;
+    wallet: number;
 }
 
+export interface UserToken {
+    access_token: string;
+    refresh_token: string;
+    user: User;
+}
+
+export type DateTime = any;
 type Nullable<T> = T | null;

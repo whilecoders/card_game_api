@@ -2,68 +2,260 @@
 # THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
 # ------------------------------------------------------
 
-type Auth {
-  """Example field (placeholder)"""
-  exampleField: Int!
+input CreateGamesDto {
+  end_time: DateTime!
+  game_duration: Float!
+  game_in_day: Float!
+  game_status: GameStatus!
+  game_type: GameType!
+  start_time: DateTime!
+  user_id: Float!
 }
 
-input CreateAuthInput {
-  """Example field (placeholder)"""
-  exampleField: Int!
+input CreateRecordSessionKqjDto {
+  choosen_card: GameKqjCards!
+  gameSessionId: Float!
+  record_status: RecordSessionStatus!
+  token: TokenValues!
+  userId: Float!
 }
 
-input CreateTransactionInput {
-  """Example field (placeholder)"""
-  exampleField: Int!
+input CreateTransactionSessionDto {
+  recordSessionId: Float!
+  token: TokenValues!
+  type: TransactionType!
 }
 
-input CreateUserInput {
-  """Example field (placeholder)"""
-  exampleField: Int!
+"""
+A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date-time format.
+"""
+scalar DateTime
+
+enum GameKqjCards {
+  JACK_OF_CLUBS
+  JACK_OF_DIAMONDS
+  JACK_OF_HEARTS
+  JACK_OF_SPADES
+  KING_OF_CLUBS
+  KING_OF_DIAMONDS
+  KING_OF_HEARTS
+  KING_OF_SPADES
+  QUEEN_OF_CLUBS
+  QUEEN_OF_DIAMONDS
+  QUEEN_OF_HEARTS
+  QUEEN_OF_SPADES
+}
+
+type GameSession {
+  createdAt: DateTime!
+  createdBy: String!
+  deletedAt: DateTime!
+  deletedBy: String!
+  game: Games!
+  game_result_card: GameKqjCards
+  id: Float!
+  record_session_kqj: RecordSessionKqj
+  session_end_time: DateTime
+  session_start_time: DateTime
+  session_status: GameKqjCards!
+  updatedAt: DateTime!
+  updatedBy: String!
+}
+
+enum GameStatus {
+  AVAILABLE
+  FINISHED
+  UNAVAILABLE
+  UPCOMING
+}
+
+enum GameType {
+  KQJ
+}
+
+type Games {
+  admin: User!
+  createdAt: DateTime!
+  createdBy: String!
+  deletedAt: DateTime!
+  deletedBy: String!
+  end_time: DateTime!
+  gameSession: [GameSession!]
+  game_duration: Float!
+  game_in_day: Float!
+  game_status: GameStatus!
+  game_type: GameType!
+  id: Float!
+  start_time: DateTime!
+  updatedAt: DateTime!
+  updatedBy: String!
 }
 
 type Mutation {
-  createAuth(createAuthInput: CreateAuthInput!): Auth!
-  createTransaction(createTransactionInput: CreateTransactionInput!): Transaction!
-  createUser(createUserInput: CreateUserInput!): User!
-  removeAuth(id: Int!): Auth!
-  removeTransaction(id: Int!): Transaction!
-  removeUser(id: Int!): User!
-  updateAuth(updateAuthInput: UpdateAuthInput!): Auth!
-  updateTransaction(updateTransactionInput: UpdateTransactionInput!): Transaction!
-  updateUser(updateUserInput: UpdateUserInput!): User!
+  DeleteGames(id: Float!): Boolean!
+  createGames(createGamesDto: CreateGamesDto!): Games!
+  createRecordSession(createRecordSessionKqjDto: CreateRecordSessionKqjDto!): RecordSessionKqj!
+  createTransactionSession(createTransactionSessionDto: CreateTransactionSessionDto!): TransactionSession!
+  refreshAccessToken(refreshToken: String!, token: String!): Token!
+  signUp(signUpCredential: SignUpCredential!): User!
+  updateGameSession(id: Float!, updateGameSessionDto: UpdateGameSessionDto!): GameSession!
+  updateGames(id: Float!, updateGamesDto: UpdateGamesDto!): Games!
+  updateWallet(adminId: Float!, userId: Float!, walletData: WalletDto!): Transaction!
 }
 
 type Query {
-  auth(id: Int!): Auth!
-  transaction(id: Int!): Transaction!
-  user(id: Int!): User!
+  getAllGameSessions: [GameSession!]!
+  getAllGameses: [Games!]!
+  getAllRecordSessions: [RecordSessionKqj!]!
+  getAllRecordsBySessionId(sessionId: String!): [RecordSessionKqj!]!
+  getAllTransactionSessions: [TransactionSession!]!
+  getGameSessionById(id: Float!): GameSession!
+  getGameSessionsByDate(endDate: DateTime!, startDate: DateTime!): [GameSession!]!
+  getGamesByDate(endDate: String!, startDate: String!): [Games!]!
+  getGamesById(id: Float!): Games!
+  getLiveGameSessions: [GameSession!]!
+  getRecordBySessionId(sessionId: String!): RecordSessionKqj!
+  getRecordSessionById(id: Float!): RecordSessionKqj!
+  getRecordsByUserId(userId: String!): [RecordSessionKqj!]!
+  getTransactionSessionById(id: Float!): TransactionSession!
+  signIn(signInCredential: SignInCredential!): UserToken!
+}
+
+type RecordSessionKqj {
+  choosen_card: GameKqjCards!
+  createdAt: DateTime!
+  createdBy: String!
+  deletedAt: DateTime!
+  deletedBy: String!
+  game_session: GameSession!
+  id: Float!
+  record_status: RecordSessionStatus!
+  token: TokenValues!
+  transaction_session: TransactionSession
+  updatedAt: DateTime!
+  updatedBy: String!
+  user: User!
+}
+
+enum RecordSessionStatus {
+  ACTIVE
+  COMPLETED
+  INACTIVE
+}
+
+enum Role {
+  ADMIN
+  MASTER
+  SUPERADMIN
+  SYSTEM
+  USER
+}
+
+input SignInCredential {
+  password: String!
+  username: String!
+}
+
+input SignUpCredential {
+  email: String!
+  password: String!
+  role: Role!
+  username: String!
+}
+
+type Token {
+  access_token: String!
+  refresh_token: String!
+}
+
+enum TokenValues {
+  TOKEN_11
+  TOKEN_55
+  TOKEN_110
+  TOKEN_550
+  TOKEN_1100
+  TOKEN_5500
 }
 
 type Transaction {
-  """Example field (placeholder)"""
-  exampleField: Int!
+  admin: User!
+  amount: Float!
+  createdAt: DateTime!
+  createdBy: String!
+  deletedAt: DateTime!
+  deletedBy: String!
+  id: Float!
+  transactionDate: DateTime!
+  type: TransactionType!
+  updatedAt: DateTime!
+  updatedBy: String!
+  user: User!
 }
 
-input UpdateAuthInput {
-  """Example field (placeholder)"""
-  exampleField: Int
-  id: Int!
+type TransactionSession {
+  createdAt: DateTime!
+  createdBy: String!
+  deletedAt: DateTime!
+  deletedBy: String!
+  id: Float!
+  record_session_kqj: RecordSessionKqj!
+  token: TokenValues!
+  type: TransactionType!
+  updatedAt: DateTime!
+  updatedBy: String!
 }
 
-input UpdateTransactionInput {
-  """Example field (placeholder)"""
-  exampleField: Int
-  id: Int!
+enum TransactionType {
+  CREDIT
+  DEBIT
 }
 
-input UpdateUserInput {
-  """Example field (placeholder)"""
-  exampleField: Int
-  id: Int!
+input UpdateGameSessionDto {
+  game_result_card: GameKqjCards!
+}
+
+input UpdateGamesDto {
+  end_time: DateTime!
+  game_duration: Float!
+  game_in_day: Float!
+  game_status: GameStatus!
+  start_time: DateTime!
 }
 
 type User {
-  """Example field (placeholder)"""
-  exampleField: Int!
+  createdAt: DateTime!
+  createdBy: String!
+  createdGames: Games!
+  deletedAt: DateTime!
+  deletedBy: String!
+  email: String!
+  id: Float!
+  name: String
+  password: String!
+  profile: String
+  record_session_kqj: RecordSessionKqj!
+  role: Role!
+  status: UserStatus!
+  updatedAt: DateTime!
+  updatedBy: String!
+  userTransactions: Transaction!
+  username: String!
+  wallet: Float!
+}
+
+enum UserStatus {
+  ACTIVE
+  INACTIVE
+  SUSPENDED
+}
+
+type UserToken {
+  access_token: String!
+  refresh_token: String!
+  user: User!
+}
+
+input WalletDto {
+  token: TokenValues!
+  type: TransactionType!
 }

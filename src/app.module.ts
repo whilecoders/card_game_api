@@ -9,6 +9,14 @@ import { ApolloServerPluginLandingPageLocalDefault } from '@apollo/server/plugin
 import { DatabaseModule } from './database/database.module';
 import { UserModule } from './user/user.module';
 import { TransactionModule } from './transaction/transaction.module';
+import { JwtModule } from '@nestjs/jwt';
+import { EnvKeyConstants } from './common/constants';
+import { ConfigModule } from '@nestjs/config';
+import { JWTService } from './common/helper/jwt.service';
+import { RecordSessionKqjModule } from './record_session_kqj/record_session_kqj.module';
+import { GamesModule } from './games/games.module';
+import { GameSessionKqjModule } from './game_session_kqj/game_session.module';
+import { TransactionSessionModule } from './transaction_session/transaction_session.module';
 
 @Module({
   imports: [
@@ -22,12 +30,27 @@ import { TransactionModule } from './transaction/transaction.module';
       },
       plugins: [ApolloServerPluginLandingPageLocalDefault()],
     }),
+    JwtModule.register({
+      global: true,
+      secret: EnvKeyConstants.JWT_SECRET,
+      signOptions: { expiresIn: '1h' },
+    }),
+    ConfigModule.forRoot({
+      isGlobal: true,
+      envFilePath: ['.env'],
+      expandVariables: true,
+    }),
     DatabaseModule,
     AuthModule,
     UserModule,
     TransactionModule,
+    RecordSessionKqjModule,
+    GamesModule,
+    GameSessionKqjModule,
+    TransactionSessionModule,
   ],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [AppService, JWTService],
+  exports: [JWTService, JwtModule],
 })
-export class AppModule { }
+export class AppModule {}

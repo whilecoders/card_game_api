@@ -1,50 +1,68 @@
-import { Role, UserStatus } from "src/common/enums";
-import { Transaction } from "src/transaction/dbrepo/transaction.repository";
-import { Column, CreateDateColumn, DeleteDateColumn, Entity, OneToMany, PrimaryGeneratedColumn, UpdateDateColumn } from "typeorm";
+import { Field, ObjectType, registerEnumType } from '@nestjs/graphql';
+import { Role, UserStatus } from 'src/common/constants/enums';
+import { BaseEntity } from 'src/common/repository/base.repository';
+import { Games } from 'src/games/dbrepo/games.repository';
+import { RecordSessionKqj } from 'src/record_session_kqj/dbrepo/record_session_kqj.repository';
+import { Transaction } from 'src/transaction/dbrepo/transaction.repository';
+import { Column, Entity, OneToMany } from 'typeorm';
 
-
-
-@Entity()
-export class User {
-  @PrimaryGeneratedColumn()
-  id: string;
-
-  @Column({ type: "varchar", length: 60, nullable: false })
+registerEnumType(Role, { name: 'Role' });
+registerEnumType(UserStatus, { name: 'UserStatus' });
+@ObjectType('User')
+@Entity({ name: 'user' })
+export class User extends BaseEntity {
+  @Field(() => String, { nullable: true })
+  @Column({ type: 'varchar', length: 60, nullable: true })
   name: string;
 
-  @Column({ type: "varchar", length: 255, nullable: true })
+  @Field(() => String, { nullable: true })
+  @Column({ type: 'varchar', length: 255, nullable: true })
   profile: string;
 
-  @Column({ unique: true, type: "varchar", length: 60, nullable: false })
+  @Field(() => String)
+  @Column({ unique: true, type: 'varchar', length: 60, nullable: false })
   username: string;
 
-  @Column({ unique: true, type: "varchar", length: 225, nullable: false })
+  @Field(() => String)
+  @Column({ unique: true, type: 'varchar', length: 225, nullable: false })
   email: string;
 
-  @Column({ type: "varchar", length: 225, nullable: false })
+  @Field(() => String)
+  @Column({ type: 'varchar', length: 225, nullable: false })
   password: string;
 
+  @Field(() => Role)
   @Column({ type: 'enum', enum: Role, default: Role.USER, nullable: false })
   role: Role;
 
-  @Column({ type: "bigint", nullable: false, default: 0 })
-  wallet: string;
+  @Field(() => Number)
+  @Column({ type: 'decimal', precision: 10, scale: 2, default: 0 })
+  wallet: number;
 
-  @Column({ type: 'enum', enum: UserStatus, default: UserStatus.ACTIVE, nullable: false })
+  @Field(() => UserStatus)
+  @Column({
+    type: 'enum',
+    enum: UserStatus,
+    default: UserStatus.ACTIVE,
+    nullable: false,
+  })
   status: UserStatus;
 
-  @CreateDateColumn({ type: 'timestamp' })
-  createdAt: Date;
+  @Field(() => Transaction)
+  @OneToMany(
+    () => Transaction,
+    (transaction) => transaction.user && transaction.admin,
+  )
+  userTransactions: Transaction[];
 
-  @UpdateDateColumn({ type: 'timestamp' })
-  updatedAt: Date;
+  @Field(() => Games)
+  @OneToMany(() => Games, (game) => game.admin)
+  createdGames: Games[];
 
-  @DeleteDateColumn({ type: 'timestamp', nullable: true })
-  deletedAt: Date;
-
-  @OneToMany(() => Transaction, (transaction) => transaction.user)
-  transactions: Transaction[];
-
-  @OneToMany(() => Transaction, (transaction) => transaction.admin)
-  adminTransactions: Transaction[];
+  @Field(() => RecordSessionKqj)
+  @OneToMany(
+    () => RecordSessionKqj,
+    (recordSessionKqj) => recordSessionKqj.user,
+  )
+  record_session_kqj: RecordSessionKqj[];
 }
