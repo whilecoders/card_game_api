@@ -2,22 +2,30 @@
 # THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
 # ------------------------------------------------------
 
+input AddUserDto {
+  city: String!
+  email: String!
+  password: String!
+  phone_number: Int!
+  username: String!
+}
+
 input CreateGamesDto {
   end_time: DateTime!
-  game_duration: Float!
-  game_in_day: Float!
+  game_duration: Int!
+  game_in_day: Int!
   game_status: GameStatus!
   game_type: GameType!
   start_time: DateTime!
-  user_id: Float!
+  user_id: Int!
 }
 
 input CreateRecordSessionKqjDto {
   choosen_card: GameKqjCards!
-  gameSessionId: Float!
+  gameSessionId: Int!
   record_status: RecordSessionStatus!
   token: TokenValues!
-  userId: Float!
+  userId: Int!
 }
 
 input CreateTransactionSessionDto {
@@ -53,7 +61,7 @@ type GameSession {
   deletedBy: String!
   game: Games!
   game_result_card: GameKqjCards
-  id: Float!
+  id: Int!
   record_session_kqj: RecordSessionKqj
   session_end_time: DateTime
   session_start_time: DateTime
@@ -85,21 +93,25 @@ type Games {
   game_in_day: Float!
   game_status: GameStatus!
   game_type: GameType!
-  id: Float!
+  id: Int!
   start_time: DateTime!
   updatedAt: DateTime!
   updatedBy: String!
 }
 
 type Mutation {
-  DeleteGames(id: Float!): Boolean!
+  DeleteGames(id: Int!): Boolean!
+  addUser(addUserDto: AddUserDto!): User!
   createGames(createGamesDto: CreateGamesDto!): Games!
   createRecordSession(createRecordSessionKqjDto: CreateRecordSessionKqjDto!): RecordSessionKqj!
   createTransactionSession(createTransactionSessionDto: CreateTransactionSessionDto!): TransactionSession!
   refreshAccessToken(refreshToken: String!, token: String!): Token!
+  resetPassword(resetPasswordDto: ResetPasswordDto!): String!
   signUp(signUpCredential: SignUpCredential!): User!
+  suspendUser(suspendUserDto: SuspendUserDto!): User!
   updateGameSession(id: Int!, updateGameSessionDto: UpdateGameSessionDto!): GameSession!
-  updateGames(id: Float!, updateGamesDto: UpdateGamesDto!): Games!
+  updateGames(id: Int!, updateGamesDto: UpdateGamesDto!): Games!
+  updateUser(id: Int!, updateUserDto: UpdateUserDto!): User!
   updateWallet(adminId: Float!, userId: Float!, walletData: WalletDto!): Transaction!
 }
 
@@ -107,17 +119,21 @@ type Query {
   getAllGameSessions: [GameSession!]!
   getAllGameses: [Games!]!
   getAllRecordSessions: [RecordSessionKqj!]!
-  getAllRecordsBySessionId(sessionId: String!): [RecordSessionKqj!]!
+  getAllRecordsBy(SessionId: Int!): [RecordSessionKqj!]!
   getAllTransactionSessions: [TransactionSession!]!
-  getGameSessionById(id: Float!): GameSession!
+  getAllUsers: [User!]!
+  getGameSessionBy(id: Int!): GameSession!
   getGameSessionsByDate(endDate: DateTime!, startDate: DateTime!): [GameSession!]!
+  getGamesBy(id: Int!): Games!
   getGamesByDate(from: DateTime!, to: DateTime!): [Games!]!
-  getGamesById(id: Int!): Games!
   getLiveGameSessions: [GameSession!]!
-  getRecordBySessionId(sessionId: String!): RecordSessionKqj!
-  getRecordSessionById(id: Float!): RecordSessionKqj!
-  getRecordsByUserId(userId: String!): [RecordSessionKqj!]!
-  getTransactionSessionById(id: Float!): TransactionSession!
+  getRecordBy(SessionId: Int!): RecordSessionKqj!
+  getRecordSessionBy(id: Int!): RecordSessionKqj!
+  getRecordsBy(UserId: Int!): [RecordSessionKqj!]!
+  getTransactionSessionBy(id: Int!): TransactionSession!
+  getUserById(id: Int!): User!
+  getUserByRole(role: Float!): [User!]!
+  getUsersByCreatedAt(date: DateTime!): [User!]!
   signIn(signInCredential: SignInCredential!): UserToken!
 }
 
@@ -127,11 +143,11 @@ type RecordSessionKqj {
   createdBy: String!
   deletedAt: DateTime!
   deletedBy: String!
-  game_session: GameSession!
-  id: Float!
+  game_session_id: GameSession!
+  id: Int!
   record_status: RecordSessionStatus!
   token: TokenValues!
-  transaction_session: TransactionSession
+  transaction_session_id: TransactionSession
   updatedAt: DateTime!
   updatedBy: String!
   user: User!
@@ -141,6 +157,13 @@ enum RecordSessionStatus {
   ACTIVE
   COMPLETED
   INACTIVE
+}
+
+input ResetPasswordDto {
+  confirmPassword: String!
+  currentPassword: String!
+  email: String!
+  newPassword: String!
 }
 
 enum Role {
@@ -157,10 +180,17 @@ input SignInCredential {
 }
 
 input SignUpCredential {
+  city: String!
   email: String!
   password: String!
+  phone_number: Int!
   role: Role!
   username: String!
+}
+
+input SuspendUserDto {
+  suspend: Boolean!
+  userId: Int!
 }
 
 type Token {
@@ -184,7 +214,7 @@ type Transaction {
   createdBy: String!
   deletedAt: DateTime!
   deletedBy: String!
-  id: Float!
+  id: Int!
   transactionDate: DateTime!
   type: TransactionType!
   updatedAt: DateTime!
@@ -197,7 +227,7 @@ type TransactionSession {
   createdBy: String!
   deletedAt: DateTime!
   deletedBy: String!
-  id: Float!
+  id: Int!
   record_session_kqj: RecordSessionKqj!
   token: TokenValues!
   type: TransactionType!
@@ -216,22 +246,31 @@ input UpdateGameSessionDto {
 
 input UpdateGamesDto {
   end_time: DateTime!
-  game_duration: Float!
-  game_in_day: Float!
+  game_duration: Int!
+  game_in_day: Int!
   game_status: GameStatus!
   start_time: DateTime!
 }
 
+input UpdateUserDto {
+  city: String
+  name: String
+  phone_number: Int
+  role: Role
+}
+
 type User {
+  city: String!
   createdAt: DateTime!
   createdBy: String!
   createdGames: Games!
   deletedAt: DateTime!
   deletedBy: String!
   email: String!
-  id: Float!
+  id: Int!
   name: String
   password: String!
+  phone_number: Int!
   profile: String
   record_session_kqj: RecordSessionKqj!
   role: Role!

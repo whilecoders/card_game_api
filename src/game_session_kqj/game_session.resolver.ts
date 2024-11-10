@@ -18,8 +18,8 @@ export class GameSessionKqjResolver {
     );
   }
 
-  @Query(() => GameSessionKqj, { name: 'getGameSessionById' })
-  async getGameSessionById(@Args('id') id: number): Promise<GameSessionKqj> {
+  @Query(() => GameSessionKqj, { name: 'getGameSessionBy' })
+  async getGameSessionById(@Args({name: 'id', type: () => Int}) id: number): Promise<GameSessionKqj> {
     return await this.gameSessionService.getGameSessionById(id);
   }
 

@@ -9,14 +9,14 @@ import {
 
 @InputType()
 export class  SignInCredential {
-    @Field()
+    @Field(()=>String)
     @IsNotEmpty({ message: 'Username cannot be empty' })
     @IsString()
     @MinLength(6, { message: 'Username must be at least 8 characters long' })
     @MaxLength(30, { message: 'Username cannot be longer than 30 characters' })
     username: string;
 
-    @Field()
+    @Field(()=>String)
     @IsNotEmpty({ message: 'Password cannot be empty' })
     @IsString()
     @MinLength(8, { message: 'Password must be at least 8 characters long' })

@@ -17,14 +17,14 @@ export class GamesResolver {
 
   @Mutation(() => Games)
   async updateGames(
-    @Args('id') id: number,
+    @Args({name: 'id', type: () => Int}) id: number,
     @Args('updateGamesDto') updateGamesDto: UpdateGamesDto,
   ): Promise<Games> {
     return await this.GamesService.updateGame(id, updateGamesDto);
   }
 
   @Mutation(() => Boolean)
-  async DeleteGames(@Args('id') id: number): Promise<boolean> {
+  async DeleteGames(@Args({name: 'id', type: () => Int}) id: number): Promise<boolean> {
     await this.GamesService.deleteGame(id);
     return true;
   }
@@ -34,7 +34,7 @@ export class GamesResolver {
     return await this.GamesService.getAllGames();
   }
 
-  @Query(() => Games, { name: 'getGamesById' })
+  @Query(() => Games, { name: 'getGamesBy' })
   async getGamesById(@Args({ name: 'id', type: () => Int }) id: number): Promise<Games> {
     return await this.GamesService.getGameById(id);
   }

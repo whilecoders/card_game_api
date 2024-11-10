@@ -40,11 +40,12 @@ export class GameSessionKqj extends BaseEntity {
   @Field(() => RecordSessionKqj,{nullable:true})
   @OneToMany(
     () => RecordSessionKqj,
-    (recordSessionKqj) => recordSessionKqj.game_session,
+    (recordSessionKqj) => recordSessionKqj.game_session_id,
     {
       nullable: true,
       onDelete: 'CASCADE',
     },
   )
+  @JoinColumn({ name: 'record_session_kqj' })
   record_session_kqj?: RecordSessionKqj;
 }

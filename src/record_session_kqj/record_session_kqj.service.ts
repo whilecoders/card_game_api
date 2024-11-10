@@ -43,7 +43,7 @@ export class RecordSessionKqjService {
     const recordSession = this.recordSessionKqjRepository.create({
       user,
       token: dto.token,
-      game_session: gameSession,
+      game_session_id: gameSession,
       choosen_card: dto.choosen_card,
       record_status: dto.record_status,
     });
@@ -69,12 +69,14 @@ export class RecordSessionKqjService {
   async getAllRecordSessions(): Promise<RecordSessionKqj[]> {
     try {
       return await this.recordSessionKqjRepository.find({
-        relations: ['user', ' game_session', 'transaction_session'],
+        relations: { user: true, game_session_id: true, transaction_session_id: true },
       });
     } catch (error) {
+      console.error("Error retrieving record sessions:", error); 
       throw new BadRequestException('Failed to retrieve record sessions');
     }
   }
+  
 
   async getRecordsByUserId(userId: number): Promise<RecordSessionKqj[]> {
     try {
@@ -99,7 +101,7 @@ export class RecordSessionKqjService {
   ): Promise<RecordSessionKqj | null> {
     try {
       const record = await this.recordSessionKqjRepository.findOne({
-        where: { game_session: { id: sessionId } },
+        where: { game_session_id: { id: sessionId } },
         relations: ['user', 'game_session', 'transaction_session'],
       });
 
@@ -121,7 +123,7 @@ export class RecordSessionKqjService {
   ): Promise<RecordSessionKqj[]> {
     try {
       const records = await this.recordSessionKqjRepository.find({
-        where: { game_session: { id: sessionId } },
+        where: { game_session_id: { id: sessionId } },
         relations: ['user', 'game_session', 'transaction_session'],
       });
 

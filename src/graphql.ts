@@ -68,6 +68,14 @@ export enum UserStatus {
     SUSPENDED = "SUSPENDED"
 }
 
+export interface AddUserDto {
+    city: string;
+    email: string;
+    password: string;
+    phone_number: number;
+    username: string;
+}
+
 export interface CreateGamesDto {
     end_time: DateTime;
     game_duration: number;
@@ -92,16 +100,30 @@ export interface CreateTransactionSessionDto {
     type: TransactionType;
 }
 
+export interface ResetPasswordDto {
+    confirmPassword: string;
+    currentPassword: string;
+    email: string;
+    newPassword: string;
+}
+
 export interface SignInCredential {
     password: string;
     username: string;
 }
 
 export interface SignUpCredential {
+    city: string;
     email: string;
     password: string;
+    phone_number: number;
     role: Role;
     username: string;
+}
+
+export interface SuspendUserDto {
+    suspend: boolean;
+    userId: number;
 }
 
 export interface UpdateGameSessionDto {
@@ -114,6 +136,13 @@ export interface UpdateGamesDto {
     game_in_day: number;
     game_status: GameStatus;
     start_time: DateTime;
+}
+
+export interface UpdateUserDto {
+    city?: Nullable<string>;
+    name?: Nullable<string>;
+    phone_number?: Nullable<number>;
+    role?: Nullable<Role>;
 }
 
 export interface WalletDto {
@@ -157,13 +186,17 @@ export interface Games {
 
 export interface IMutation {
     DeleteGames(id: number): boolean | Promise<boolean>;
+    addUser(addUserDto: AddUserDto): User | Promise<User>;
     createGames(createGamesDto: CreateGamesDto): Games | Promise<Games>;
     createRecordSession(createRecordSessionKqjDto: CreateRecordSessionKqjDto): RecordSessionKqj | Promise<RecordSessionKqj>;
     createTransactionSession(createTransactionSessionDto: CreateTransactionSessionDto): TransactionSession | Promise<TransactionSession>;
     refreshAccessToken(refreshToken: string, token: string): Token | Promise<Token>;
+    resetPassword(resetPasswordDto: ResetPasswordDto): string | Promise<string>;
     signUp(signUpCredential: SignUpCredential): User | Promise<User>;
+    suspendUser(suspendUserDto: SuspendUserDto): User | Promise<User>;
     updateGameSession(id: number, updateGameSessionDto: UpdateGameSessionDto): GameSession | Promise<GameSession>;
     updateGames(id: number, updateGamesDto: UpdateGamesDto): Games | Promise<Games>;
+    updateUser(id: number, updateUserDto: UpdateUserDto): User | Promise<User>;
     updateWallet(adminId: number, userId: number, walletData: WalletDto): Transaction | Promise<Transaction>;
 }
 
@@ -171,17 +204,21 @@ export interface IQuery {
     getAllGameSessions(): GameSession[] | Promise<GameSession[]>;
     getAllGameses(): Games[] | Promise<Games[]>;
     getAllRecordSessions(): RecordSessionKqj[] | Promise<RecordSessionKqj[]>;
-    getAllRecordsBySessionId(sessionId: string): RecordSessionKqj[] | Promise<RecordSessionKqj[]>;
+    getAllRecordsBy(SessionId: number): RecordSessionKqj[] | Promise<RecordSessionKqj[]>;
     getAllTransactionSessions(): TransactionSession[] | Promise<TransactionSession[]>;
-    getGameSessionById(id: number): GameSession | Promise<GameSession>;
+    getAllUsers(): User[] | Promise<User[]>;
+    getGameSessionBy(id: number): GameSession | Promise<GameSession>;
     getGameSessionsByDate(endDate: DateTime, startDate: DateTime): GameSession[] | Promise<GameSession[]>;
+    getGamesBy(id: number): Games | Promise<Games>;
     getGamesByDate(from: DateTime, to: DateTime): Games[] | Promise<Games[]>;
-    getGamesById(id: number): Games | Promise<Games>;
     getLiveGameSessions(): GameSession[] | Promise<GameSession[]>;
-    getRecordBySessionId(sessionId: string): RecordSessionKqj | Promise<RecordSessionKqj>;
-    getRecordSessionById(id: number): RecordSessionKqj | Promise<RecordSessionKqj>;
-    getRecordsByUserId(userId: string): RecordSessionKqj[] | Promise<RecordSessionKqj[]>;
-    getTransactionSessionById(id: number): TransactionSession | Promise<TransactionSession>;
+    getRecordBy(SessionId: number): RecordSessionKqj | Promise<RecordSessionKqj>;
+    getRecordSessionBy(id: number): RecordSessionKqj | Promise<RecordSessionKqj>;
+    getRecordsBy(UserId: number): RecordSessionKqj[] | Promise<RecordSessionKqj[]>;
+    getTransactionSessionBy(id: number): TransactionSession | Promise<TransactionSession>;
+    getUserById(id: number): User | Promise<User>;
+    getUserByRole(role: number): User[] | Promise<User[]>;
+    getUsersByCreatedAt(date: DateTime): User[] | Promise<User[]>;
     signIn(signInCredential: SignInCredential): UserToken | Promise<UserToken>;
 }
 
@@ -191,11 +228,11 @@ export interface RecordSessionKqj {
     createdBy: string;
     deletedAt: DateTime;
     deletedBy: string;
-    game_session: GameSession;
+    game_session_id: GameSession;
     id: number;
     record_status: RecordSessionStatus;
     token: TokenValues;
-    transaction_session?: Nullable<TransactionSession>;
+    transaction_session_id?: Nullable<TransactionSession>;
     updatedAt: DateTime;
     updatedBy: string;
     user: User;
@@ -235,6 +272,7 @@ export interface TransactionSession {
 }
 
 export interface User {
+    city: string;
     createdAt: DateTime;
     createdBy: string;
     createdGames: Games;
@@ -244,6 +282,7 @@ export interface User {
     id: number;
     name?: Nullable<string>;
     password: string;
+    phone_number: number;
     profile?: Nullable<string>;
     record_session_kqj: RecordSessionKqj;
     role: Role;

@@ -6,6 +6,7 @@ import {
   Column,
   CreateDateColumn,
   Entity,
+  JoinColumn,
   ManyToOne,
 } from 'typeorm';
 
@@ -32,6 +33,7 @@ export class Transaction extends BaseEntity {
     nullable: false,
     onDelete: 'CASCADE',
   })
+  @JoinColumn({ name: 'user' })
   user: User;
 
   @Field(() => User)
@@ -39,6 +41,7 @@ export class Transaction extends BaseEntity {
     nullable: false,
     onDelete: 'CASCADE',
   })
+  @JoinColumn({ name: 'admin' })
   admin: User;
 
   @Field(() => Date)

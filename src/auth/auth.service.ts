@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   ConflictException,
   Inject,
   Injectable,
@@ -14,6 +15,7 @@ import { PasswordHashService } from 'src/common/helper/password.service';
 import { SignInCredential } from './dto/signin.input';
 import { UserTokenType } from './entities/signin.entity';
 import { TokenType } from './entities/token.entity';
+import { ResetPasswordDto } from './dto/reset_password.dto';
 
 @Injectable()
 export class AuthService {
@@ -21,9 +23,9 @@ export class AuthService {
     @Inject('USER_REPOSITORY')
     private readonly userRepository: Repository<User>,
     private jwtService: JWTService,
-  ) { }
-  async SignUp(signUpCredential: SignUpCredential) {
-    const { username, email, password, role } = signUpCredential;
+  ) {}
+  async SignUpAdmin(signUpCredential: SignUpCredential) {
+    const { username, email, password, role, city, phone_number } = signUpCredential;
     const hashedPassword = await PasswordHashService.hashPassword(password);
 
     const existingUser = await this.userRepository.findOne({
@@ -43,6 +45,8 @@ export class AuthService {
       username,
       email,
       password: hashedPassword,
+      city,
+      phone_number,
       role: role,
     });
 
@@ -97,7 +101,7 @@ export class AuthService {
         refresh_token: refreshToken,
         access_token: token,
       };
-      console.log("old token -> ", tokens);
+      console.log('old token -> ', tokens);
       return tokens;
     }
 
@@ -109,8 +113,7 @@ export class AuthService {
     }
 
     const newAccessToken = await this.jwtService.generateAccessToken(user.id);
-    console.log("new token -> ", newAccessToken);
-
+    console.log('new token -> ', newAccessToken);
 
     const tokens: TokenType = {
       access_token: newAccessToken,
@@ -118,5 +121,36 @@ export class AuthService {
     };
 
     return tokens;
+  }
+
+  async resetPassword(resetPasswordDto: ResetPasswordDto): Promise<string> {
+    const { email, currentPassword, newPassword, confirmPassword } =
+      resetPasswordDto;
+    if (newPassword !== confirmPassword) {
+      throw new BadRequestException(
+        'New password and confirm password do not match',
+      );
+    }
+    try {
+      const user = await this.userRepository.findOne({ where: { email } });
+      if (!user) {
+        throw new NotFoundException(`User with email ${email} not found`);
+      }
+      const isCurrentPasswordValid = await PasswordHashService.verifyPassword(
+        currentPassword,
+        user.password,
+      );
+      if (!isCurrentPasswordValid) {
+        throw new BadRequestException('Current password is incorrect');
+      }
+      const hashedPassword =
+        await PasswordHashService.hashPassword(newPassword);
+      user.password = hashedPassword;
+
+      await this.userRepository.save(user);
+      return 'Password reset successful';
+    } catch (error) {
+      throw new InternalServerErrorException('Failed to reset password');
+    }
   }
 }
