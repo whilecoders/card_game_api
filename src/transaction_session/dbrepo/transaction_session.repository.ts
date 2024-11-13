@@ -2,7 +2,7 @@ import { Field, ObjectType } from '@nestjs/graphql';
 import { TokenValues, TransactionType } from 'src/common/constants';
 import { BaseEntity } from 'src/common/repository/base.repository';
 import { RecordSessionKqj } from 'src/record_session_kqj/dbrepo/record_session_kqj.repository';
-import { Column, Entity, OneToOne } from 'typeorm';
+import { Column, Entity, JoinColumn, OneToOne } from 'typeorm';
 
 @ObjectType('TransactionSession')
 @Entity({ name: 'transaction_session' })
@@ -23,11 +23,12 @@ export class TransactionSession extends BaseEntity {
   @Field(() => RecordSessionKqj)
   @OneToOne(
     () => RecordSessionKqj,
-    (recordSessionKqj) => recordSessionKqj.transaction_session,
+    (recordSessionKqj) => recordSessionKqj.transaction_session_id,
     {
       nullable: false,
       onDelete: 'CASCADE',
     },
   )
+  @JoinColumn({ name: 'record_session_kqj' })
   record_session_kqj: RecordSessionKqj;
 }

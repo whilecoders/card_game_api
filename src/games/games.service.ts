@@ -57,7 +57,15 @@ export class GamesService {
         createGameDto.game_in_day,
       );
 
-      return game_created;
+      const find_game = await this.gamesRepository.findOne({
+        where: { id: game_created.id },
+        relations: {
+          gameSession: true,
+          admin: true,
+        },
+      });
+
+      return find_game;
     } catch (error) {
       console.error('Error creating GameLaunch:', error);
       throw new InternalServerErrorException('Internal Server error 400');
@@ -118,7 +126,7 @@ export class GamesService {
     try {
       const gameLaunch = await this.gamesRepository.findOne({
         where: { id },
-        relations: ['admin'],
+        relations: { admin: true, gameSession: true },
       });
 
       if (!gameLaunch) {
@@ -192,7 +200,7 @@ export class GamesService {
     try {
       const allGameLaunch = await this.gamesRepository.find({
         where: { deletedBy: null },
-        relations: ['admin', 'gameSession'],
+        relations: { admin: true, gameSession: true },
       });
       if (!allGameLaunch.length)
         throw new NotFoundException(`No GameLaunches found`);
@@ -207,7 +215,7 @@ export class GamesService {
   async getGameById(id: number): Promise<Games> {
     const gameLaunch = await this.gamesRepository.findOne({
       where: { id, deletedBy: null },
-      relations: ['admin', 'gameSession'],
+      relations: { admin: true, gameSession: true },
     });
     if (!gameLaunch)
       throw new NotFoundException(`GameLaunch with ID ${id} not found`);
@@ -233,20 +241,43 @@ export class GamesService {
     }
   }
 
-  async getGamesByDate(startDate: string, endDate: string): Promise<Games[]> {
-    const start = new Date(startDate);
-    const end = new Date(endDate);
-
-    if (isNaN(start.getTime()) || isNaN(end.getTime())) {
+  async getGamesByDate(from: Date, to: Date): Promise<Games[]> {
+    if (isNaN(from.getTime()) || isNaN(to.getTime())) {
       throw new BadRequestException(
         'Invalid date format. Please provide valid ISO dates.',
       );
     }
-
     return await this.gamesRepository.find({
       where: {
-        start_time: Between(start, end),
+        start_time: Between(from, to),
       },
+      relations: { admin: true, gameSession: true },
     });
   }
+
+async getTodaysGameSession(): Promise<GameSessionKqj[]> {
+  try {
+    const today = new Date();
+
+    const todaysSessions = await this.gameSessionRepository.find({
+      where: {
+        session_start_time: Between(
+          today,
+          new Date(today.getTime() + 24 * 60 * 60 * 1000) 
+        ),
+      },
+      relations: { game: { admin: true , gameSession:true }},
+    });
+
+    if (!todaysSessions.length) {
+      throw new NotFoundException('No game sessions found for today.');
+    }
+
+    return todaysSessions;
+  } catch (error) {
+    console.error('Error retrieving today\'s game sessions:', error);
+    throw new InternalServerErrorException('Failed to retrieve today\'s game sessions.');
+  }
+}
+
 }

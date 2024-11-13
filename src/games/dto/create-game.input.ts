@@ -1,11 +1,11 @@
-import { InputType, Field } from '@nestjs/graphql';
+import { InputType, Field, Int } from '@nestjs/graphql';
 import { IsEnum, IsNotEmpty, IsNumber } from 'class-validator';
 import { GameType, GameStatus } from 'src/common/constants';
 import { IsFullDateString } from 'src/common/validators';
 
 @InputType()
 export class CreateGamesDto {
-  @Field(() => Number,{nullable:false})
+  @Field(() => Int,{nullable:false})
   @IsNotEmpty({ message: 'user id is required.' })
   user_id: number;
 
@@ -29,14 +29,14 @@ export class CreateGamesDto {
   })
   end_time: Date;
 
-  @Field(() => Number,{nullable:false})
+  @Field(() => Int,{nullable:false})
   @IsNotEmpty({
     message: 'Game duration is required and must be a number.',
   })
   @IsNumber({}, { message: 'Game duration must be a valid number.' })
   game_duration: number;
 
-  @Field(() => Number,{nullable:false})
+  @Field(() => Int,{nullable:false})
   @IsNotEmpty({ message: 'Game in day is required and must be a number.' }) 
   @IsNumber({}, { message: 'Game in day must be a valid number.' })
   game_in_day: number;
