@@ -11,13 +11,15 @@ input AddUserDto {
 }
 
 input CreateGamesDto {
-  end_time: DateTime!
+  admin_id: Int!
+  end_date: DateTime!
+  end_time: String!
   game_duration: Int!
   game_in_day: Int!
   game_status: GameStatus!
   game_type: GameType!
-  start_time: DateTime!
-  user_id: Int!
+  start_date: DateTime!
+  start_time: String!
 }
 
 input CreateRecordSessionKqjDto {
@@ -32,6 +34,17 @@ input CreateTransactionSessionDto {
   recordSessionId: Float!
   token: TokenValues!
   type: TransactionType!
+}
+
+type DailyGame {
+  createdAt: DateTime!
+  createdBy: String!
+  deletedAt: DateTime!
+  deletedBy: String!
+  games: Games!
+  id: Int!
+  updatedAt: DateTime!
+  updatedBy: String!
 }
 
 """
@@ -82,19 +95,22 @@ enum GameType {
 }
 
 type Games {
+  DailyGame: [DailyGame!]
   admin: User!
   createdAt: DateTime!
   createdBy: String!
   deletedAt: DateTime!
   deletedBy: String!
-  end_time: DateTime!
+  end_date: DateTime!
+  end_time: String!
   gameSession: [GameSession!]
   game_duration: Float!
   game_in_day: Float!
   game_status: GameStatus!
   game_type: GameType!
   id: Int!
-  start_time: DateTime!
+  start_date: DateTime!
+  start_time: String!
   updatedAt: DateTime!
   updatedBy: String!
 }
@@ -102,6 +118,7 @@ type Games {
 type Mutation {
   DeleteGames(id: Int!): Boolean!
   addUser(addUserDto: AddUserDto!): User!
+  createGameSession: [Games!]!
   createGames(createGamesDto: CreateGamesDto!): Games!
   createRecordSession(createRecordSessionKqjDto: CreateRecordSessionKqjDto!): RecordSessionKqj!
   createTransactionSession(createTransactionSessionDto: CreateTransactionSessionDto!): TransactionSession!
@@ -130,6 +147,7 @@ type Query {
   getRecordBy(SessionId: Int!): RecordSessionKqj!
   getRecordSessionBy(id: Int!): RecordSessionKqj!
   getRecordsBy(UserId: Int!): [RecordSessionKqj!]!
+  getTodaysGameSession: [GameSession!]!
   getTransactionSessionBy(id: Int!): TransactionSession!
   getUserById(id: Int!): User!
   getUserByRole(role: Float!): [User!]!
@@ -245,11 +263,13 @@ input UpdateGameSessionDto {
 }
 
 input UpdateGamesDto {
-  end_time: DateTime!
+  end_date: DateTime!
+  end_time: String!
   game_duration: Int!
   game_in_day: Int!
   game_status: GameStatus!
-  start_time: DateTime!
+  start_date: DateTime!
+  start_time: String!
 }
 
 input UpdateUserDto {

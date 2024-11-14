@@ -59,7 +59,7 @@ export class UserService {
   }
 
   async addUser(addUserDto: AddUserDto) {
-    const { username, email, password ,city,phone_number} = addUserDto;
+    const { username, email, password, city, phone_number } = addUserDto;
     const hashedPassword = await PasswordHashService.hashPassword(password);
 
     const existingUser = await this.userRepository.findOne({
@@ -130,4 +130,3 @@ export class UserService {
     }
   }
 }
-

@@ -77,13 +77,15 @@ export interface AddUserDto {
 }
 
 export interface CreateGamesDto {
-    end_time: DateTime;
+    admin_id: number;
+    end_date: DateTime;
+    end_time: string;
     game_duration: number;
     game_in_day: number;
     game_status: GameStatus;
     game_type: GameType;
-    start_time: DateTime;
-    user_id: number;
+    start_date: DateTime;
+    start_time: string;
 }
 
 export interface CreateRecordSessionKqjDto {
@@ -131,11 +133,13 @@ export interface UpdateGameSessionDto {
 }
 
 export interface UpdateGamesDto {
-    end_time: DateTime;
+    end_date: DateTime;
+    end_time: string;
     game_duration: number;
     game_in_day: number;
     game_status: GameStatus;
-    start_time: DateTime;
+    start_date: DateTime;
+    start_time: string;
 }
 
 export interface UpdateUserDto {
@@ -148,6 +152,17 @@ export interface UpdateUserDto {
 export interface WalletDto {
     token: TokenValues;
     type: TransactionType;
+}
+
+export interface DailyGame {
+    createdAt: DateTime;
+    createdBy: string;
+    deletedAt: DateTime;
+    deletedBy: string;
+    games: Games;
+    id: number;
+    updatedAt: DateTime;
+    updatedBy: string;
 }
 
 export interface GameSession {
@@ -167,19 +182,22 @@ export interface GameSession {
 }
 
 export interface Games {
+    DailyGame?: Nullable<DailyGame[]>;
     admin: User;
     createdAt: DateTime;
     createdBy: string;
     deletedAt: DateTime;
     deletedBy: string;
-    end_time: DateTime;
+    end_date: DateTime;
+    end_time: string;
     gameSession?: Nullable<GameSession[]>;
     game_duration: number;
     game_in_day: number;
     game_status: GameStatus;
     game_type: GameType;
     id: number;
-    start_time: DateTime;
+    start_date: DateTime;
+    start_time: string;
     updatedAt: DateTime;
     updatedBy: string;
 }
@@ -187,6 +205,7 @@ export interface Games {
 export interface IMutation {
     DeleteGames(id: number): boolean | Promise<boolean>;
     addUser(addUserDto: AddUserDto): User | Promise<User>;
+    createGameSession(): Games[] | Promise<Games[]>;
     createGames(createGamesDto: CreateGamesDto): Games | Promise<Games>;
     createRecordSession(createRecordSessionKqjDto: CreateRecordSessionKqjDto): RecordSessionKqj | Promise<RecordSessionKqj>;
     createTransactionSession(createTransactionSessionDto: CreateTransactionSessionDto): TransactionSession | Promise<TransactionSession>;
@@ -215,6 +234,7 @@ export interface IQuery {
     getRecordBy(SessionId: number): RecordSessionKqj | Promise<RecordSessionKqj>;
     getRecordSessionBy(id: number): RecordSessionKqj | Promise<RecordSessionKqj>;
     getRecordsBy(UserId: number): RecordSessionKqj[] | Promise<RecordSessionKqj[]>;
+    getTodaysGameSession(): GameSession[] | Promise<GameSession[]>;
     getTransactionSessionBy(id: number): TransactionSession | Promise<TransactionSession>;
     getUserById(id: number): User | Promise<User>;
     getUserByRole(role: number): User[] | Promise<User[]>;
