@@ -133,11 +133,14 @@ export interface UpdateGameSessionDto {
 }
 
 export interface UpdateGamesDto {
+    admin_id: number;
     end_date: DateTime;
     end_time: string;
-    game_duration: number;
-    game_in_day: number;
-    game_status: GameStatus;
+    game_duration?: Nullable<number>;
+    game_id: number;
+    game_in_day?: Nullable<number>;
+    game_status?: Nullable<GameStatus>;
+    game_type?: Nullable<GameType>;
     start_date: DateTime;
     start_time: string;
 }
@@ -214,7 +217,7 @@ export interface IMutation {
     signUp(signUpCredential: SignUpCredential): User | Promise<User>;
     suspendUser(suspendUserDto: SuspendUserDto): User | Promise<User>;
     updateGameSession(id: number, updateGameSessionDto: UpdateGameSessionDto): GameSession | Promise<GameSession>;
-    updateGames(id: number, updateGamesDto: UpdateGamesDto): Games | Promise<Games>;
+    updateGames(updateGamesDto: UpdateGamesDto): Games | Promise<Games>;
     updateUser(id: number, updateUserDto: UpdateUserDto): User | Promise<User>;
     updateWallet(adminId: number, userId: number, walletData: WalletDto): Transaction | Promise<Transaction>;
 }

@@ -36,11 +36,11 @@ export class Games extends BaseEntity {
   end_time: string;
 
   @Field(() => Date)
-  @Column({ type: 'date', nullable: false })
+  @Column({ type: 'datetime', nullable: false })
   start_date: Date;
 
   @Field(() => Date)
-  @Column({ type: 'date', nullable: false })
+  @Column({ type: 'datetime', nullable: false })
   end_date: Date;
 
   @Field(() => Number)

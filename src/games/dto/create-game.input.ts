@@ -11,7 +11,7 @@ import {
 @InputType()
 export class CreateGamesDto {
   @Field(() => Int, { nullable: false })
-  @IsNotEmpty({ message: 'admin id is required.' })
+  @IsNotEmpty({ message: 'user id is required.' })
   admin_id: number;
 
   @Field(() => GameType, { nullable: false })
@@ -28,9 +28,9 @@ export class CreateGamesDto {
   @Field(() => String, { nullable: false })
   @IsNotEmpty({ message: 'End time is required.' })
   @IsValidTimeFormat({ message: 'End time must be in HH:MM:SS format.' })
-  // @Validate(IsValidTimeRange, {
-  //   message: 'End time must be greater than start time.',
-  // })
+  @Validate(IsValidTimeRange, {
+    message: 'End time must be greater than start time.',
+  })
   end_time: string;
 
   @Field(() => Date, { nullable: false })

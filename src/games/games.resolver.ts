@@ -22,10 +22,9 @@ export class GamesResolver {
 
   @Mutation(() => Games)
   async updateGames(
-    @Args({ name: 'id', type: () => Int }) id: number,
     @Args('updateGamesDto') updateGamesDto: UpdateGamesDto,
   ): Promise<Games> {
-    return await this.GamesService.updateGame(id, updateGamesDto);
+    return await this.GamesService.updateGame(updateGamesDto);
   }
 
   @Mutation(() => Boolean)

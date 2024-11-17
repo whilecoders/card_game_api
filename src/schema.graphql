@@ -127,7 +127,7 @@ type Mutation {
   signUp(signUpCredential: SignUpCredential!): User!
   suspendUser(suspendUserDto: SuspendUserDto!): User!
   updateGameSession(id: Int!, updateGameSessionDto: UpdateGameSessionDto!): GameSession!
-  updateGames(id: Int!, updateGamesDto: UpdateGamesDto!): Games!
+  updateGames(updateGamesDto: UpdateGamesDto!): Games!
   updateUser(id: Int!, updateUserDto: UpdateUserDto!): User!
   updateWallet(adminId: Float!, userId: Float!, walletData: WalletDto!): Transaction!
 }
@@ -263,11 +263,14 @@ input UpdateGameSessionDto {
 }
 
 input UpdateGamesDto {
+  admin_id: Int!
   end_date: DateTime!
   end_time: String!
-  game_duration: Int!
-  game_in_day: Int!
-  game_status: GameStatus!
+  game_duration: Int
+  game_id: Int!
+  game_in_day: Int
+  game_status: GameStatus
+  game_type: GameType
   start_date: DateTime!
   start_time: String!
 }
