@@ -4,14 +4,23 @@ import {
   Inject,
   InternalServerErrorException,
   BadRequestException,
+  ConflictException,
 } from '@nestjs/common';
-import { Between, Repository } from 'typeorm';
+import {
+  Between,
+  LessThanOrEqual,
+  MoreThan,
+  MoreThanOrEqual,
+  Not,
+  Repository,
+} from 'typeorm';
 import { GameSessionKqj } from 'src/game_session_kqj/dbrepo/game_session.repository';
 import { User } from 'src/user/dbrepo/user.repository';
 import { Games } from './dbrepo/games.repository';
 import { CreateGamesDto } from './dto/create-game.input';
-import { UpdateGamesDto } from './dto/update-game.input';
-import { GameSessionStatus, GameStatus } from 'src/common/constants';
+import { UpdateGamesDto as UpdateGameDto } from './dto/update-game.input';
+import { GameSessionStatus } from 'src/common/constants';
+import { DailyGame } from 'src/daily_game/dbrepo/daily_game.repository';
 
 @Injectable()
 export class GamesService {
@@ -20,179 +29,230 @@ export class GamesService {
     private readonly gamesRepository: Repository<Games>,
 
     @Inject('GAME_SESSION_KQJ_REPOSITORY')
-    private readonly gameSessionRepository: Repository<GameSessionKqj>,
+    private readonly gameSessionKqjRepository: Repository<GameSessionKqj>,
 
     @Inject('USER_REPOSITORY')
     private readonly userRepository: Repository<User>,
+
+    @Inject('DAILY_GAME_REPOSITORY')
+    private readonly dailyGameRepository: Repository<DailyGame>,
   ) {}
 
   async createGame(createGameDto: CreateGamesDto): Promise<Games> {
     const admin = await this.userRepository.findOne({
-      where: { id: createGameDto.user_id },
+      where: { id: createGameDto.admin_id },
     });
     if (!admin) {
       throw new NotFoundException('Admin user not found');
     }
 
-    const gameLaunch = this.gamesRepository.create({
-      ...createGameDto,
-      admin,
-      start_time: createGameDto.start_time,
-      end_time: createGameDto.end_time,
-      game_status: GameStatus.AVAILABLE,
+    const startDate = new Date(createGameDto.start_date);
+    startDate.setHours(0, 0, 0, 0);
+    createGameDto.start_date = startDate;
+
+    const endDate = new Date(createGameDto.end_date);
+    endDate.setHours(23, 59, 59, 999);
+    createGameDto.end_date = endDate;
+
+    createGameDto.start_date = startDate;
+    createGameDto.end_date = endDate;
+
+    const existingGame = await this.gamesRepository.findOne({
+      where: [
+        {
+          start_date: LessThanOrEqual(createGameDto.end_date),
+          end_date: MoreThan(createGameDto.start_date),
+        },
+        {
+          start_date: MoreThan(createGameDto.start_date),
+          end_date: LessThanOrEqual(createGameDto.end_date),
+        },
+      ],
     });
 
+    if (existingGame) {
+      throw new ConflictException(
+        'A game with overlapping dates already exists',
+      );
+    }
+
+    const game = this.gamesRepository.create({ ...createGameDto, admin });
+
     try {
-      const game_created = await this.gamesRepository.save(gameLaunch);
+      const game_created = await this.gamesRepository.save(game);
       if (!game_created) {
         throw new InternalServerErrorException(
           'Failed to create GameLaunch. Please try again.',
         );
       }
-
-      await this.createGameSessions(
-        game_created,
-        createGameDto.start_time,
-        createGameDto.game_duration,
-        createGameDto.game_in_day,
-      );
-
-      const find_game = await this.gamesRepository.findOne({
-        where: { id: game_created.id },
-        relations: {
-          gameSession: true,
-          admin: true,
-        },
-      });
-
-      return find_game;
+      return game_created;
     } catch (error) {
-      console.error('Error creating GameLaunch:', error);
+      console.log(error);
       throw new InternalServerErrorException('Internal Server error 400');
     }
   }
 
-  private async createGameSessions(
-    game: Games,
-    start_time: Date,
-    game_duration: number,
-    gameInDay: number,
-  ) {
-    interface gameSessionPayload {
-      start_time: Date;
-      end_time: Date;
+  async createDailyGame(): Promise<void> {
+    const currentDate = new Date();
+    const startOfDay = new Date(currentDate.setHours(0, 0, 0, 0));
+    const endOfDay = new Date(currentDate.setHours(23, 59, 59, 999));
+
+    const games = await this.gamesRepository.find({
+      where: {
+        start_date: LessThanOrEqual(currentDate),
+        end_date: MoreThanOrEqual(currentDate),
+      },
+    });
+
+    if (games.length === 0) {
+      throw new NotFoundException('No games found for the current date.');
     }
-    const sessionsToCreate: gameSessionPayload[] = [];
 
-    let currentStartTime = new Date(start_time); // start time for the first session
+    const dailyGamesToCreate = games.map((game) => ({
+      games: game,
+      createdAt: startOfDay,
+    }));
 
-    for (let i = 0; i < gameInDay; i++) {
-      // Calculate end time by adding game_duration (converted to milliseconds) to the start time
-      const endTime = new Date(
-        currentStartTime.getTime() + game_duration * 1000,
+    await this.dailyGameRepository.save(dailyGamesToCreate);
+  }
+
+  async createGameSessions(): Promise<GameSessionKqj[]> {
+    const currentDate = new Date();
+
+    const startOfDay = new Date(currentDate.setHours(0, 0, 0, 0));
+    const endOfDay = new Date(currentDate.setHours(23, 59, 59, 999));
+
+    const dailyGame = await this.dailyGameRepository.findOne({
+      where: {
+        createdAt: Between(startOfDay, endOfDay),
+      },
+      relations: ['games'],
+    });
+
+    if (!dailyGame) {
+      throw new NotFoundException('No DailyGame entry found for today.');
+    }
+    const { games } = dailyGame;
+    const { start_time, game_duration, game_in_day } = games;
+
+    // Helper function to add seconds to a time string and return a Date with both date and time
+    const addSecondsToDateTime = (
+      date: Date,
+      time: string,
+      seconds: number = 0,
+    ): Date => {
+      const [hours, minutes, secs] = time.split(':').map(Number);
+      const combinedDate = new Date(date);
+      combinedDate.setHours(hours, minutes, secs || 0, 0); // Set the time component
+      combinedDate.setSeconds(combinedDate.getSeconds() + seconds); // Add duration in seconds
+      return combinedDate;
+    };
+
+    // Create session start and end times
+    const sessionsToCreate: { start_time: Date; end_time: Date }[] = [];
+    let currentStartTime = addSecondsToDateTime(currentDate, start_time); // Initial session start time
+
+    for (let i = 0; i < game_in_day; i++) {
+      const endTime = addSecondsToDateTime(
+        currentStartTime,
+        '00:00:00',
+        game_duration,
       );
 
-      // Push the session with start and end times to the array
       sessionsToCreate.push({
-        start_time: new Date(currentStartTime),
+        start_time: currentStartTime,
         end_time: endTime,
       });
 
-      // Update currentStartTime to the start of the next session
-      currentStartTime = new Date(endTime);
+      currentStartTime = endTime; // Move to the next session's start time
     }
 
-    const gameSession = this.gameSessionRepository.create(
-      sessionsToCreate.map((val: gameSessionPayload) => ({
-        game,
-        session_start_time: val.start_time,
-        session_end_time: val.end_time,
-        session_status: GameSessionStatus.LIVE,
+    const gameSessions = this.gameSessionKqjRepository.create(
+      sessionsToCreate.map((session) => ({
+        games,
+        session_start_time: session.start_time,
+        session_end_time: session.end_time,
+        session_status: GameSessionStatus.UPCOMING,
       })),
     );
+
     try {
-      await this.gameSessionRepository.save(gameSession);
+      const createdSession =
+        await this.gameSessionKqjRepository.save(gameSessions);
+      if (!createdSession) {
+        throw new InternalServerErrorException(
+          'Failed to save game sessions. Please try again.',
+        );
+      }
+      return createdSession;
     } catch (error) {
       throw new InternalServerErrorException(
-        'Failed to save game sessions. Please try again.',
+        'Error saving game sessions:',
+        error,
       );
     }
   }
 
-  async updateGame(
-    id: number,
-    updateGameLaunchDto: UpdateGamesDto,
-  ): Promise<Games> {
+  async updateGame(updateGameDto: UpdateGameDto): Promise<Games> {
     try {
-      const gameLaunch = await this.gamesRepository.findOne({
-        where: { id },
+      const game = await this.gamesRepository.findOne({
+        where: { id: updateGameDto.game_id },
         relations: { admin: true, gameSession: true },
       });
 
-      if (!gameLaunch) {
-        throw new NotFoundException(`GameLaunch with ID ${id} not found`);
+      if (!game) {
+        throw new NotFoundException(
+          `Game with ID ${updateGameDto.game_id} not found`,
+        );
       }
 
-      gameLaunch.start_time = updateGameLaunchDto.start_time;
-      gameLaunch.end_time = updateGameLaunchDto.end_time;
-      gameLaunch.game_duration = updateGameLaunchDto.game_duration;
-      gameLaunch.game_in_day = updateGameLaunchDto.game_in_day;
-      gameLaunch.game_status = updateGameLaunchDto.game_status;
+      const admin = await this.userRepository.findOne({
+        where: { id: updateGameDto.admin_id },
+      });
+      if (!admin) {
+        throw new NotFoundException(
+          `Admin with ID ${updateGameDto.admin_id} not found`,
+        );
+      }
 
-      await this.updateGameSessions(
-        gameLaunch,
-        gameLaunch.start_time,
-        gameLaunch.game_duration,
-        gameLaunch.game_in_day,
-      );
+      const overlappingGame = await this.gamesRepository.findOne({
+        where: [
+          {
+            id: Not(updateGameDto.game_id),
+            start_date: LessThanOrEqual(updateGameDto.end_date),
+            end_date: MoreThan(updateGameDto.start_date),
+          },
+          {
+            id: Not(updateGameDto.game_id),
+            start_date: MoreThan(updateGameDto.start_date),
+            end_date: LessThanOrEqual(updateGameDto.end_date),
+          },
+        ],
+      });
 
-      return await this.gamesRepository.save(gameLaunch);
+      if (overlappingGame) {
+        throw new ConflictException(
+          'Another game with overlapping dates already exists',
+        );
+      }
+
+      const startDate = new Date(updateGameDto.start_date);
+      startDate.setHours(0, 0, 0, 0);
+      const endDate = new Date(updateGameDto.end_date);
+      endDate.setHours(23, 59, 59, 999);
+
+      updateGameDto.start_date = startDate;
+      updateGameDto.end_date = endDate;
+
+      Object.assign(game, updateGameDto);
+
+      return await this.gamesRepository.save(game);
     } catch (error) {
       console.error('Error updating GameLaunch:', error);
+      if (error instanceof NotFoundException) {
+        throw error;
+      }
       throw new InternalServerErrorException('Failed to update GameLaunch.');
-    }
-  }
-
-  private async updateGameSessions(
-    game: Games,
-    start_time: Date,
-    game_duration: number,
-    game_in_day: number,
-  ) {
-    try {
-      const deleteResult = await this.gameSessionRepository.delete({ game });
-
-      if (deleteResult.affected === 0) {
-        throw new Error('No sessions were deleted for the specified game.');
-      }
-
-      const sessionsToCreate = [];
-      let currentStartTime = new Date(start_time);
-
-      for (let i = 0; i < game_in_day; i++) {
-        const sessionEndTime = new Date(
-          currentStartTime.getTime() + game_duration * 1000,
-        );
-
-        const newSession = this.gameSessionRepository.create({
-          game,
-          session_start_time: currentStartTime,
-          session_end_time: sessionEndTime,
-          session_status: GameSessionStatus.LIVE,
-        });
-        sessionsToCreate.push(newSession);
-        currentStartTime = sessionEndTime;
-      }
-
-      const saveResult =
-        await this.gameSessionRepository.save(sessionsToCreate);
-
-      if (saveResult.length === 0) {
-        throw new Error('No new sessions were saved to the database.');
-      }
-    } catch (error) {
-      console.error('Error during updateGameSessions:', error);
-      throw new Error('Failed to update game sessions. Please try again.');
     }
   }
 
@@ -249,35 +309,9 @@ export class GamesService {
     }
     return await this.gamesRepository.find({
       where: {
-        start_time: Between(from, to),
+        start_date: Between(from, to),
       },
       relations: { admin: true, gameSession: true },
     });
   }
-
-async getTodaysGameSession(): Promise<GameSessionKqj[]> {
-  try {
-    const today = new Date();
-
-    const todaysSessions = await this.gameSessionRepository.find({
-      where: {
-        session_start_time: Between(
-          today,
-          new Date(today.getTime() + 24 * 60 * 60 * 1000) 
-        ),
-      },
-      relations: { game: { admin: true , gameSession:true }},
-    });
-
-    if (!todaysSessions.length) {
-      throw new NotFoundException('No game sessions found for today.');
-    }
-
-    return todaysSessions;
-  } catch (error) {
-    console.error('Error retrieving today\'s game sessions:', error);
-    throw new InternalServerErrorException('Failed to retrieve today\'s game sessions.');
-  }
-}
-
 }

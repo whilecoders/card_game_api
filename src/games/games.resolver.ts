@@ -3,28 +3,34 @@ import { CreateGamesDto } from './dto/create-game.input';
 import { GamesService } from './games.service';
 import { Games } from './dbrepo/games.repository';
 import { UpdateGamesDto } from './dto/update-game.input';
+import { GameSessionKqj } from 'src/game_session_kqj/dbrepo/game_session.repository';
 
 @Resolver(() => Games)
 export class GamesResolver {
-  constructor(private readonly GamesService: GamesService) { }
+  constructor(private readonly GamesService: GamesService) {}
 
-  @Mutation(() => Games)
+  @Mutation(() =>Games)
   async createGames(
     @Args('createGamesDto') createGamesDto: CreateGamesDto,
   ): Promise<Games> {
     return await this.GamesService.createGame(createGamesDto);
   }
+  @Mutation(() => [Games])
+  async createGameSession(): Promise<GameSessionKqj[]> {
+    return await this.GamesService.createGameSessions();
+  }
 
   @Mutation(() => Games)
   async updateGames(
-    @Args({name: 'id', type: () => Int}) id: number,
     @Args('updateGamesDto') updateGamesDto: UpdateGamesDto,
   ): Promise<Games> {
-    return await this.GamesService.updateGame(id, updateGamesDto);
+    return await this.GamesService.updateGame(updateGamesDto);
   }
 
   @Mutation(() => Boolean)
-  async DeleteGames(@Args({name: 'id', type: () => Int}) id: number): Promise<boolean> {
+  async DeleteGames(
+    @Args({ name: 'id', type: () => Int }) id: number,
+  ): Promise<boolean> {
     await this.GamesService.deleteGame(id);
     return true;
   }
@@ -35,14 +41,16 @@ export class GamesResolver {
   }
 
   @Query(() => Games, { name: 'getGamesBy' })
-  async getGamesById(@Args({ name: 'id', type: () => Int }) id: number): Promise<Games> {
+  async getGamesById(
+    @Args({ name: 'id', type: () => Int }) id: number,
+  ): Promise<Games> {
     return await this.GamesService.getGameById(id);
   }
 
   @Query(() => [Games], { name: 'getGamesByDate' })
   async getGamesByDate(
-    @Args({name: 'from', type: () => Date}) from: Date,
-    @Args({name: 'to', type: () => Date}) to: Date,
+    @Args({ name: 'from', type: () => Date }) from: Date,
+    @Args({ name: 'to', type: () => Date }) to: Date,
   ): Promise<Games[]> {
     return await this.GamesService.getGamesByDate(from, to);
   }

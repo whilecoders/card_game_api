@@ -4,8 +4,7 @@ import { Games } from './games.repository';
 export const GamesProviders = [
   {
     provide: 'GAMES_REPOSITORY',
-    useFactory: (dataSource: DataSource) =>
-      dataSource.getRepository(Games),
+    useFactory: (dataSource: DataSource) => dataSource.getRepository(Games),
     inject: ['DATA_SOURCE'],
   },
 ];

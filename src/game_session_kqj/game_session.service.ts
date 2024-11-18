@@ -3,11 +3,11 @@ import {
   NotFoundException,
   BadRequestException,
   Inject,
+  InternalServerErrorException,
 } from '@nestjs/common';
 import { Between, Repository } from 'typeorm';
 import { UpdateGameSessionDto } from './dto/update-game_session.input';
 import { GameSessionKqj } from './dbrepo/game_session.repository';
-import { Games } from 'src/games/dbrepo/games.repository';
 import { GameSessionStatus } from 'src/common/constants';
 
 @Injectable()
@@ -47,13 +47,15 @@ export class GameSessionKqjService {
   }
 
   async getAllGameSessions(): Promise<GameSessionKqj[]> {
-    return await this.gameSessionKqjRepository.find({relations:['game','record_session_kqj']});
+    return await this.gameSessionKqjRepository.find({
+      relations: ['game', 'record_session_kqj'],
+    });
   }
 
   async getLiveGameSessions(): Promise<GameSessionKqj[]> {
     return await this.gameSessionKqjRepository.find({
       where: { session_status: GameSessionStatus.LIVE },
-      relations:['game','record_session_kqj'],
+      relations: ['game', 'record_session_kqj'],
     });
   }
 
@@ -74,7 +76,34 @@ export class GameSessionKqjService {
       where: {
         session_start_time: Between(start, end),
       },
-      relations:['game','record_session_kqj'],
+      relations: ['game', 'record_session_kqj'],
     });
+  }
+
+  async getTodaysGameSession(): Promise<GameSessionKqj[]> {
+    try {
+      const today = new Date();
+
+      const todaysSessions = await this.gameSessionKqjRepository.find({
+        where: {
+          session_start_time: Between(
+            today,
+            new Date(today.getTime() + 24 * 60 * 60 * 1000),
+          ),
+        },
+        relations: { game: { admin: true, gameSession: true } },
+      });
+
+      if (!todaysSessions.length) {
+        throw new NotFoundException('No game sessions found for today.');
+      }
+
+      return todaysSessions;
+    } catch (error) {
+      console.error("Error retrieving today's game sessions:", error);
+      throw new InternalServerErrorException(
+        "Failed to retrieve today's game sessions.",
+      );
+    }
   }
 }

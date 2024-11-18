@@ -41,4 +41,9 @@ export class GameSessionKqjResolver {
     return await this.gameSessionService.getGameSessionsByDate(startDate, endDate);
   }
 
+  @Query(()=>[GameSessionKqj],{name:'getTodaysGameSession'})
+  async getTodaysGameSession():Promise<GameSessionKqj[]>{
+    return await this.gameSessionService.getTodaysGameSession()
+  }
+
 }
