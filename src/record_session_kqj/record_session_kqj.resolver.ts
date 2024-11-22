@@ -2,6 +2,8 @@ import { Resolver, Query, Mutation, Args, Int } from '@nestjs/graphql';
 import { RecordSessionKqj } from './dbrepo/record_session_kqj.repository';
 import { CreateRecordSessionKqjDto } from './dto/create-record_session_kqj.input';
 import { RecordSessionKqjService } from './record_session_kqj.service';
+import { RecordStatus } from 'src/common/constants';
+import { DailyWinnersAndLosers } from './dto/Daily-Winner-Looser.input';
 
 @Resolver(() => RecordSessionKqj)
 export class RecordSessionKqjResolver {
@@ -17,6 +19,28 @@ export class RecordSessionKqjResolver {
     return await this.recordSessionKqjService.createRecordSession(
       createRecordSessionKqjDto,
     );
+  }
+
+  @Mutation(() => RecordSessionKqj)
+  async updateUserRecordStatus(
+    @Args('userId', { type: () => Int }) userId: number,
+    @Args('gameSessionId', { type: () => Int }) gameSessionId: number,
+    @Args('recordStatus', { type: () => RecordStatus })
+    recordStatus: RecordStatus,
+  ): Promise<RecordSessionKqj> {
+    return this.recordSessionKqjService.updateRecordStatus(
+      userId,
+      gameSessionId,
+      recordStatus,
+    );
+  }
+
+  @Mutation(() => Boolean)
+  async markSessionAsCompleted(
+    @Args('gameSessionId', { type: () => Int }) gameSessionId: number,
+  ): Promise<boolean> {
+    await this.recordSessionKqjService.markSessionAsCompleted(gameSessionId);
+    return true;
   }
 
   @Query(() => RecordSessionKqj, { name: 'getRecordSessionBy' })
@@ -50,5 +74,20 @@ export class RecordSessionKqjResolver {
     @Args('SessionId', { type: () => Int }) sessionId: number,
   ) {
     return this.recordSessionKqjService.getAllRecordsBySessionId(sessionId);
+  }
+
+  @Query(() => Number)
+  async getTotalUsersToday(): Promise<number> {
+    return this.recordSessionKqjService.getTotalUsersToday();
+  }
+
+  @Query(() => Number)
+  async getTotalTokensToday(): Promise<number> {
+    return this.recordSessionKqjService.getTotalTokensToday();
+  }
+
+  @Query(() => DailyWinnersAndLosers)
+  async getDailyWinnersAndLosers(): Promise<DailyWinnersAndLosers> {
+    return await this.recordSessionKqjService.getDailyWinnersAndLosers();
   }
 }

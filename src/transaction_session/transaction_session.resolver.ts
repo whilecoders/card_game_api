@@ -2,6 +2,7 @@ import { Resolver, Query, Mutation, Args, Int } from '@nestjs/graphql';
 import { TransactionSessionService } from './transaction_session.service';
 import { TransactionSession } from './dbrepo/transaction_session.repository';
 import { CreateTransactionSessionDto } from './dto/create-transaction_session.input';
+import { ProfitAndLoss } from './dto/profite-loss.input';
 
 @Resolver(() => TransactionSession)
 export class TransactionSessionResolver {
@@ -25,4 +26,10 @@ export class TransactionSessionResolver {
   async getAllTransactionSessions(): Promise<TransactionSession[]> {
     return await this.transactionSessionService.getAllTransactionSessions();
   }
+
+  @Query(() => ProfitAndLoss)
+  async getProfitAndLoss(): Promise<ProfitAndLoss> {
+    return this.transactionSessionService.getProfitAndLoss();
+  }
+  
 }

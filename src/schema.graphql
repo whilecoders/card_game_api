@@ -47,6 +47,11 @@ type DailyGame {
   updatedBy: String!
 }
 
+type DailyWinnersAndLosers {
+  losers: Float!
+  winners: Float!
+}
+
 """
 A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date-time format.
 """
@@ -118,18 +123,26 @@ type Games {
 type Mutation {
   DeleteGames(id: Int!): Boolean!
   addUser(addUserDto: AddUserDto!): User!
-  createGameSession: [Games!]!
+  adminSignUp(signUpCredential: SignUpCredential!): User!
   createGames(createGamesDto: CreateGamesDto!): Games!
   createRecordSession(createRecordSessionKqjDto: CreateRecordSessionKqjDto!): RecordSessionKqj!
   createTransactionSession(createTransactionSessionDto: CreateTransactionSessionDto!): TransactionSession!
+  markSessionAsCompleted(gameSessionId: Int!): Boolean!
   refreshAccessToken(refreshToken: String!, token: String!): Token!
   resetPassword(resetPasswordDto: ResetPasswordDto!): String!
-  signUp(signUpCredential: SignUpCredential!): User!
   suspendUser(suspendUserDto: SuspendUserDto!): User!
   updateGameSession(id: Int!, updateGameSessionDto: UpdateGameSessionDto!): GameSession!
   updateGames(updateGamesDto: UpdateGamesDto!): Games!
   updateUser(id: Int!, updateUserDto: UpdateUserDto!): User!
+  updateUserRecordStatus(gameSessionId: Int!, recordStatus: RecordSessionStatus!, userId: Int!): RecordSessionKqj!
   updateWallet(adminId: Float!, userId: Float!, walletData: WalletDto!): Transaction!
+  userSignUp(signUpCredential: SignUpCredential!): User!
+}
+
+type ProfitAndLoss {
+  loss: Float!
+  net: Float!
+  profit: Float!
 }
 
 type Query {
@@ -139,15 +152,21 @@ type Query {
   getAllRecordsBy(SessionId: Int!): [RecordSessionKqj!]!
   getAllTransactionSessions: [TransactionSession!]!
   getAllUsers: [User!]!
+  getDailyWinnersAndLosers: DailyWinnersAndLosers!
+  getFinishedSessionsToday: Float!
   getGameSessionBy(id: Int!): GameSession!
   getGameSessionsByDate(endDate: DateTime!, startDate: DateTime!): [GameSession!]!
   getGamesBy(id: Int!): Games!
   getGamesByDate(from: DateTime!, to: DateTime!): [Games!]!
   getLiveGameSessions: [GameSession!]!
+  getProfitAndLoss: ProfitAndLoss!
   getRecordBy(SessionId: Int!): RecordSessionKqj!
   getRecordSessionBy(id: Int!): RecordSessionKqj!
   getRecordsBy(UserId: Int!): [RecordSessionKqj!]!
   getTodaysGameSession: [GameSession!]!
+  getTotalSessionsToday: Float!
+  getTotalTokensToday: Float!
+  getTotalUsersToday: Float!
   getTransactionSessionBy(id: Int!): TransactionSession!
   getUserById(id: Int!): User!
   getUserByRole(role: Float!): [User!]!
@@ -174,7 +193,7 @@ type RecordSessionKqj {
 enum RecordSessionStatus {
   ACTIVE
   COMPLETED
-  INACTIVE
+  SUSPENDED
 }
 
 input ResetPasswordDto {

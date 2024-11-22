@@ -11,6 +11,10 @@ registerEnumType(RecordStatus, { name: 'RecordSessionStatus' });
 @ObjectType('RecordSessionKqj')
 @Entity({ name: 'record_session_kqj' })
 export class RecordSessionKqj extends BaseEntity {
+  length: any;
+  forEach(arg0: (record: any) => void) {
+    throw new Error('Method not implemented.');
+  }
   @Field(() => GameKqjCards, { nullable: false })
   @Column({ type: 'enum', enum: GameKqjCards, nullable: false })
   choosen_card: GameKqjCards;
@@ -26,8 +30,8 @@ export class RecordSessionKqj extends BaseEntity {
   @Column({ type: 'enum', enum: TokenValues, nullable: false })
   token: TokenValues;
 
-  @Field(() => RecordStatus, { nullable: false })
-  @Column({ type: 'enum', enum: RecordStatus, nullable: false })
+  @Field(() => RecordStatus, { nullable: false ,defaultValue: RecordStatus.ACTIVE})
+  @Column({ type: 'enum', enum: RecordStatus, nullable: false ,default: RecordStatus.ACTIVE,})
   record_status: RecordStatus;
 
   @Field(() => GameSessionKqj, { nullable: false })

@@ -20,7 +20,7 @@ export class TaskScheduler {
     private readonly dailyGameRepository: Repository<DailyGame>,
   ) {}
 
-  @Cron('53 16 * * *', {
+  @Cron('23 23 * * *', {
     name: 'createDailyGame',
   })
   async createDailyGame(): Promise<void> {

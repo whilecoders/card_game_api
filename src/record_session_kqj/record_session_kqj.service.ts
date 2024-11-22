@@ -3,12 +3,15 @@ import {
   NotFoundException,
   BadRequestException,
   Inject,
+  InternalServerErrorException,
 } from '@nestjs/common';
-import { Repository } from 'typeorm';
+import { Between, Repository } from 'typeorm';
 import { RecordSessionKqj } from './dbrepo/record_session_kqj.repository';
 import { CreateRecordSessionKqjDto } from './dto/create-record_session_kqj.input';
 import { User } from 'src/user/dbrepo/user.repository';
 import { GameSessionKqj } from 'src/game_session_kqj/dbrepo/game_session.repository';
+import { RecordStatus } from 'src/common/constants';
+import { DailyWinnersAndLosers } from './dto/Daily-Winner-Looser.input';
 
 @Injectable()
 export class RecordSessionKqjService {
@@ -69,14 +72,17 @@ export class RecordSessionKqjService {
   async getAllRecordSessions(): Promise<RecordSessionKqj[]> {
     try {
       return await this.recordSessionKqjRepository.find({
-        relations: { user: true, game_session_id: true, transaction_session_id: true },
+        relations: {
+          user: true,
+          game_session_id: true,
+          transaction_session_id: true,
+        },
       });
     } catch (error) {
-      console.error("Error retrieving record sessions:", error); 
+      console.error('Error retrieving record sessions:', error);
       throw new BadRequestException('Failed to retrieve record sessions');
     }
   }
-  
 
   async getRecordsByUserId(userId: number): Promise<RecordSessionKqj[]> {
     try {
@@ -139,4 +145,159 @@ export class RecordSessionKqjService {
       );
     }
   }
+
+  async updateRecordStatus(
+    userId: number,
+    gameSessionId: number,
+    status: RecordStatus,
+  ): Promise<RecordSessionKqj> {
+    try {
+      const recordSession = await this.recordSessionKqjRepository.findOne({
+        where: { user: { id: userId }, game_session_id: { id: gameSessionId } },
+      });
+
+      if (!recordSession) {
+        throw new NotFoundException(
+          `RecordSession for userId ${userId} and gameSessionId ${gameSessionId} not found`,
+        );
+      }
+
+      if (recordSession.record_status === RecordStatus.COMPLETED) {
+        throw new BadRequestException(
+          'Cannot update a session that is already completed',
+        );
+      }
+
+      recordSession.record_status = status;
+
+      return await this.recordSessionKqjRepository.save(recordSession);
+    } catch (error) {
+      if (
+        error instanceof NotFoundException ||
+        error instanceof BadRequestException
+      ) {
+        throw error;
+      }
+      throw new InternalServerErrorException('Failed to update record status');
+    }
+  }
+
+  async markSessionAsCompleted(gameSessionId: number): Promise<void> {
+    try {
+      const recordSessions = await this.recordSessionKqjRepository.find({
+        where: { game_session_id: { id: gameSessionId } },
+      });
+
+      if (!recordSessions.length) {
+        throw new NotFoundException(
+          `No records found for gameSessionId ${gameSessionId}`,
+        );
+      }
+
+      for (const record of recordSessions) {
+        record.record_status = RecordStatus.COMPLETED;
+      }
+
+      await this.recordSessionKqjRepository.save(recordSessions);
+    } catch (error) {
+      if (error instanceof NotFoundException) {
+        throw error;
+      }
+      throw new InternalServerErrorException(
+        'Failed to mark session as completed',
+      );
+    }
+  }
+
+  async getTotalUsersToday(): Promise<number> {
+    try {
+      const start = new Date();
+      start.setHours(0, 0, 0, 0);
+      const end = new Date();
+      end.setHours(23, 59, 59, 999);
+
+      const records = await this.recordSessionKqjRepository.find({
+        where: {
+          createdAt: Between(start, end),
+        },
+        relations: ['user'],
+      });
+
+      const uniqueUsers = new Set(records.map((record) => record.user.id));
+      return uniqueUsers.size;
+    } catch (error) {
+      throw new InternalServerErrorException(
+        'Failed to get total users for today',
+      );
+    }
+  }
+
+  async getTotalTokensToday(): Promise<number> {
+    try {
+      const start = new Date();
+      start.setHours(0, 0, 0, 0);
+      const end = new Date();
+      end.setHours(23, 59, 59, 999);
+
+      const records = await this.recordSessionKqjRepository.find({
+        where: {
+          createdAt: Between(start, end),
+        },
+      });
+
+      const totalTokens = records.reduce(
+        (sum, record) => sum + record.token,
+        0,
+      );
+      return totalTokens;
+    } catch (error) {
+      throw new InternalServerErrorException(
+        'Failed to get total tokens for today',
+      );
+    }
+  }
+
+  async getDailyWinnersAndLosers(): Promise<DailyWinnersAndLosers> {
+    try {
+      const startOfDay = new Date();
+      startOfDay.setHours(0, 0, 0, 0);
+
+      const endOfDay = new Date();
+      endOfDay.setHours(23, 59, 59, 999);
+
+      // Fetch game sessions for today
+      const sessions = await this.gameSessionKqjRepository.find({
+        where: {
+          session_start_time: Between(startOfDay, endOfDay),
+        },
+        relations: ['record_session_kqj'],
+      });
+
+      let winners = 0;
+      let losers = 0;
+
+      // Iterate through each session and its records
+      for (const session of sessions) {
+        if (!session.record_session_kqj?.length || !session.game_result_card) {
+          continue;
+        }
+
+        session.record_session_kqj.forEach((record) => {
+          if (record.choosen_card === session.game_result_card) {
+            winners++;
+          } else {
+            losers++;
+          }
+        });
+      }
+
+      return { winners, losers };
+    } catch (error) {
+      console.error('Error fetching daily winners and losers:', error);
+      throw new InternalServerErrorException(
+        'Failed to fetch daily winners and losers',
+      );
+    }
+  }
+
 }

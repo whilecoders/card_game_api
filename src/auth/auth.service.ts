@@ -16,6 +16,7 @@ import { SignInCredential } from './dto/signin.input';
 import { UserTokenType } from './entities/signin.entity';
 import { TokenType } from './entities/token.entity';
 import { ResetPasswordDto } from './dto/reset_password.dto';
+import { Role } from 'src/common/constants';
 
 @Injectable()
 export class AuthService {
@@ -24,8 +25,9 @@ export class AuthService {
     private readonly userRepository: Repository<User>,
     private jwtService: JWTService,
   ) {}
-  async SignUpAdmin(signUpCredential: SignUpCredential) {
-    const { username, email, password, role, city, phone_number } = signUpCredential;
+  async AdminSignUp(signUpCredential: SignUpCredential) {
+    const { username, email, password, role, city, phone_number } =
+      signUpCredential;
     const hashedPassword = await PasswordHashService.hashPassword(password);
 
     const existingUser = await this.userRepository.findOne({
@@ -48,6 +50,41 @@ export class AuthService {
       city,
       phone_number,
       role: role,
+    });
+
+    try {
+      await this.userRepository.save(user);
+    } catch (error) {
+      throw new InternalServerErrorException('Error creating user');
+    }
+
+    return user;
+  }
+
+  async UserSignUp(signUpCredential: SignUpCredential) {
+    const { username, email, password, city, phone_number } = signUpCredential;
+    const hashedPassword = await PasswordHashService.hashPassword(password);
+
+    const existingUser = await this.userRepository.findOne({
+      where: [{ username }, { email }],
+    });
+
+    if (existingUser) {
+      if (existingUser.username === username) {
+        throw new ConflictException('Username already exists');
+      }
+      if (existingUser.email === email) {
+        throw new ConflictException('Email already exists');
+      }
+    }
+
+    const user = this.userRepository.create({
+      username,
+      email,
+      city,
+      phone_number,
+      password: hashedPassword,
+      role: Role.USER,
     });
 
     try {

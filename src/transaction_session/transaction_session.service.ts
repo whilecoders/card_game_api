@@ -11,6 +11,7 @@ import { CreateTransactionSessionDto } from './dto/create-transaction_session.in
 import { RecordSessionKqj } from 'src/record_session_kqj/dbrepo/record_session_kqj.repository';
 import { TransactionType } from 'src/common/constants';
 import { User } from 'src/user/dbrepo/user.repository';
+import { ProfitAndLoss } from './dto/profite-loss.input';
 
 @Injectable()
 export class TransactionSessionService {
@@ -96,6 +97,38 @@ export class TransactionSessionService {
       });
     } catch (error) {
       throw new BadRequestException('Failed to retrieve transaction sessions');
+    }
+  }
+
+  async getProfitAndLoss(): Promise<ProfitAndLoss> {
+    try {
+      const creditTransactions = await this.transactionSessionRepository.find({
+        where: { type: TransactionType.CREDIT },
+      });
+
+      const debitTransactions = await this.transactionSessionRepository.find({
+        where: { type: TransactionType.DEBIT },
+      });
+
+      const profit = creditTransactions.reduce(
+        (sum, transaction) => sum + transaction.token,
+        0,
+      );
+      const loss = debitTransactions.reduce(
+        (sum, transaction) => sum + transaction.token,
+        0,
+      );
+
+      const net = profit - loss;
+
+      return {
+        profit,
+        loss,
+        net,
+      };
+    } catch (error) {
+      console.error('Error calculating profit and loss:', error);
+      throw new Error('Failed to calculate profit and loss.');
     }
   }
 }

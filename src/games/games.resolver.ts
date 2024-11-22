@@ -9,15 +9,11 @@ import { GameSessionKqj } from 'src/game_session_kqj/dbrepo/game_session.reposit
 export class GamesResolver {
   constructor(private readonly GamesService: GamesService) {}
 
-  @Mutation(() =>Games)
+  @Mutation(() => Games)
   async createGames(
     @Args('createGamesDto') createGamesDto: CreateGamesDto,
   ): Promise<Games> {
     return await this.GamesService.createGame(createGamesDto);
-  }
-  @Mutation(() => [Games])
-  async createGameSession(): Promise<GameSessionKqj[]> {
-    return await this.GamesService.createGameSessions();
   }
 
   @Mutation(() => Games)

@@ -37,7 +37,7 @@ export enum GameType {
 export enum RecordSessionStatus {
     ACTIVE = "ACTIVE",
     COMPLETED = "COMPLETED",
-    INACTIVE = "INACTIVE"
+    SUSPENDED = "SUSPENDED"
 }
 
 export enum Role {
@@ -168,6 +168,11 @@ export interface DailyGame {
     updatedBy: string;
 }
 
+export interface DailyWinnersAndLosers {
+    losers: number;
+    winners: number;
+}
+
 export interface GameSession {
     createdAt: DateTime;
     createdBy: string;
@@ -208,18 +213,26 @@ export interface Games {
 export interface IMutation {
     DeleteGames(id: number): boolean | Promise<boolean>;
     addUser(addUserDto: AddUserDto): User | Promise<User>;
-    createGameSession(): Games[] | Promise<Games[]>;
+    adminSignUp(signUpCredential: SignUpCredential): User | Promise<User>;
     createGames(createGamesDto: CreateGamesDto): Games | Promise<Games>;
     createRecordSession(createRecordSessionKqjDto: CreateRecordSessionKqjDto): RecordSessionKqj | Promise<RecordSessionKqj>;
     createTransactionSession(createTransactionSessionDto: CreateTransactionSessionDto): TransactionSession | Promise<TransactionSession>;
+    markSessionAsCompleted(gameSessionId: number): boolean | Promise<boolean>;
     refreshAccessToken(refreshToken: string, token: string): Token | Promise<Token>;
     resetPassword(resetPasswordDto: ResetPasswordDto): string | Promise<string>;
-    signUp(signUpCredential: SignUpCredential): User | Promise<User>;
     suspendUser(suspendUserDto: SuspendUserDto): User | Promise<User>;
     updateGameSession(id: number, updateGameSessionDto: UpdateGameSessionDto): GameSession | Promise<GameSession>;
     updateGames(updateGamesDto: UpdateGamesDto): Games | Promise<Games>;
     updateUser(id: number, updateUserDto: UpdateUserDto): User | Promise<User>;
+    updateUserRecordStatus(gameSessionId: number, recordStatus: RecordSessionStatus, userId: number): RecordSessionKqj | Promise<RecordSessionKqj>;
     updateWallet(adminId: number, userId: number, walletData: WalletDto): Transaction | Promise<Transaction>;
+    userSignUp(signUpCredential: SignUpCredential): User | Promise<User>;
+}
+
+export interface ProfitAndLoss {
+    loss: number;
+    net: number;
+    profit: number;
 }
 
 export interface IQuery {
@@ -229,15 +242,21 @@ export interface IQuery {
     getAllRecordsBy(SessionId: number): RecordSessionKqj[] | Promise<RecordSessionKqj[]>;
     getAllTransactionSessions(): TransactionSession[] | Promise<TransactionSession[]>;
     getAllUsers(): User[] | Promise<User[]>;
+    getDailyWinnersAndLosers(): DailyWinnersAndLosers | Promise<DailyWinnersAndLosers>;
+    getFinishedSessionsToday(): number | Promise<number>;
     getGameSessionBy(id: number): GameSession | Promise<GameSession>;
     getGameSessionsByDate(endDate: DateTime, startDate: DateTime): GameSession[] | Promise<GameSession[]>;
     getGamesBy(id: number): Games | Promise<Games>;
     getGamesByDate(from: DateTime, to: DateTime): Games[] | Promise<Games[]>;
     getLiveGameSessions(): GameSession[] | Promise<GameSession[]>;
+    getProfitAndLoss(): ProfitAndLoss | Promise<ProfitAndLoss>;
     getRecordBy(SessionId: number): RecordSessionKqj | Promise<RecordSessionKqj>;
     getRecordSessionBy(id: number): RecordSessionKqj | Promise<RecordSessionKqj>;
     getRecordsBy(UserId: number): RecordSessionKqj[] | Promise<RecordSessionKqj[]>;
     getTodaysGameSession(): GameSession[] | Promise<GameSession[]>;
+    getTotalSessionsToday(): number | Promise<number>;
+    getTotalTokensToday(): number | Promise<number>;
+    getTotalUsersToday(): number | Promise<number>;
     getTransactionSessionBy(id: number): TransactionSession | Promise<TransactionSession>;
     getUserById(id: number): User | Promise<User>;
     getUserByRole(role: number): User[] | Promise<User[]>;

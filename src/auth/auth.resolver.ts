@@ -13,8 +13,17 @@ export class AuthResolver {
   constructor(private readonly authService: AuthService) {}
 
   @Mutation(() => User)
-  async signUp(@Args('signUpCredential') signUpCredential: SignUpCredential) {
-    return this.authService.SignUpAdmin(signUpCredential);
+  async adminSignUp(
+    @Args('signUpCredential') signUpCredential: SignUpCredential,
+  ) {
+    return this.authService.AdminSignUp(signUpCredential);
+  }
+
+  @Mutation(() => User)
+  async userSignUp(
+    @Args('signUpCredential') signUpCredential: SignUpCredential,
+  ) {
+    return this.authService.UserSignUp(signUpCredential);
   }
 
   @Query(() => UserTokenType)

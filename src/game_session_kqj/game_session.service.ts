@@ -106,4 +106,35 @@ export class GameSessionKqjService {
       );
     }
   }
+
+  async getTotalSessionsToday(): Promise<number> {
+    const start = new Date();
+    start.setHours(0, 0, 0, 0);
+    const end = new Date();
+    end.setHours(23, 59, 59, 999);
+
+    const sessions = await this.gameSessionKqjRepository.find({
+      where: {
+        session_start_time: Between(start, end),
+      },
+    });
+
+    return sessions.length;
+  }
+
+  async getFinishedSessionsToday(): Promise<number> {
+    const start = new Date();
+    start.setHours(0, 0, 0, 0);
+    const end = new Date();
+    end.setHours(23, 59, 59, 999);
+
+    const finishedSessions = await this.gameSessionKqjRepository.find({
+      where: {
+        session_end_time: Between(start, end),
+        session_status: GameSessionStatus.END,
+      },
+    });
+
+    return finishedSessions.length;
+  }
 }
