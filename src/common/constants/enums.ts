@@ -38,7 +38,7 @@ export enum GameSessionStatus {
 
 export enum RecordStatus {
   ACTIVE,
-  INACTIVE,
+  SUSPENDED,
   COMPLETED,
 }
 

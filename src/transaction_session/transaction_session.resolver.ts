@@ -1,7 +1,8 @@
-import { Resolver, Query, Mutation, Args } from '@nestjs/graphql';
+import { Resolver, Query, Mutation, Args, Int } from '@nestjs/graphql';
 import { TransactionSessionService } from './transaction_session.service';
 import { TransactionSession } from './dbrepo/transaction_session.repository';
 import { CreateTransactionSessionDto } from './dto/create-transaction_session.input';
+import { ProfitAndLoss } from './dto/profite-loss.input';
 
 @Resolver(() => TransactionSession)
 export class TransactionSessionResolver {
@@ -14,9 +15,9 @@ export class TransactionSessionResolver {
     return await this.transactionSessionService.createTransactionSession(createTransactionSessionDto);
   }
 
-  @Query(() => TransactionSession, { name: 'getTransactionSessionById' })
+  @Query(() => TransactionSession, { name: 'getTransactionSessionBy' })
   async getTransactionSessionById(
-    @Args('id') id: number,
+    @Args('id',{ type: () => Int }) id: number,
   ): Promise<TransactionSession> {
     return await this.transactionSessionService.getTransactionSessionById(id);
   }
@@ -25,4 +26,10 @@ export class TransactionSessionResolver {
   async getAllTransactionSessions(): Promise<TransactionSession[]> {
     return await this.transactionSessionService.getAllTransactionSessions();
   }
+
+  @Query(() => ProfitAndLoss)
+  async getProfitAndLoss(): Promise<ProfitAndLoss> {
+    return this.transactionSessionService.getProfitAndLoss();
+  }
+  
 }

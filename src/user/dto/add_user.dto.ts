@@ -7,14 +7,13 @@ import {
   MaxLength,
   MinLength,
 } from 'class-validator';
-import { Role } from 'src/common/constants/enums';
 
 @InputType()
-export class SignUpCredential {
+export class AddUserDto {
   @Field(() => String)
   @IsNotEmpty({ message: 'Username cannot be empty' })
   @IsString()
-  @MinLength(6, { message: 'Username must be at least 8 characters long' })
+  @MinLength(6, { message: 'Username must be at least 6 characters long' })
   @MaxLength(30, { message: 'Username cannot be longer than 30 characters' })
   username: string;
 
@@ -47,8 +46,4 @@ export class SignUpCredential {
   @Field(() => Int)
   @IsNotEmpty({ message: 'phone number cannot be empty' })
   phone_number: number;
-
-  @Field(() => Role)
-  @IsNotEmpty()
-  role: Role;
 }

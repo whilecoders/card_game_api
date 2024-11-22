@@ -4,9 +4,10 @@ import { UserModule } from 'src/user/user.module';
 import { GameSessionKqjModule } from 'src/game_session_kqj/game_session.module';
 import { GamesService } from './games.service';
 import { GamesResolver } from './games.resolver';
+import { DailyGameModule } from 'src/daily_game/daily_game.module';
 
 @Module({
-  imports: [UserModule, forwardRef(() => GameSessionKqjModule)],
+  imports: [UserModule, GameSessionKqjModule, DailyGameModule],
   providers: [GamesResolver, GamesService, ...GamesProviders],
   exports: [...GamesProviders],
 })
