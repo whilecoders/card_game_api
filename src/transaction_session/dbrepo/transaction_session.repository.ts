@@ -23,7 +23,7 @@ export class TransactionSession extends BaseEntity {
   @Field(() => RecordSessionKqj)
   @OneToOne(
     () => RecordSessionKqj,
-    (recordSessionKqj) => recordSessionKqj.transaction_session_id,
+    (recordSessionKqj) => recordSessionKqj.transaction_session,
     {
       nullable: false,
       onDelete: 'CASCADE',

@@ -75,7 +75,7 @@ export class RecordSessionKqjService {
         relations: {
           user: true,
           game_session_id: true,
-          transaction_session_id: true,
+          transaction_session: true,
         },
       });
     } catch (error) {

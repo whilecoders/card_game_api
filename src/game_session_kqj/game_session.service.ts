@@ -9,6 +9,7 @@ import { Between, Repository } from 'typeorm';
 import { UpdateGameSessionDto } from './dto/update-game_session.input';
 import { GameSessionKqj } from './dbrepo/game_session.repository';
 import { GameSessionStatus } from 'src/common/constants';
+import { PaginatedGameSessionKqjDto } from './dto/paginated-game-session-kqj';
 
 @Injectable()
 export class GameSessionKqjService {
@@ -46,10 +47,22 @@ export class GameSessionKqjService {
     return gameSession;
   }
 
-  async getAllGameSessions(): Promise<GameSessionKqj[]> {
-    return await this.gameSessionKqjRepository.find({
+  async getAllGameSessions(
+    skip: number,
+    take: number,
+  ): Promise<PaginatedGameSessionKqjDto> {
+    const [data, count] = await this.gameSessionKqjRepository.findAndCount({
       relations: ['game', 'record_session_kqj'],
+      skip,
+      take,
     });
+
+    return {
+      data,
+      count,
+      skip,
+      take,
+    };
   }
 
   async getLiveGameSessions(): Promise<GameSessionKqj[]> {

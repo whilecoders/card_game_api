@@ -12,6 +12,7 @@ import { AddUserDto } from './dto/add_user.dto';
 import { UpdateUserDto } from './dto/update_user.dto';
 import { SuspendUserDto } from './dto/suspend_user.dto';
 import { PasswordHashService } from 'src/common/helper';
+import { PaginatedUserDto } from './dto/paginated-user.dto';
 
 @Injectable()
 export class UserService {
@@ -20,9 +21,17 @@ export class UserService {
     private readonly userRepository: Repository<User>,
   ) {}
 
-  async getAllUsers(): Promise<User[]> {
+  async getAllUsers(skip: number, take: number): Promise<PaginatedUserDto> {
     try {
-      return await this.userRepository.find();
+      const count = await this.userRepository.count();
+      const data = await this.userRepository.find({ skip, take });
+
+      return {
+        count,
+        take,
+        skip,
+        data,
+      };
     } catch (error) {
       throw new InternalServerErrorException('Failed to fetch users');
     }

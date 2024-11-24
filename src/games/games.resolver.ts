@@ -4,6 +4,7 @@ import { GamesService } from './games.service';
 import { Games } from './dbrepo/games.repository';
 import { UpdateGamesDto } from './dto/update-game.input';
 import { GameSessionKqj } from 'src/game_session_kqj/dbrepo/game_session.repository';
+import { PaginatedGamesDto } from './dto/paginated-game.dto';
 
 @Resolver(() => Games)
 export class GamesResolver {
@@ -31,9 +32,12 @@ export class GamesResolver {
     return true;
   }
 
-  @Query(() => [Games], { name: 'getAllGameses' })
-  async getAllGameses(): Promise<Games[]> {
-    return await this.GamesService.getAllGames();
+  @Query(() => PaginatedGamesDto, { name: 'getAllGameses' })
+  async getAllGameses(
+    @Args('skip', { type: () => Int }) skip: number,
+    @Args('take', { type: () => Int }) take: number,
+  ): Promise<PaginatedGamesDto> {
+    return await this.GamesService.getAllGames(skip, take);
   }
 
   @Query(() => Games, { name: 'getGamesBy' })

@@ -2,6 +2,7 @@ import { Resolver, Query, Mutation, Args, Int } from '@nestjs/graphql';
 import { UpdateGameSessionDto } from './dto/update-game_session.input';
 import { GameSessionKqj } from './dbrepo/game_session.repository';
 import { GameSessionKqjService } from './game_session.service';
+import { PaginatedGameSessionKqjDto } from './dto/paginated-game-session-kqj';
 
 @Resolver(() => GameSessionKqj)
 export class GameSessionKqjResolver {
@@ -25,11 +26,13 @@ export class GameSessionKqjResolver {
     return await this.gameSessionKqjService.getGameSessionById(id);
   }
 
-  @Query(() => [GameSessionKqj], { name: 'getAllGameSessions' })
-  async getAllGameSessions(): Promise<GameSessionKqj[]> {
-    return await this.gameSessionKqjService.getAllGameSessions();
+  @Query(() => PaginatedGameSessionKqjDto, { name: 'getAllGameSessions' })
+  async getAllGameSessions(
+    @Args('skip', { type: () => Int}) skip: number,
+    @Args('take', { type: () => Int}) take: number,
+  ): Promise<PaginatedGameSessionKqjDto> {
+    return this.gameSessionKqjService.getAllGameSessions(skip, take);
   }
-
   @Query(() => [GameSessionKqj], { name: 'getLiveGameSessions' })
   async getLiveGameSessions(): Promise<GameSessionKqj[]> {
     return await this.gameSessionKqjService.getLiveGameSessions();

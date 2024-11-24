@@ -55,6 +55,6 @@ export class RecordSessionKqj extends BaseEntity {
       onDelete: 'CASCADE',
     },
   )
-  @JoinColumn({ name: 'transaction_session_id' })
-  transaction_session_id?: TransactionSession;
+  @JoinColumn({ name: 'transaction_session' })
+  transaction_session?: TransactionSession;
 }

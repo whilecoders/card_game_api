@@ -21,6 +21,7 @@ import { CreateGamesDto } from './dto/create-game.input';
 import { UpdateGamesDto as UpdateGameDto } from './dto/update-game.input';
 import { GameSessionStatus } from 'src/common/constants';
 import { DailyGame } from 'src/daily_game/dbrepo/daily_game.repository';
+import { PaginatedGamesDto } from './dto/paginated-game.dto';
 
 @Injectable()
 export class GamesService {
@@ -155,15 +156,20 @@ export class GamesService {
     }
   }
 
-  async getAllGames(): Promise<Games[]> {
+  async getAllGames(skip: number, take: number): Promise<PaginatedGamesDto> {
     try {
-      const allGameLaunch = await this.gamesRepository.find({
+      const [data, count] = await this.gamesRepository.findAndCount({
         where: { deletedBy: null },
         relations: { admin: true, gameSession: true },
+        skip,
+        take,
       });
-      if (!allGameLaunch.length)
+
+      if (!data.length) {
         throw new NotFoundException(`No GameLaunches found`);
-      return allGameLaunch;
+      }
+
+      return { data, count, skip, take };
     } catch (error) {
       throw new InternalServerErrorException(
         'Failed to retrieve GameLaunches.',

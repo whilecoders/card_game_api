@@ -241,7 +241,7 @@ export interface IQuery {
     getAllRecordSessions(): RecordSessionKqj[] | Promise<RecordSessionKqj[]>;
     getAllRecordsBy(SessionId: number): RecordSessionKqj[] | Promise<RecordSessionKqj[]>;
     getAllTransactionSessions(): TransactionSession[] | Promise<TransactionSession[]>;
-    getAllUsers(): User[] | Promise<User[]>;
+    getAllUsers(skip: number, take: number): User[] | Promise<User[]>;
     getDailyWinnersAndLosers(): DailyWinnersAndLosers | Promise<DailyWinnersAndLosers>;
     getFinishedSessionsToday(): number | Promise<number>;
     getGameSessionBy(id: number): GameSession | Promise<GameSession>;
@@ -274,7 +274,7 @@ export interface RecordSessionKqj {
     id: number;
     record_status: RecordSessionStatus;
     token: TokenValues;
-    transaction_session_id?: Nullable<TransactionSession>;
+    transaction_session?: Nullable<TransactionSession>;
     updatedAt: DateTime;
     updatedBy: string;
     user: User;

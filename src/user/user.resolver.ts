@@ -6,15 +6,19 @@ import { Role } from 'src/common/constants/enums';
 import { AddUserDto } from './dto/add_user.dto';
 import { UpdateUserDto } from './dto/update_user.dto';
 import { SuspendUserDto } from './dto/suspend_user.dto';
+import { PaginatedUserDto } from './dto/paginated-user.dto';
 
 @Resolver(() => User)
 export class UserResolver {
   constructor(private readonly userService: UserService) {}
 
-  @Query(() => [User])
-  async getAllUsers(): Promise<User[]> {
+  @Query(() => PaginatedUserDto)
+  async getAllUsers(
+    @Args('take', { type: () => Int }) take: number,
+    @Args('skip', { type: () => Int }) skip: number
+  ): Promise<PaginatedUserDto> {
     try {
-      return await this.userService.getAllUsers();
+      return await this.userService.getAllUsers(skip,take);
     } catch (error) {
       throw new NotFoundException('Unable to fetch users');
     }

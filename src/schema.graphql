@@ -151,7 +151,7 @@ type Query {
   getAllRecordSessions: [RecordSessionKqj!]!
   getAllRecordsBy(SessionId: Int!): [RecordSessionKqj!]!
   getAllTransactionSessions: [TransactionSession!]!
-  getAllUsers: [User!]!
+  getAllUsers(skip: Int!, take: Int!): [User!]!
   getDailyWinnersAndLosers: DailyWinnersAndLosers!
   getFinishedSessionsToday: Float!
   getGameSessionBy(id: Int!): GameSession!
@@ -184,7 +184,7 @@ type RecordSessionKqj {
   id: Int!
   record_status: RecordSessionStatus!
   token: TokenValues!
-  transaction_session_id: TransactionSession
+  transaction_session: TransactionSession
   updatedAt: DateTime!
   updatedBy: String!
   user: User!
