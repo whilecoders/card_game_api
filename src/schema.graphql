@@ -139,6 +139,27 @@ type Mutation {
   userSignUp(signUpCredential: SignUpCredential!): User!
 }
 
+type PaginatedGameSessionKqjDto {
+  count: Int!
+  data: [GameSession!]!
+  skip: Int!
+  take: Int!
+}
+
+type PaginatedGamesDto {
+  count: Int!
+  data: [Games!]!
+  skip: Int!
+  take: Int!
+}
+
+type PaginatedUserDto {
+  count: Int!
+  data: [User!]!
+  skip: Int!
+  take: Int!
+}
+
 type ProfitAndLoss {
   loss: Float!
   net: Float!
@@ -146,12 +167,12 @@ type ProfitAndLoss {
 }
 
 type Query {
-  getAllGameSessions: [GameSession!]!
-  getAllGameses: [Games!]!
+  getAllGameSessions(skip: Int!, take: Int!): PaginatedGameSessionKqjDto!
+  getAllGameses(skip: Int!, take: Int!): PaginatedGamesDto!
   getAllRecordSessions: [RecordSessionKqj!]!
   getAllRecordsBy(SessionId: Int!): [RecordSessionKqj!]!
   getAllTransactionSessions: [TransactionSession!]!
-  getAllUsers(skip: Int!, take: Int!): [User!]!
+  getAllUsers(skip: Int!, take: Int!): PaginatedUserDto!
   getDailyWinnersAndLosers: DailyWinnersAndLosers!
   getFinishedSessionsToday: Float!
   getGameSessionBy(id: Int!): GameSession!

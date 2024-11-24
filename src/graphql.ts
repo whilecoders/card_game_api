@@ -229,6 +229,27 @@ export interface IMutation {
     userSignUp(signUpCredential: SignUpCredential): User | Promise<User>;
 }
 
+export interface PaginatedGameSessionKqjDto {
+    count: number;
+    data: GameSession[];
+    skip: number;
+    take: number;
+}
+
+export interface PaginatedGamesDto {
+    count: number;
+    data: Games[];
+    skip: number;
+    take: number;
+}
+
+export interface PaginatedUserDto {
+    count: number;
+    data: User[];
+    skip: number;
+    take: number;
+}
+
 export interface ProfitAndLoss {
     loss: number;
     net: number;
@@ -236,12 +257,12 @@ export interface ProfitAndLoss {
 }
 
 export interface IQuery {
-    getAllGameSessions(): GameSession[] | Promise<GameSession[]>;
-    getAllGameses(): Games[] | Promise<Games[]>;
+    getAllGameSessions(skip: number, take: number): PaginatedGameSessionKqjDto | Promise<PaginatedGameSessionKqjDto>;
+    getAllGameses(skip: number, take: number): PaginatedGamesDto | Promise<PaginatedGamesDto>;
     getAllRecordSessions(): RecordSessionKqj[] | Promise<RecordSessionKqj[]>;
     getAllRecordsBy(SessionId: number): RecordSessionKqj[] | Promise<RecordSessionKqj[]>;
     getAllTransactionSessions(): TransactionSession[] | Promise<TransactionSession[]>;
-    getAllUsers(skip: number, take: number): User[] | Promise<User[]>;
+    getAllUsers(skip: number, take: number): PaginatedUserDto | Promise<PaginatedUserDto>;
     getDailyWinnersAndLosers(): DailyWinnersAndLosers | Promise<DailyWinnersAndLosers>;
     getFinishedSessionsToday(): number | Promise<number>;
     getGameSessionBy(id: number): GameSession | Promise<GameSession>;
