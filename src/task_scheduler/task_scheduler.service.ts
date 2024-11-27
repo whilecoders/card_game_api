@@ -3,12 +3,13 @@ import {
   InternalServerErrorException,
   NotFoundException,
 } from '@nestjs/common';
-import { Cron } from '@nestjs/schedule';
 import { GameSessionKqj } from 'src/game_session_kqj/dbrepo/game_session.repository';
 import { Games } from 'src/games/dbrepo/games.repository';
 import { Between, LessThanOrEqual, MoreThanOrEqual, Repository } from 'typeorm';
 import { GameSessionStatus } from '../common/constants';
 import { DailyGame } from 'src/daily_game/dbrepo/daily_game.repository';
+import { Cron, SchedulerRegistry } from '@nestjs/schedule';
+import { CronJob } from 'cron';
 
 export class TaskScheduler {
   constructor(
@@ -18,12 +19,13 @@ export class TaskScheduler {
     private gameSessionKqjRepository: Repository<GameSessionKqj>,
     @Inject('DAILY_GAME_REPOSITORY')
     private readonly dailyGameRepository: Repository<DailyGame>,
-  ) {}
+    private schedulerRegistry: SchedulerRegistry
+  ) { }
 
-  @Cron('23 23 * * *', {
-    name: 'createDailyGame',
-  })
+  @Cron('52 18 * * *', { name: 'createDailyGame' })
   async createDailyGame(): Promise<void> {
+    console.log("creating game sessions");
+
     try {
       const currentDate = new Date();
 
@@ -54,6 +56,7 @@ export class TaskScheduler {
       }
     }
   }
+
   private async createGameSessions(): Promise<GameSessionKqj[]> {
     const currentDate = new Date();
 
@@ -120,6 +123,52 @@ export class TaskScheduler {
     try {
       const createdSession =
         await this.gameSessionKqjRepository.save(gameSessions);
+
+      for (const session of gameSessions) {
+        let start = session.session_start_time;
+        let end = session.session_start_time;
+
+        if (typeof start === 'string' || typeof end == 'string') {
+          start = new Date(start);
+          end = new Date(end);
+        }
+        // Validate Date
+        if (isNaN(start.getTime()) || isNaN(end.getTime())) {
+          console.error('Invalid date for session_start_time:', session.session_start_time);
+          continue;
+        }
+        const startJob = new CronJob(`${start.getMinutes()} ${start.getHours()} ${start.getDate()} ${start.getMonth() + 1} *`, () => {
+          console.log('stating game session ');
+
+          const startSession = this.gameSessionKqjRepository.update(
+            session.id, { session_status: GameSessionStatus.LIVE }
+          )
+          startSession.then((updatedSession) => {
+            console.log("successfully updated =>", updatedSession)
+          })
+        });
+        startJob.runOnce = true;
+
+        const endJob = new CronJob(`${end.getMinutes()} ${end.getHours()} ${end.getDate()} ${end.getMonth() + 1} *`, () => {
+          console.log('stating game session ');
+
+          const startSession = this.gameSessionKqjRepository.update(
+            session.id, { session_status: GameSessionStatus.END }
+          )
+          startSession.then((updatedSession) => {
+            console.log("successfully updated =>", updatedSession)
+          })
+        });
+        endJob.runOnce = true;
+
+        this.schedulerRegistry.addCronJob(`session start ${start}`, startJob);
+        this.schedulerRegistry.addCronJob(`session end ${end}`, startJob);
+
+        startJob.start();
+        endJob.start();
+      }
+
+
       if (!createdSession) {
         throw new InternalServerErrorException(
           'Failed to save game sessions. Please try again.',
