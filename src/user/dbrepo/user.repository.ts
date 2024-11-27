@@ -1,4 +1,4 @@
-import { Field, ObjectType, registerEnumType } from '@nestjs/graphql';
+import { Field, Int, ObjectType, registerEnumType } from '@nestjs/graphql';
 import { Role, UserStatus } from 'src/common/constants/enums';
 import { BaseEntity } from 'src/common/repository/base.repository';
 import { Games } from 'src/games/dbrepo/games.repository';
@@ -31,6 +31,14 @@ export class User extends BaseEntity {
   @Field(() => String)
   @Column({ type: 'varchar', length: 225, nullable: false })
   password: string;
+
+  @Field(() => String)
+  @Column({ type: 'varchar', length: 40, nullable: false })
+  city: string;
+
+  @Field(() => Int)
+  @Column({ type: 'varchar', length: 40, nullable: false })
+  phone_number: number;
 
   @Field(() => Role)
   @Column({ type: 'enum', enum: Role, default: Role.USER, nullable: false })

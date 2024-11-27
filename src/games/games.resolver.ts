@@ -1,8 +1,10 @@
-import { Resolver, Query, Mutation, Args } from '@nestjs/graphql';
+import { Resolver, Query, Mutation, Args, Int } from '@nestjs/graphql';
 import { CreateGamesDto } from './dto/create-game.input';
 import { GamesService } from './games.service';
 import { Games } from './dbrepo/games.repository';
 import { UpdateGamesDto } from './dto/update-game.input';
+import { GameSessionKqj } from 'src/game_session_kqj/dbrepo/game_session.repository';
+import { PaginatedGamesDto } from './dto/paginated-game.dto';
 
 @Resolver(() => Games)
 export class GamesResolver {
@@ -17,33 +19,39 @@ export class GamesResolver {
 
   @Mutation(() => Games)
   async updateGames(
-    @Args('id') id: number,
     @Args('updateGamesDto') updateGamesDto: UpdateGamesDto,
   ): Promise<Games> {
-    return await this.GamesService.updateGame(id, updateGamesDto);
+    return await this.GamesService.updateGame(updateGamesDto);
   }
 
   @Mutation(() => Boolean)
-  async DeleteGames(@Args('id') id: number): Promise<boolean> {
+  async DeleteGames(
+    @Args({ name: 'id', type: () => Int }) id: number,
+  ): Promise<boolean> {
     await this.GamesService.deleteGame(id);
     return true;
   }
 
-  @Query(() => [Games], { name: 'getAllGameses' })
-  async getAllGameses(): Promise<Games[]> {
-    return await this.GamesService.getAllGames();
+  @Query(() => PaginatedGamesDto, { name: 'getAllGameses' })
+  async getAllGameses(
+    @Args('skip', { type: () => Int }) skip: number,
+    @Args('take', { type: () => Int }) take: number,
+  ): Promise<PaginatedGamesDto> {
+    return await this.GamesService.getAllGames(skip, take);
   }
 
-  @Query(() => Games, { name: 'getGamesById' })
-  async getGamesById(@Args('id') id: number): Promise<Games> {
+  @Query(() => Games, { name: 'getGamesBy' })
+  async getGamesById(
+    @Args({ name: 'id', type: () => Int }) id: number,
+  ): Promise<Games> {
     return await this.GamesService.getGameById(id);
   }
 
   @Query(() => [Games], { name: 'getGamesByDate' })
   async getGamesByDate(
-    @Args('startDate') startDate: string,
-    @Args('endDate') endDate: string,
+    @Args({ name: 'from', type: () => Date }) from: Date,
+    @Args({ name: 'to', type: () => Date }) to: Date,
   ): Promise<Games[]> {
-    return await this.GamesService.getGamesByDate(startDate, endDate);
+    return await this.GamesService.getGamesByDate(from, to);
   }
 }

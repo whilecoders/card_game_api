@@ -23,13 +23,6 @@ export enum GameKqjCards {
     QUEEN_OF_SPADES = "QUEEN_OF_SPADES"
 }
 
-export enum GameSessionStatus {
-    END = "END",
-    INACTIVE = "INACTIVE",
-    LIVE = "LIVE",
-    UPCOMING = "UPCOMING"
-}
-
 export enum GameStatus {
     AVAILABLE = "AVAILABLE",
     FINISHED = "FINISHED",
@@ -53,7 +46,7 @@ export enum MessageType {
 export enum RecordSessionStatus {
     ACTIVE = "ACTIVE",
     COMPLETED = "COMPLETED",
-    INACTIVE = "INACTIVE"
+    SUSPENDED = "SUSPENDED"
 }
 
 export enum Role {
@@ -89,14 +82,24 @@ export enum UserStatus {
     SUSPENDED = "SUSPENDED"
 }
 
+export interface AddUserDto {
+    city: string;
+    email: string;
+    password: string;
+    phone_number: number;
+    username: string;
+}
+
 export interface CreateGamesDto {
-    end_time: DateTime;
+    admin_id: number;
+    end_date: DateTime;
+    end_time: string;
     game_duration: number;
     game_in_day: number;
     game_status: GameStatus;
     game_type: GameType;
-    start_time: DateTime;
-    user_id: number;
+    start_date: DateTime;
+    start_time: string;
 }
 
 export interface CreateRecordSessionKqjDto {
@@ -110,7 +113,14 @@ export interface CreateRecordSessionKqjDto {
 export interface CreateTransactionSessionDto {
     recordSessionId: number;
     token: TokenValues;
-    type?: Nullable<TransactionType>;
+    type: TransactionType;
+}
+
+export interface ResetPasswordDto {
+    confirmPassword: string;
+    currentPassword: string;
+    email: string;
+    newPassword: string;
 }
 
 export interface SignInCredential {
@@ -119,30 +129,62 @@ export interface SignInCredential {
 }
 
 export interface SignUpCredential {
+    city: string;
     email: string;
     password: string;
+    phone_number: number;
     role: Role;
     username: string;
 }
 
+export interface SuspendUserDto {
+    suspend: boolean;
+    userId: number;
+}
+
 export interface UpdateGameSessionDto {
-    game_result_card?: Nullable<GameKqjCards>;
-    session_end_time?: Nullable<string>;
-    session_start_time?: Nullable<string>;
-    session_status?: Nullable<GameSessionStatus>;
+    game_result_card: GameKqjCards;
 }
 
 export interface UpdateGamesDto {
-    end_time: DateTime;
-    game_duration: number;
-    game_in_day: number;
-    game_status: GameStatus;
-    start_time: DateTime;
+    admin_id: number;
+    end_date: DateTime;
+    end_time: string;
+    game_duration?: Nullable<number>;
+    game_id: number;
+    game_in_day?: Nullable<number>;
+    game_status?: Nullable<GameStatus>;
+    game_type?: Nullable<GameType>;
+    start_date: DateTime;
+    start_time: string;
+}
+
+export interface UpdateUserDto {
+    city?: Nullable<string>;
+    name?: Nullable<string>;
+    phone_number?: Nullable<number>;
+    role?: Nullable<Role>;
 }
 
 export interface WalletDto {
-    amount: number;
+    token: TokenValues;
     type: TransactionType;
+}
+
+export interface DailyGame {
+    createdAt: DateTime;
+    createdBy: string;
+    deletedAt: DateTime;
+    deletedBy: string;
+    games: Games;
+    id: number;
+    updatedAt: DateTime;
+    updatedBy: string;
+}
+
+export interface DailyWinnersAndLosers {
+    losers: number;
+    winners: number;
 }
 
 export interface GameSession {
@@ -162,19 +204,22 @@ export interface GameSession {
 }
 
 export interface Games {
+    DailyGame?: Nullable<DailyGame[]>;
     admin: User;
     createdAt: DateTime;
     createdBy: string;
     deletedAt: DateTime;
     deletedBy: string;
-    end_time: DateTime;
+    end_date: DateTime;
+    end_time: string;
     gameSession?: Nullable<GameSession[]>;
     game_duration: number;
     game_in_day: number;
     game_status: GameStatus;
     game_type: GameType;
     id: number;
-    start_time: DateTime;
+    start_date: DateTime;
+    start_time: string;
     updatedAt: DateTime;
     updatedBy: string;
 }
@@ -196,30 +241,76 @@ export interface Message {
 
 export interface IMutation {
     DeleteGames(id: number): boolean | Promise<boolean>;
+    addUser(addUserDto: AddUserDto): User | Promise<User>;
+    adminSignUp(signUpCredential: SignUpCredential): User | Promise<User>;
     createGames(createGamesDto: CreateGamesDto): Games | Promise<Games>;
     createRecordSession(createRecordSessionKqjDto: CreateRecordSessionKqjDto): RecordSessionKqj | Promise<RecordSessionKqj>;
     createTransactionSession(createTransactionSessionDto: CreateTransactionSessionDto): TransactionSession | Promise<TransactionSession>;
+    markSessionAsCompleted(gameSessionId: number): boolean | Promise<boolean>;
     refreshAccessToken(refreshToken: string, token: string): Token | Promise<Token>;
-    signUp(signUpCredential: SignUpCredential): User | Promise<User>;
+    resetPassword(resetPasswordDto: ResetPasswordDto): string | Promise<string>;
+    suspendUser(suspendUserDto: SuspendUserDto): User | Promise<User>;
     updateGameSession(id: number, updateGameSessionDto: UpdateGameSessionDto): GameSession | Promise<GameSession>;
-    updateGames(id: number, updateGamesDto: UpdateGamesDto): Games | Promise<Games>;
+    updateGames(updateGamesDto: UpdateGamesDto): Games | Promise<Games>;
+    updateUser(id: number, updateUserDto: UpdateUserDto): User | Promise<User>;
+    updateUserRecordStatus(gameSessionId: number, recordStatus: RecordSessionStatus, userId: number): RecordSessionKqj | Promise<RecordSessionKqj>;
     updateWallet(adminId: number, userId: number, walletData: WalletDto): Transaction | Promise<Transaction>;
+    userSignUp(signUpCredential: SignUpCredential): User | Promise<User>;
+}
+
+export interface PaginatedGameSessionKqjDto {
+    count: number;
+    data: GameSession[];
+    skip: number;
+    take: number;
+}
+
+export interface PaginatedGamesDto {
+    count: number;
+    data: Games[];
+    skip: number;
+    take: number;
+}
+
+export interface PaginatedUserDto {
+    count: number;
+    data: User[];
+    skip: number;
+    take: number;
+}
+
+export interface ProfitAndLoss {
+    loss: number;
+    net: number;
+    profit: number;
 }
 
 export interface IQuery {
-    getAllGameSessions(): GameSession[] | Promise<GameSession[]>;
-    getAllGameses(): Games[] | Promise<Games[]>;
+    getAllGameSessions(skip: number, take: number): PaginatedGameSessionKqjDto | Promise<PaginatedGameSessionKqjDto>;
+    getAllGameses(skip: number, take: number): PaginatedGamesDto | Promise<PaginatedGamesDto>;
     getAllRecordSessions(): RecordSessionKqj[] | Promise<RecordSessionKqj[]>;
+    getAllRecordsBy(SessionId: number): RecordSessionKqj[] | Promise<RecordSessionKqj[]>;
     getAllTransactionSessions(): TransactionSession[] | Promise<TransactionSession[]>;
-    getGameSessionById(id: number): GameSession | Promise<GameSession>;
+    getAllUsers(skip: number, take: number): PaginatedUserDto | Promise<PaginatedUserDto>;
+    getDailyWinnersAndLosers(): DailyWinnersAndLosers | Promise<DailyWinnersAndLosers>;
+    getFinishedSessionsToday(): number | Promise<number>;
+    getGameSessionBy(id: number): GameSession | Promise<GameSession>;
     getGameSessionsByDate(endDate: DateTime, startDate: DateTime): GameSession[] | Promise<GameSession[]>;
-    getGamesByDate(endDate: string, startDate: string): Games[] | Promise<Games[]>;
-    getGamesById(id: number): Games | Promise<Games>;
+    getGamesBy(id: number): Games | Promise<Games>;
+    getGamesByDate(from: DateTime, to: DateTime): Games[] | Promise<Games[]>;
     getLiveGameSessions(): GameSession[] | Promise<GameSession[]>;
-    getRecordBySessionId(sessionId: string): RecordSessionKqj | Promise<RecordSessionKqj>;
-    getRecordSessionById(id: number): RecordSessionKqj | Promise<RecordSessionKqj>;
-    getRecordsByUserId(userId: string): RecordSessionKqj[] | Promise<RecordSessionKqj[]>;
-    getTransactionSessionById(id: number): TransactionSession | Promise<TransactionSession>;
+    getProfitAndLoss(): ProfitAndLoss | Promise<ProfitAndLoss>;
+    getRecordBy(SessionId: number): RecordSessionKqj | Promise<RecordSessionKqj>;
+    getRecordSessionBy(id: number): RecordSessionKqj | Promise<RecordSessionKqj>;
+    getRecordsBy(UserId: number): RecordSessionKqj[] | Promise<RecordSessionKqj[]>;
+    getTodaysGameSession(): GameSession[] | Promise<GameSession[]>;
+    getTotalSessionsToday(): number | Promise<number>;
+    getTotalTokensToday(): number | Promise<number>;
+    getTotalUsersToday(): number | Promise<number>;
+    getTransactionSessionBy(id: number): TransactionSession | Promise<TransactionSession>;
+    getUserById(id: number): User | Promise<User>;
+    getUserByRole(role: number): User[] | Promise<User[]>;
+    getUsersByCreatedAt(date: DateTime): User[] | Promise<User[]>;
     signIn(signInCredential: SignInCredential): UserToken | Promise<UserToken>;
 }
 
@@ -229,7 +320,7 @@ export interface RecordSessionKqj {
     createdBy: string;
     deletedAt: DateTime;
     deletedBy: string;
-    game_session: GameSession;
+    game_session_id: GameSession;
     id: number;
     record_status: RecordSessionStatus;
     token: TokenValues;
@@ -287,6 +378,7 @@ export interface TransactionSession {
 }
 
 export interface User {
+    city: string;
     createdAt: DateTime;
     createdBy: string;
     createdGames: Games;
@@ -296,6 +388,7 @@ export interface User {
     id: number;
     name?: Nullable<string>;
     password: string;
+    phone_number: number;
     profile?: Nullable<string>;
     record_session_kqj: RecordSessionKqj;
     role: Role;
