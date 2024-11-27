@@ -103,6 +103,32 @@ type Games {
   updatedBy: String!
 }
 
+type Message {
+  createdAt: DateTime!
+  createdBy: String!
+  deletedAt: DateTime!
+  deletedBy: String!
+
+  """Example field (placeholder)"""
+  exampleField: Int!
+  id: Int!
+  imageUrl: String!
+  message: String!
+  messageStatus: MessageType!
+  messageType: MessageType!
+  updatedAt: DateTime!
+  updatedBy: String!
+}
+
+enum MessageType {
+  AUDIO
+  IMAGE
+  INFO
+  MESSAGE
+  TRADE
+  VIDEO
+}
+
 type Mutation {
   DeleteGames(id: Float!): Boolean!
   createGames(createGamesDto: CreateGamesDto!): Games!
@@ -162,6 +188,20 @@ enum Role {
   USER
 }
 
+type Room {
+  createdAt: DateTime!
+  createdBy: String!
+  deletedAt: DateTime!
+  deletedBy: String!
+  id: Int!
+  latestMessage: Message!
+  members: [User!]!
+  messages: [Message!]
+  status: Status!
+  updatedAt: DateTime!
+  updatedBy: String!
+}
+
 input SignInCredential {
   password: String!
   username: String!
@@ -172,6 +212,16 @@ input SignUpCredential {
   password: String!
   role: Role!
   username: String!
+}
+
+enum Status {
+  ACTIVE
+  INACTIVE
+}
+
+input SuspendUserDto {
+  suspend: Boolean!
+  userId: Int!
 }
 
 type Token {
@@ -249,6 +299,7 @@ type User {
   profile: String
   record_session_kqj: RecordSessionKqj!
   role: Role!
+  room: Room!
   status: UserStatus!
   updatedAt: DateTime!
   updatedBy: String!

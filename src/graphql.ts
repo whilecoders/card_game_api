@@ -41,6 +41,15 @@ export enum GameType {
     KQJ = "KQJ"
 }
 
+export enum MessageType {
+    AUDIO = "AUDIO",
+    IMAGE = "IMAGE",
+    INFO = "INFO",
+    MESSAGE = "MESSAGE",
+    TRADE = "TRADE",
+    VIDEO = "VIDEO"
+}
+
 export enum RecordSessionStatus {
     ACTIVE = "ACTIVE",
     COMPLETED = "COMPLETED",
@@ -53,6 +62,11 @@ export enum Role {
     SUPERADMIN = "SUPERADMIN",
     SYSTEM = "SYSTEM",
     USER = "USER"
+}
+
+export enum Status {
+    ACTIVE = "ACTIVE",
+    INACTIVE = "INACTIVE"
 }
 
 export enum TokenValues {
@@ -165,6 +179,21 @@ export interface Games {
     updatedBy: string;
 }
 
+export interface Message {
+    createdAt: DateTime;
+    createdBy: string;
+    deletedAt: DateTime;
+    deletedBy: string;
+    exampleField: number;
+    id: number;
+    imageUrl: string;
+    message: string;
+    messageStatus: MessageType;
+    messageType: MessageType;
+    updatedAt: DateTime;
+    updatedBy: string;
+}
+
 export interface IMutation {
     DeleteGames(id: number): boolean | Promise<boolean>;
     createGames(createGamesDto: CreateGamesDto): Games | Promise<Games>;
@@ -208,6 +237,20 @@ export interface RecordSessionKqj {
     updatedAt: DateTime;
     updatedBy: string;
     user: User;
+}
+
+export interface Room {
+    createdAt: DateTime;
+    createdBy: string;
+    deletedAt: DateTime;
+    deletedBy: string;
+    id: number;
+    latestMessage: Message;
+    members: User[];
+    messages?: Nullable<Message[]>;
+    status: Status;
+    updatedAt: DateTime;
+    updatedBy: string;
 }
 
 export interface Token {
@@ -256,6 +299,7 @@ export interface User {
     profile?: Nullable<string>;
     record_session_kqj: RecordSessionKqj;
     role: Role;
+    room: Room;
     status: UserStatus;
     updatedAt: DateTime;
     updatedBy: string;

@@ -2,6 +2,7 @@ import { Field, ObjectType, registerEnumType } from '@nestjs/graphql';
 import { Role, UserStatus } from 'src/common/constants/enums';
 import { BaseEntity } from 'src/common/repository/base.repository';
 import { Games } from 'src/games/dbrepo/games.repository';
+import { Message } from 'src/message/dbrepo/message.repository';
 import { RecordSessionKqj } from 'src/record_session_kqj/dbrepo/record_session_kqj.repository';
 import { Transaction } from 'src/transaction/dbrepo/transaction.repository';
 import { Column, Entity, OneToMany } from 'typeorm';

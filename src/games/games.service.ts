@@ -104,6 +104,8 @@ export class GamesService {
     );
     try {
       await this.gameSessionRepository.save(gameSession);
+
+      
     } catch (error) {
       throw new InternalServerErrorException(
         'Failed to save game sessions. Please try again.',
