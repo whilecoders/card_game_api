@@ -73,7 +73,7 @@ export class GamesService {
 
     if (existingGame) {
       throw new ConflictException(
-        'A game with overlapping dates already exists',
+        'A game already exists with this dates',
       );
     }
 
@@ -100,48 +100,10 @@ export class GamesService {
         relations: { admin: true, gameSession: true },
       });
 
-<<<<<<< HEAD
-      // Update currentStartTime to the start of the next session
-      currentStartTime = new Date(endTime);
-    }
-
-    const gameSession = this.gameSessionRepository.create(
-      sessionsToCreate.map((val: gameSessionPayload) => ({
-        game,
-        session_start_time: val.start_time,
-        session_end_time: val.end_time,
-        session_status: GameSessionStatus.LIVE,
-      })),
-    );
-    try {
-      await this.gameSessionRepository.save(gameSession);
-
-      
-    } catch (error) {
-      throw new InternalServerErrorException(
-        'Failed to save game sessions. Please try again.',
-      );
-    }
-  }
-
-  async updateGame(
-    id: number,
-    updateGameLaunchDto: UpdateGamesDto,
-  ): Promise<Games> {
-    try {
-      const gameLaunch = await this.gamesRepository.findOne({
-        where: { id },
-        relations: ['admin'],
-      });
-
-      if (!gameLaunch) {
-        throw new NotFoundException(`GameLaunch with ID ${id} not found`);
-=======
       if (!game) {
         throw new NotFoundException(
           `Game with ID ${updateGameDto.game_id} not found`,
         );
->>>>>>> e3e6786886ee6e3c4082194d4558cd2d0c7cc3bc
       }
 
       const admin = await this.userRepository.findOne({

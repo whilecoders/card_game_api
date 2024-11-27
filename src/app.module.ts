@@ -17,9 +17,10 @@ import { RecordSessionKqjModule } from './record_session_kqj/record_session_kqj.
 import { GamesModule } from './games/games.module';
 import { GameSessionKqjModule } from './game_session_kqj/game_session.module';
 import { TransactionSessionModule } from './transaction_session/transaction_session.module';
-import { ScheduleModule } from '@nestjs/schedule';
+
 import { DailyGameModule } from './daily_game/daily_game.module';
 import { TaskSchedulerModule } from './task_scheduler/task_scheduler.module';
+import { ScheduleModule } from '@nestjs/schedule';
 
 @Module({
   imports: [

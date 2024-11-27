@@ -131,7 +131,6 @@ type Message {
   id: Int!
   imageUrl: String!
   message: String!
-  messageStatus: MessageType!
   messageType: MessageType!
   updatedAt: DateTime!
   updatedBy: String!
@@ -266,8 +265,7 @@ type Room {
   id: Int!
   latestMessage: Message!
   members: [User!]!
-  messages: [Message!]
-  status: Status!
+  messages: [Message!]!
   updatedAt: DateTime!
   updatedBy: String!
 }
@@ -286,14 +284,6 @@ input SignUpCredential {
   username: String!
 }
 
-<<<<<<< HEAD
-enum Status {
-  ACTIVE
-  INACTIVE
-}
-
-=======
->>>>>>> e3e6786886ee6e3c4082194d4558cd2d0c7cc3bc
 input SuspendUserDto {
   suspend: Boolean!
   userId: Int!
@@ -385,7 +375,7 @@ type User {
   profile: String
   record_session_kqj: RecordSessionKqj!
   role: Role!
-  room: Room!
+  roomMember: Room!
   status: UserStatus!
   updatedAt: DateTime!
   updatedBy: String!

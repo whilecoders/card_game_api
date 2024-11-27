@@ -4,8 +4,9 @@ import { BaseEntity } from 'src/common/repository/base.repository';
 import { Games } from 'src/games/dbrepo/games.repository';
 import { Message } from 'src/message/dbrepo/message.repository';
 import { RecordSessionKqj } from 'src/record_session_kqj/dbrepo/record_session_kqj.repository';
+import { Room } from 'src/room/dbrepo/room.repository';
 import { Transaction } from 'src/transaction/dbrepo/transaction.repository';
-import { Column, Entity, OneToMany } from 'typeorm';
+import { Column, Entity, JoinColumn, ManyToOne, OneToMany, OneToOne } from 'typeorm';
 
 registerEnumType(Role, { name: 'Role' });
 registerEnumType(UserStatus, { name: 'UserStatus' });
@@ -74,4 +75,12 @@ export class User extends BaseEntity {
     (recordSessionKqj) => recordSessionKqj.user,
   )
   record_session_kqj: RecordSessionKqj[];
+  @Field(() => Room)
+  @ManyToOne(() => Room, (room) => room.members)
+  roomMember: Room;
+
+
+  @OneToOne(() => Message, (message) => message.sender)
+  @JoinColumn({ name: "sender" })
+  sender: Message
 }

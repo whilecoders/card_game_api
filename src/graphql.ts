@@ -57,11 +57,6 @@ export enum Role {
     USER = "USER"
 }
 
-export enum Status {
-    ACTIVE = "ACTIVE",
-    INACTIVE = "INACTIVE"
-}
-
 export enum TokenValues {
     TOKEN_11 = "TOKEN_11",
     TOKEN_55 = "TOKEN_55",
@@ -233,7 +228,6 @@ export interface Message {
     id: number;
     imageUrl: string;
     message: string;
-    messageStatus: MessageType;
     messageType: MessageType;
     updatedAt: DateTime;
     updatedBy: string;
@@ -338,8 +332,7 @@ export interface Room {
     id: number;
     latestMessage: Message;
     members: User[];
-    messages?: Nullable<Message[]>;
-    status: Status;
+    messages: Message[];
     updatedAt: DateTime;
     updatedBy: string;
 }
@@ -392,7 +385,7 @@ export interface User {
     profile?: Nullable<string>;
     record_session_kqj: RecordSessionKqj;
     role: Role;
-    room: Room;
+    roomMember: Room;
     status: UserStatus;
     updatedAt: DateTime;
     updatedBy: string;

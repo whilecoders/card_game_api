@@ -1,9 +1,9 @@
 import { ObjectType, Field, Int, registerEnumType } from '@nestjs/graphql';
-import { MessageStatus, MessageType } from 'src/common/constants';
 import { Room } from 'src/room/dbrepo/room.repository';
 import { User } from 'src/user/dbrepo/user.repository';
 import {  Column, Entity, JoinColumn, ManyToOne, OneToMany, OneToOne } from 'typeorm';
 import { BaseEntity } from 'src/common/repository/base.repository';
+import { MessageType } from 'src/graphql';
 
 registerEnumType( MessageType, { name: "MessageType" })
 
@@ -33,9 +33,9 @@ export class Message extends BaseEntity {
   @Column({ type: "enum", enum: MessageType, nullable: false, default: MessageType.MESSAGE })
   messageType: MessageType
 
-  @Field(() => MessageType, { nullable: false })
-  @Column({ type: "enum", enum: MessageStatus, nullable: false, default: MessageStatus.NONE })
-  messageStatus: MessageStatus
+  // @Field(() => MessageType, { nullable: false })
+  // @Column({ type: "enum", enum: MessageStatus, nullable: false, default: MessageStatus.NONE })
+  // messageStatus: MessageStatus
 
   @Field( () => String)
   @Column({nullable: true, type: "text" })
