@@ -7,6 +7,7 @@ input AddUserDto {
   email: String!
   password: String!
   phone_number: Int!
+  role: Role!
   username: String!
 }
 
@@ -152,6 +153,7 @@ type Mutation {
   createGames(createGamesDto: CreateGamesDto!): Games!
   createRecordSession(createRecordSessionKqjDto: CreateRecordSessionKqjDto!): RecordSessionKqj!
   createTransactionSession(createTransactionSessionDto: CreateTransactionSessionDto!): TransactionSession!
+  deleteUser(adminId: Float!, userId: Float!): Boolean!
   markSessionAsCompleted(gameSessionId: Int!): Boolean!
   refreshAccessToken(refreshToken: String!, token: String!): Token!
   resetPassword(resetPasswordDto: ResetPasswordDto!): String!
@@ -201,7 +203,7 @@ type Query {
   getDailyWinnersAndLosers: DailyWinnersAndLosers!
   getFinishedSessionsToday: Float!
   getGameSessionBy(id: Int!): GameSession!
-  getGameSessionsByDate(endDate: DateTime!, startDate: DateTime!): [GameSession!]!
+  getGameSessionsByDateOrToday(endDate: DateTime, startDate: DateTime): [GameSession!]!
   getGamesBy(id: Int!): Games!
   getGamesByDate(from: DateTime!, to: DateTime!): [Games!]!
   getLiveGameSessions: [GameSession!]!
@@ -209,11 +211,11 @@ type Query {
   getRecordBy(SessionId: Int!): RecordSessionKqj!
   getRecordSessionBy(id: Int!): RecordSessionKqj!
   getRecordsBy(UserId: Int!): [RecordSessionKqj!]!
-  getTodaysGameSession: [GameSession!]!
   getTotalSessionsToday: Float!
   getTotalTokensToday: Float!
   getTotalUsersToday: Float!
   getTransactionSessionBy(id: Int!): TransactionSession!
+  getTransactionsByUserId(userId: Int!): [TransactionSession!]!
   getUserById(id: Int!): User!
   getUserByRole(role: Float!): [User!]!
   getUsersByCreatedAt(date: DateTime!): [User!]!
@@ -355,9 +357,12 @@ input UpdateGamesDto {
 
 input UpdateUserDto {
   city: String
+  email: String
   name: String
   phone_number: Int
   role: Role
+  status: UserStatus
+  username: String
 }
 
 type User {

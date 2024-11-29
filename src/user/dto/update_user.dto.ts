@@ -1,6 +1,13 @@
 import { InputType, Field, Int } from '@nestjs/graphql';
-import { IsEnum, IsOptional, IsString } from 'class-validator';
-import { Role } from 'src/common/constants/enums';
+import {
+  IsEmail,
+  IsEnum,
+  IsOptional,
+  IsString,
+  MaxLength,
+  MinLength,
+} from 'class-validator';
+import { Role, UserStatus } from 'src/common/constants/enums';
 
 @InputType()
 export class UpdateUserDto {
@@ -21,4 +28,21 @@ export class UpdateUserDto {
   @Field(() => Int, { nullable: true })
   @IsOptional()
   phone_number?: number;
+
+  @Field(() => String, { nullable: true })
+  @IsOptional()
+  @IsEmail()
+  email?: string;
+
+  @Field(() => String, { nullable: true })
+  @IsString()
+  @IsOptional()
+  @MinLength(6, { message: 'Username must be at least 8 characters long' })
+  @MaxLength(30, { message: 'Username cannot be longer than 30 characters' })
+  username?: string;
+
+  @Field(() => UserStatus, { nullable: true })
+  @IsEnum(UserStatus)
+  @IsOptional()
+  status?: UserStatus;
 }

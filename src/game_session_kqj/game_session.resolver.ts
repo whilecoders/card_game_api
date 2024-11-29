@@ -28,8 +28,8 @@ export class GameSessionKqjResolver {
 
   @Query(() => PaginatedGameSessionKqjDto, { name: 'getAllGameSessions' })
   async getAllGameSessions(
-    @Args('skip', { type: () => Int}) skip: number,
-    @Args('take', { type: () => Int}) take: number,
+    @Args('skip', { type: () => Int }) skip: number,
+    @Args('take', { type: () => Int }) take: number,
   ): Promise<PaginatedGameSessionKqjDto> {
     return this.gameSessionKqjService.getAllGameSessions(skip, take);
   }
@@ -38,29 +38,14 @@ export class GameSessionKqjResolver {
     return await this.gameSessionKqjService.getLiveGameSessions();
   }
 
-  @Query(() => [GameSessionKqj], { name: 'getGameSessionsByDate' })
-  async getGameSessionsByDate(
-    @Args('startDate') startDate: Date,
-    @Args('endDate') endDate: Date,
+  @Query(() => [GameSessionKqj], { name: 'getGameSessionsByDateOrToday' })
+  async getGameSessionsByDateOrToday(
+    @Args('startDate', { type: () => Date, nullable: true }) startDate?: Date,
+    @Args('endDate', { type: () => Date, nullable: true }) endDate?: Date,
   ): Promise<GameSessionKqj[]> {
-    return await this.gameSessionKqjService.getGameSessionsByDate(
+    return await this.gameSessionKqjService.getGameSessionsByDateOrToday(
       startDate,
       endDate,
     );
-  }
-
-  @Query(() => [GameSessionKqj], { name: 'getTodaysGameSession' })
-  async getTodaysGameSession(): Promise<GameSessionKqj[]> {
-    return await this.gameSessionKqjService.getTodaysGameSession();
-  }
-
-  @Query(() => Number)
-  async getTotalSessionsToday(): Promise<number> {
-    return this.gameSessionKqjService.getTotalSessionsToday();
-  }
-
-  @Query(() => Number)
-  async getFinishedSessionsToday(): Promise<number> {
-    return this.gameSessionKqjService.getFinishedSessionsToday();
   }
 }

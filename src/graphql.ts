@@ -82,6 +82,7 @@ export interface AddUserDto {
     email: string;
     password: string;
     phone_number: number;
+    role: Role;
     username: string;
 }
 
@@ -156,9 +157,12 @@ export interface UpdateGamesDto {
 
 export interface UpdateUserDto {
     city?: Nullable<string>;
+    email?: Nullable<string>;
     name?: Nullable<string>;
     phone_number?: Nullable<number>;
     role?: Nullable<Role>;
+    status?: Nullable<UserStatus>;
+    username?: Nullable<string>;
 }
 
 export interface WalletDto {
@@ -240,6 +244,7 @@ export interface IMutation {
     createGames(createGamesDto: CreateGamesDto): Games | Promise<Games>;
     createRecordSession(createRecordSessionKqjDto: CreateRecordSessionKqjDto): RecordSessionKqj | Promise<RecordSessionKqj>;
     createTransactionSession(createTransactionSessionDto: CreateTransactionSessionDto): TransactionSession | Promise<TransactionSession>;
+    deleteUser(adminId: number, userId: number): boolean | Promise<boolean>;
     markSessionAsCompleted(gameSessionId: number): boolean | Promise<boolean>;
     refreshAccessToken(refreshToken: string, token: string): Token | Promise<Token>;
     resetPassword(resetPasswordDto: ResetPasswordDto): string | Promise<string>;
@@ -289,7 +294,7 @@ export interface IQuery {
     getDailyWinnersAndLosers(): DailyWinnersAndLosers | Promise<DailyWinnersAndLosers>;
     getFinishedSessionsToday(): number | Promise<number>;
     getGameSessionBy(id: number): GameSession | Promise<GameSession>;
-    getGameSessionsByDate(endDate: DateTime, startDate: DateTime): GameSession[] | Promise<GameSession[]>;
+    getGameSessionsByDateOrToday(endDate?: Nullable<DateTime>, startDate?: Nullable<DateTime>): GameSession[] | Promise<GameSession[]>;
     getGamesBy(id: number): Games | Promise<Games>;
     getGamesByDate(from: DateTime, to: DateTime): Games[] | Promise<Games[]>;
     getLiveGameSessions(): GameSession[] | Promise<GameSession[]>;
@@ -297,11 +302,11 @@ export interface IQuery {
     getRecordBy(SessionId: number): RecordSessionKqj | Promise<RecordSessionKqj>;
     getRecordSessionBy(id: number): RecordSessionKqj | Promise<RecordSessionKqj>;
     getRecordsBy(UserId: number): RecordSessionKqj[] | Promise<RecordSessionKqj[]>;
-    getTodaysGameSession(): GameSession[] | Promise<GameSession[]>;
     getTotalSessionsToday(): number | Promise<number>;
     getTotalTokensToday(): number | Promise<number>;
     getTotalUsersToday(): number | Promise<number>;
     getTransactionSessionBy(id: number): TransactionSession | Promise<TransactionSession>;
+    getTransactionsByUserId(userId: number): TransactionSession[] | Promise<TransactionSession[]>;
     getUserById(id: number): User | Promise<User>;
     getUserByRole(role: number): User[] | Promise<User[]>;
     getUsersByCreatedAt(date: DateTime): User[] | Promise<User[]>;

@@ -15,10 +15,10 @@ export class UserResolver {
   @Query(() => PaginatedUserDto)
   async getAllUsers(
     @Args('take', { type: () => Int }) take: number,
-    @Args('skip', { type: () => Int }) skip: number
+    @Args('skip', { type: () => Int }) skip: number,
   ): Promise<PaginatedUserDto> {
     try {
-      return await this.userService.getAllUsers(skip,take);
+      return await this.userService.getAllUsers(skip, take);
     } catch (error) {
       throw new NotFoundException('Unable to fetch users');
     }
@@ -83,5 +83,14 @@ export class UserResolver {
     } catch (error) {
       throw new NotFoundException(error.message);
     }
+  }
+
+  @Mutation(() => Boolean, { name: 'deleteUser' })
+  async deleteUser(
+    @Args('userId') userId: number,
+    @Args('adminId') adminId: number,
+  ): Promise<boolean> {
+    await this.userService.deleteUser(userId, adminId);
+    return true;
   }
 }

@@ -68,20 +68,21 @@ export class UserService {
   }
 
   async addUser(addUserDto: AddUserDto) {
-    const { username, email, password, city, phone_number } = addUserDto;
+    const { username, email, password, city, phone_number, role } = addUserDto;
     const hashedPassword = await PasswordHashService.hashPassword(password);
 
-    const existingUser = await this.userRepository.findOne({
-      where: [{ username }, { email }],
+    const userByUsername = await this.userRepository.findOne({
+      where: { username },
     });
+    if (userByUsername) {
+      throw new ConflictException('Username already exists');
+    }
 
-    if (existingUser) {
-      if (existingUser.username === username) {
-        throw new ConflictException('Username already exists');
-      }
-      if (existingUser.email === email) {
-        throw new ConflictException('Email already exists');
-      }
+    const userByEmail = await this.userRepository.findOne({
+      where: { email },
+    });
+    if (userByEmail) {
+      throw new ConflictException('Email already exists');
     }
 
     const user = this.userRepository.create({
@@ -90,7 +91,7 @@ export class UserService {
       city,
       phone_number,
       password: hashedPassword,
-      role: Role.USER,
+      role: role,
     });
 
     try {
@@ -136,6 +137,28 @@ export class UserService {
       throw new InternalServerErrorException(
         'Failed to suspend or activate user',
       );
+    }
+  }
+
+  async deleteUser(userId: number, adminId: number): Promise<void> {
+    const user = await this.userRepository.findOne({ where: { id: userId } });
+    if (!user) {
+      throw new NotFoundException(`User with ID ${userId} not found`);
+    }
+
+    const admin = await this.userRepository.findOne({ where: { id: adminId } });
+    if (!admin) {
+      throw new NotFoundException(`Admin with ID ${adminId} not found`);
+    }
+
+    try {
+      user.deletedBy = admin.username;
+      user.deletedAt = new Date();
+
+      await this.userRepository.save(user);
+    } catch (error) {
+      console.error('Error deleting user:', error);
+      throw new InternalServerErrorException('Failed to delete user');
     }
   }
 }
