@@ -11,7 +11,7 @@ import { CreateTransactionSessionDto } from './dto/create-transaction_session.in
 import { RecordSessionKqj } from 'src/record_session_kqj/dbrepo/record_session_kqj.repository';
 import { TransactionType } from 'src/common/constants';
 import { User } from 'src/user/dbrepo/user.repository';
-import { ProfitAndLoss } from './dto/profite-loss.input';
+import { ProfitAndLoss } from '../dashboard/dto/profite-loss.input';
 
 @Injectable()
 export class TransactionSessionService {
@@ -100,35 +100,22 @@ export class TransactionSessionService {
     }
   }
 
-  async getProfitAndLoss(): Promise<ProfitAndLoss> {
+  async getTransactionsByUserId(userId: number): Promise<TransactionSession[]> {
+    const user = await this.userRepository.findOne({ where: { id: userId } });
+    if (!user) {
+      throw new NotFoundException(`User with ID ${userId} not found`);
+    }
+
     try {
-      const creditTransactions = await this.transactionSessionRepository.find({
-        where: { type: TransactionType.CREDIT },
+      return await this.transactionSessionRepository.find({
+        relations: ['record_session_kqj', 'record_session_kqj.user'],
+        where: { record_session_kqj: { user: { id: userId } } },
       });
-
-      const debitTransactions = await this.transactionSessionRepository.find({
-        where: { type: TransactionType.DEBIT },
-      });
-
-      const profit = creditTransactions.reduce(
-        (sum, transaction) => sum + transaction.token,
-        0,
-      );
-      const loss = debitTransactions.reduce(
-        (sum, transaction) => sum + transaction.token,
-        0,
-      );
-
-      const net = profit - loss;
-
-      return {
-        profit,
-        loss,
-        net,
-      };
     } catch (error) {
-      console.error('Error calculating profit and loss:', error);
-      throw new Error('Failed to calculate profit and loss.');
+      console.error(`Error fetching transactions for user ${userId}:`, error);
+      throw new InternalServerErrorException(
+        'Failed to fetch transactions for the specified user.',
+      );
     }
   }
 }

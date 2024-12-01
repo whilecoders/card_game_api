@@ -11,7 +11,7 @@ import { CreateRecordSessionKqjDto } from './dto/create-record_session_kqj.input
 import { User } from 'src/user/dbrepo/user.repository';
 import { GameSessionKqj } from 'src/game_session_kqj/dbrepo/game_session.repository';
 import { RecordStatus } from 'src/common/constants';
-import { DailyWinnersAndLosers } from './dto/Daily-Winner-Looser.input';
+import { DailyWinnersAndLosers } from '../dashboard/dto/Daily-Winner-Looser.input';
 
 @Injectable()
 export class RecordSessionKqjService {
@@ -208,96 +208,4 @@ export class RecordSessionKqjService {
       );
     }
   }
-
-  async getTotalUsersToday(): Promise<number> {
-    try {
-      const start = new Date();
-      start.setHours(0, 0, 0, 0);
-      const end = new Date();
-      end.setHours(23, 59, 59, 999);
-
-      const records = await this.recordSessionKqjRepository.find({
-        where: {
-          createdAt: Between(start, end),
-        },
-        relations: ['user'],
-      });
-
-      const uniqueUsers = new Set(records.map((record) => record.user.id));
-      return uniqueUsers.size;
-    } catch (error) {
-      throw new InternalServerErrorException(
-        'Failed to get total users for today',
-      );
-    }
-  }
-
-  async getTotalTokensToday(): Promise<number> {
-    try {
-      const start = new Date();
-      start.setHours(0, 0, 0, 0);
-      const end = new Date();
-      end.setHours(23, 59, 59, 999);
-
-      const records = await this.recordSessionKqjRepository.find({
-        where: {
-          createdAt: Between(start, end),
-        },
-      });
-
-      const totalTokens = records.reduce(
-        (sum, record) => sum + record.token,
-        0,
-      );
-      return totalTokens;
-    } catch (error) {
-      throw new InternalServerErrorException(
-        'Failed to get total tokens for today',
-      );
-    }
-  }
-
-  async getDailyWinnersAndLosers(): Promise<DailyWinnersAndLosers> {
-    try {
-      const startOfDay = new Date();
-      startOfDay.setHours(0, 0, 0, 0);
-
-      const endOfDay = new Date();
-      endOfDay.setHours(23, 59, 59, 999);
-
-      // Fetch game sessions for today
-      const sessions = await this.gameSessionKqjRepository.find({
-        where: {
-          session_start_time: Between(startOfDay, endOfDay),
-        },
-        relations: ['record_session_kqj'],
-      });
-
-      let winners = 0;
-      let losers = 0;
-
-      // Iterate through each session and its records
-      for (const session of sessions) {
-        if (!session.record_session_kqj?.length || !session.game_result_card) {
-          continue;
-        }
-
-        session.record_session_kqj.forEach((record) => {
-          if (record.choosen_card === session.game_result_card) {
-            winners++;
-          } else {
-            losers++;
-          }
-        });
-      }
-
-      return { winners, losers };
-    } catch (error) {
-      console.error('Error fetching daily winners and losers:', error);
-      throw new InternalServerErrorException(
-        'Failed to fetch daily winners and losers',
-      );
-    }
-  }
-
 }

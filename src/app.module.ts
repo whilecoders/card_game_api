@@ -21,6 +21,7 @@ import { TransactionSessionModule } from './transaction_session/transaction_sess
 import { DailyGameModule } from './daily_game/daily_game.module';
 import { TaskSchedulerModule } from './task_scheduler/task_scheduler.module';
 import { ScheduleModule } from '@nestjs/schedule';
+import { DashboardModule } from './dashboard/dashboard.module';
 
 @Module({
   imports: [
@@ -55,6 +56,7 @@ import { ScheduleModule } from '@nestjs/schedule';
     TransactionSessionModule,
     DailyGameModule,
     TaskSchedulerModule,
+    DashboardModule,
   ],
   controllers: [AppController],
   providers: [AppService, JWTService],

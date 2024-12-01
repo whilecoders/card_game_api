@@ -7,6 +7,7 @@ import {
   MaxLength,
   MinLength,
 } from 'class-validator';
+import { Role } from 'src/common/constants';
 
 @InputType()
 export class AddUserDto {
@@ -46,4 +47,8 @@ export class AddUserDto {
   @Field(() => Int)
   @IsNotEmpty({ message: 'phone number cannot be empty' })
   phone_number: number;
+
+  @Field(() => Role)
+  @IsNotEmpty({ message: 'Role Cannot be empty' })
+  role: Role;
 }

@@ -3,7 +3,7 @@ import { RecordSessionKqj } from './dbrepo/record_session_kqj.repository';
 import { CreateRecordSessionKqjDto } from './dto/create-record_session_kqj.input';
 import { RecordSessionKqjService } from './record_session_kqj.service';
 import { RecordStatus } from 'src/common/constants';
-import { DailyWinnersAndLosers } from './dto/Daily-Winner-Looser.input';
+import { DailyWinnersAndLosers } from '../dashboard/dto/Daily-Winner-Looser.input';
 
 @Resolver(() => RecordSessionKqj)
 export class RecordSessionKqjResolver {
@@ -74,20 +74,5 @@ export class RecordSessionKqjResolver {
     @Args('SessionId', { type: () => Int }) sessionId: number,
   ) {
     return this.recordSessionKqjService.getAllRecordsBySessionId(sessionId);
-  }
-
-  @Query(() => Number)
-  async getTotalUsersToday(): Promise<number> {
-    return this.recordSessionKqjService.getTotalUsersToday();
-  }
-
-  @Query(() => Number)
-  async getTotalTokensToday(): Promise<number> {
-    return this.recordSessionKqjService.getTotalTokensToday();
-  }
-
-  @Query(() => DailyWinnersAndLosers)
-  async getDailyWinnersAndLosers(): Promise<DailyWinnersAndLosers> {
-    return await this.recordSessionKqjService.getDailyWinnersAndLosers();
   }
 }
