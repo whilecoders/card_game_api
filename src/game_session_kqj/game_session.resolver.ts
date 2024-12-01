@@ -33,6 +33,7 @@ export class GameSessionKqjResolver {
   ): Promise<PaginatedGameSessionKqjDto> {
     return this.gameSessionKqjService.getAllGameSessions(skip, take);
   }
+  
   @Query(() => [GameSessionKqj], { name: 'getLiveGameSessions' })
   async getLiveGameSessions(): Promise<GameSessionKqj[]> {
     return await this.gameSessionKqjService.getLiveGameSessions();

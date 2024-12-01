@@ -22,7 +22,7 @@ export class TaskScheduler {
     private schedulerRegistry: SchedulerRegistry
   ) { }
 
-  @Cron('52 18 * * *', { name: 'createDailyGame' })
+  @Cron('25 22 * * *', { name: 'createDailyGame' })
   async createDailyGame(): Promise<void> {
     console.log("creating game sessions");
 
@@ -126,44 +126,44 @@ export class TaskScheduler {
 
       for (const session of gameSessions) {
         let start = session.session_start_time;
-        let end = session.session_start_time;
+        let end = session.session_end_time;
 
         if (typeof start === 'string' || typeof end == 'string') {
           start = new Date(start);
           end = new Date(end);
         }
+
         // Validate Date
         if (isNaN(start.getTime()) || isNaN(end.getTime())) {
           console.error('Invalid date for session_start_time:', session.session_start_time);
           continue;
         }
-        const startJob = new CronJob(`${start.getMinutes()} ${start.getHours()} ${start.getDate()} ${start.getMonth() + 1} *`, () => {
-          console.log('stating game session ');
-
-          const startSession = this.gameSessionKqjRepository.update(
-            session.id, { session_status: GameSessionStatus.LIVE }
-          )
-          startSession.then((updatedSession) => {
-            console.log("successfully updated =>", updatedSession)
-          })
-        });
+        const startJob = new CronJob(
+          `${start.getMinutes()} ${start.getHours()} ${start.getDate()} ${start.getMonth() + 1} *`, () => {
+            console.log('stating game session ');
+            const startSession = this.gameSessionKqjRepository.update(
+              session.id, { session_status: GameSessionStatus.LIVE }
+            )
+            startSession.then((updatedSession) => {
+              console.log("successfully updated =>", updatedSession)
+            })
+          });
         startJob.runOnce = true;
 
-        const endJob = new CronJob(`${end.getMinutes()} ${end.getHours()} ${end.getDate()} ${end.getMonth() + 1} *`, () => {
-          console.log('stating game session ');
-
-          const startSession = this.gameSessionKqjRepository.update(
-            session.id, { session_status: GameSessionStatus.END }
-          )
-          startSession.then((updatedSession) => {
-            console.log("successfully updated =>", updatedSession)
-          })
-        });
+        const endJob = new CronJob(
+          `${end.getMinutes()} ${end.getHours()} ${end.getDate()} ${end.getMonth() + 1} *`, () => {
+            console.log('stating game session ');
+            const startSession = this.gameSessionKqjRepository.update(
+              session.id, { session_status: GameSessionStatus.END }
+            )
+            startSession.then((updatedSession) => {
+              console.log("successfully updated =>", updatedSession)
+            })
+          });
         endJob.runOnce = true;
 
         this.schedulerRegistry.addCronJob(`session start ${start}`, startJob);
         this.schedulerRegistry.addCronJob(`session end ${end}`, startJob);
-
         startJob.start();
         endJob.start();
       }
