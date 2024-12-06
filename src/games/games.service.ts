@@ -58,24 +58,24 @@ export class GamesService {
     createGameDto.start_date = startDate;
     createGameDto.end_date = endDate;
 
-    const existingGame = await this.gamesRepository.findOne({
-      where: [
-        {
-          start_date: LessThanOrEqual(createGameDto.end_date),
-          end_date: MoreThan(createGameDto.start_date),
-        },
-        {
-          start_date: MoreThan(createGameDto.start_date),
-          end_date: LessThanOrEqual(createGameDto.end_date),
-        },
-      ],
-    });
+    // const existingGame = await this.gamesRepository.findOne({
+    //   where: [
+    //     {
+    //       start_date: LessThanOrEqual(createGameDto.end_date),
+    //       end_date: MoreThan(createGameDto.start_date),
+    //     },
+    //     {
+    //       start_date: MoreThan(createGameDto.start_date),
+    //       end_date: LessThanOrEqual(createGameDto.end_date),
+    //     },
+    //   ],
+    // });
 
-    if (existingGame) {
-      throw new ConflictException(
-        'A game already exists with this dates',
-      );
-    }
+    // if (existingGame) {
+    //   throw new ConflictException(
+    //     'A game already exists with this dates',
+    //   );
+    // }
 
     const game = this.gamesRepository.create({ ...createGameDto, admin });
 
