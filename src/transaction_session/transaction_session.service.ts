@@ -5,13 +5,14 @@ import {
   Inject,
   InternalServerErrorException,
 } from '@nestjs/common';
-import { Repository } from 'typeorm';
+import { Between, Repository } from 'typeorm';
 import { TransactionSession } from './dbrepo/transaction_session.repository';
 import { CreateTransactionSessionDto } from './dto/create-transaction_session.input';
 import { RecordSessionKqj } from 'src/record_session_kqj/dbrepo/record_session_kqj.repository';
 import { TransactionType } from 'src/common/constants';
 import { User } from 'src/user/dbrepo/user.repository';
 import { ProfitAndLoss } from '../dashboard/dto/profite-loss.input';
+import { DateFilterDto } from 'src/common/model/date-filter.dto';
 
 @Injectable()
 export class TransactionSessionService {
@@ -67,6 +68,7 @@ export class TransactionSessionService {
       token: dto.token,
       type: dto.type || TransactionType.CREDIT,
       record_session_kqj: recordSession,
+      createdAt: new Date(),
     });
 
     try {
@@ -116,6 +118,42 @@ export class TransactionSessionService {
       throw new InternalServerErrorException(
         'Failed to fetch transactions for the specified user.',
       );
+    }
+  }
+
+  async getTransactionsByDate(
+    filter?: DateFilterDto,
+  ): Promise<TransactionSession[]> {
+    let start: Date;
+    let end: Date;
+
+    if (filter && filter.startDate && filter.endDate) {
+      start = new Date(filter.startDate);
+      end = new Date(filter.endDate);
+
+      if (isNaN(start.getTime()) || isNaN(end.getTime())) {
+        throw new BadRequestException(
+          'Invalid date format. Please provide valid ISO dates.',
+        );
+      }
+      if (start >= end) {
+        throw new BadRequestException('Start date must be before end date.');
+      }
+    } else {
+      const today = new Date();
+      start = new Date(today.setHours(0, 0, 0, 0));
+      end = new Date(today.setHours(23, 59, 59, 999));
+    }
+
+    try {
+      return await this.transactionSessionRepository.find({
+        where: {
+          createdAt: Between(start, end),
+        },
+        relations: ['record_session_kqj', 'record_session_kqj.user'],
+      });
+    } catch (error) {
+      throw new BadRequestException('Failed to fetch transactions by date.');
     }
   }
 }

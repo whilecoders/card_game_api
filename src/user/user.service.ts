@@ -161,4 +161,37 @@ export class UserService {
       throw new InternalServerErrorException('Failed to delete user');
     }
   }
+
+  async searchUser(
+    filters: Partial<User>,
+    skip: number,
+    take: number,
+  ): Promise<PaginatedUserDto> {
+    try {
+      const queryBuilder = this.userRepository.createQueryBuilder('user');
+
+      Object.entries(filters).forEach(([key, value]) => {
+        if (value !== undefined && value !== null) {
+          queryBuilder.andWhere(`user.${key} = :${key}`, { [key]: value });
+        }
+      });
+      queryBuilder.skip(skip).take(take);
+      const [data, count] = await queryBuilder.getManyAndCount();
+      if (!data.length) {
+        throw new NotFoundException(
+          'No users found with the provided criteria.',
+        );
+      }
+      return {
+        count,
+        take,
+        skip,
+        data,
+      };
+    } catch (error) {
+      throw new InternalServerErrorException(
+        'Failed to fetch users with the provided criteria.',
+      );
+    }
+  }
 }

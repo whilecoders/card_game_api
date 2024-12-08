@@ -12,6 +12,7 @@ import { User } from 'src/user/dbrepo/user.repository';
 import { GameSessionKqj } from 'src/game_session_kqj/dbrepo/game_session.repository';
 import { RecordStatus } from 'src/common/constants';
 import { DailyWinnersAndLosers } from '../dashboard/dto/Daily-Winner-Looser.input';
+import { DateFilterDto } from 'src/common/model/date-filter.dto';
 
 @Injectable()
 export class RecordSessionKqjService {
@@ -49,6 +50,7 @@ export class RecordSessionKqjService {
       game_session_id: gameSession,
       choosen_card: dto.choosen_card,
       record_status: dto.record_status,
+      createdAt: new Date(), 
     });
 
     try {
@@ -207,5 +209,30 @@ export class RecordSessionKqjService {
         'Failed to mark session as completed',
       );
     }
+  }
+
+  async getRecordsByDate(filter?: DateFilterDto): Promise<RecordSessionKqj[]> {
+    let start: Date;
+    let end: Date;
+
+    if (filter && filter.startDate && filter.endDate) {
+      start = new Date(filter.startDate);
+      end = new Date(filter.endDate);
+
+      if (isNaN(start.getTime()) || isNaN(end.getTime())) {
+        throw new BadRequestException('Invalid date format. Please provide valid ISO dates.');
+      }
+    } else {
+      const today = new Date();
+      start = new Date(today.setHours(0, 0, 0, 0)); 
+      end = new Date(today.setHours(23, 59, 59, 999));
+    }
+
+    return this.recordSessionKqjRepository.find({
+      where: {
+        createdAt: Between(start, end),
+      },
+      relations: ['game', 'user'], 
+    });
   }
 }
