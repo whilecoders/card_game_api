@@ -214,7 +214,6 @@ type Query {
   getGamesByDate(filter: DateFilterDto): [Games!]!
   getLiveGameSessions: [GameSession!]!
   getProfitAndLoss: ProfitAndLoss!
-  getRecordBy(SessionId: Int!): RecordSessionKqj!
   getRecordSessionBy(id: Int!): RecordSessionKqj!
   getRecordsBy(UserId: Int!): [RecordSessionKqj!]!
   getRecordsByDate(filter: DateFilterDto): [RecordSessionKqj!]!

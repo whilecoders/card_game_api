@@ -63,13 +63,6 @@ export class RecordSessionKqjResolver {
     return this.recordSessionKqjService.getRecordsByUserId(userId);
   }
 
-  @Query(() => RecordSessionKqj, { name: 'getRecordBy' })
-  async getRecordBySessionId(
-    @Args('SessionId', { type: () => Int }) sessionId: number,
-  ) {
-    return this.recordSessionKqjService.getRecordBySessionId(sessionId);
-  }
-
   @Query(() => [RecordSessionKqj], { name: 'getAllRecordsBy' })
   async getAllRecordsBySessionId(
     @Args('SessionId', { type: () => Int }) sessionId: number,
