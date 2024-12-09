@@ -22,6 +22,9 @@ import { DailyGameModule } from './daily_game/daily_game.module';
 import { TaskSchedulerModule } from './task_scheduler/task_scheduler.module';
 import { ScheduleModule } from '@nestjs/schedule';
 import { DashboardModule } from './dashboard/dashboard.module';
+import { GamesocketModule } from './gamesocket/gamesocket.module';
+import { TaskScheduler } from './task_scheduler/task_scheduler.service';
+import { GamesocketGateway } from './gamesocket/gamesocket.gateway';
 
 @Module({
   imports: [
@@ -57,9 +60,10 @@ import { DashboardModule } from './dashboard/dashboard.module';
     DailyGameModule,
     TaskSchedulerModule,
     DashboardModule,
+    GamesocketModule,
   ],
   controllers: [AppController],
   providers: [AppService, JWTService],
   exports: [JWTService, JwtModule],
 })
-export class AppModule {}
+export class AppModule { }

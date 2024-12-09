@@ -17,6 +17,11 @@ export class DashboardResolver {
     return this.dashboardService.getFinishedSessionsToday();
   }
 
+  // upcomming session
+  // current running session
+
+
+  
   @Query(() => Number)
   async getTotalUsersToday(): Promise<number> {
     return this.dashboardService.getTotalUsersToday();

@@ -10,6 +10,7 @@ import { GameSessionStatus } from '../common/constants';
 import { DailyGame } from 'src/daily_game/dbrepo/daily_game.repository';
 import { Cron, SchedulerRegistry } from '@nestjs/schedule';
 import { CronJob } from 'cron';
+import { GamesocketGateway } from 'src/gamesocket/gamesocket.gateway';
 
 export class TaskScheduler {
   constructor(
@@ -20,7 +21,8 @@ export class TaskScheduler {
     @Inject('DAILY_GAME_REPOSITORY')
     private readonly dailyGameRepository: Repository<DailyGame>,
     private schedulerRegistry: SchedulerRegistry,
-  ) {}
+    private gamesocketGateway: GamesocketGateway,
+  ) { }
 
   @Cron('52 18 * * *', { name: 'createDailyGame' })
   async createDailyGame(): Promise<void> {
@@ -142,32 +144,40 @@ export class TaskScheduler {
         }
         const startJob: CronJob = new CronJob(
           `${start.getMinutes()} ${start.getHours()} ${start.getDate()} ${start.getMonth() + 1} *`,
-          () => {
+          async () => {
             console.log('stating game session ');
 
-            const startSession = this.gameSessionKqjRepository.update(
+            const startSession = await this.gameSessionKqjRepository.update(
               session.id,
               { session_status: GameSessionStatus.LIVE },
             );
-            startSession.then((updatedSession) => {
-              console.log('successfully updated =>', updatedSession);
+            this.gamesocketGateway.broadcastEvent('gameStart', {
+              sessionId: session.id,
+              status: GameSessionStatus.LIVE,
             });
+            // startSession.then((updatedSession) => {
+            //   console.log('successfully updated =>', updatedSession);
+            // });
           },
         );
         startJob.runOnce = true;
 
         const endJob: CronJob = new CronJob(
           `${end.getMinutes()} ${end.getHours()} ${end.getDate()} ${end.getMonth() + 1} *`,
-          () => {
+          async () => {
             console.log('stating game session ');
 
-            const startSession = this.gameSessionKqjRepository.update(
+            const startSession = await this.gameSessionKqjRepository.update(
               session.id,
               { session_status: GameSessionStatus.END },
             );
-            startSession.then((updatedSession) => {
-              console.log('successfully updated =>', updatedSession);
+            this.gamesocketGateway.broadcastEvent('gameEnd', {
+              sessionId: session.id,
+              status: GameSessionStatus.END,
             });
+            // startSession.then((updatedSession) => {
+            //   console.log('successfully updated =>', updatedSession);
+            // });
           },
         );
         endJob.runOnce = true;
