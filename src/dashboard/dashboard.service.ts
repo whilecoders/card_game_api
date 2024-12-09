@@ -174,4 +174,45 @@ export class DashboardService {
       throw new Error('Failed to calculate profit and loss.');
     }
   }
+
+  async getUpcomingSessions(): Promise<GameSessionKqj[]> {
+    try {
+      const startOfDay = new Date();
+      startOfDay.setHours(0, 0, 0, 0);
+
+      const endOfDay = new Date();
+      endOfDay.setHours(23, 59, 59, 999);
+  
+      return await this.gameSessionKqjRepository.find({
+        where: {
+          session_start_time: Between(startOfDay,endOfDay),
+          session_status: GameSessionStatus.UPCOMING,
+        },
+      });
+    } catch (error) {
+      console.error('Error fetching upcoming sessions:', error);
+      throw new InternalServerErrorException('Failed to fetch upcoming sessions.');
+    }
+  }
+
+  async getLiveSessions(): Promise<GameSessionKqj[]> {
+    try {
+      const startOfDay = new Date();
+      startOfDay.setHours(0, 0, 0, 0);
+
+      const endOfDay = new Date();
+      endOfDay.setHours(23, 59, 59, 999);
+  
+      return await this.gameSessionKqjRepository.find({
+        where: {
+          session_start_time: Between(startOfDay,endOfDay),
+          session_status: GameSessionStatus.LIVE,
+        },
+      });
+    } catch (error) {
+      console.error('Error fetching running sessions:', error);
+      throw new InternalServerErrorException('Failed to fetch running sessions.');
+    }
+  }
+   
 }

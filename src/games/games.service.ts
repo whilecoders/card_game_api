@@ -22,6 +22,7 @@ import { UpdateGamesDto as UpdateGameDto } from './dto/update-game.input';
 import { GameSessionStatus } from 'src/common/constants';
 import { DailyGame } from 'src/daily_game/dbrepo/daily_game.repository';
 import { PaginatedGamesDto } from './dto/paginated-game.dto';
+import { DateFilterDto } from 'src/common/model/date-filter.dto';
 
 @Injectable()
 export class GamesService {
@@ -72,9 +73,7 @@ export class GamesService {
     });
 
     if (existingGame) {
-      throw new ConflictException(
-        'A game already exists with this dates',
-      );
+      throw new ConflictException('A game already exists with this dates');
     }
 
     const game = this.gamesRepository.create({ ...createGameDto, admin });
@@ -206,15 +205,28 @@ export class GamesService {
     }
   }
 
-  async getGamesByDate(from: Date, to: Date): Promise<Games[]> {
-    if (isNaN(from.getTime()) || isNaN(to.getTime())) {
-      throw new BadRequestException(
-        'Invalid date format. Please provide valid ISO dates.',
-      );
+  async getGamesByDate(filter?: DateFilterDto): Promise<Games[]> {
+    let start: Date;
+    let end: Date;
+
+    if (filter && filter.startDate && filter.endDate) {
+      start = new Date(filter.startDate);
+      end = new Date(filter.endDate);
+
+      if (isNaN(start.getTime()) || isNaN(end.getTime())) {
+        throw new BadRequestException(
+          'Invalid date format. Please provide valid ISO dates.',
+        );
+      }
+    } else {
+      const today = new Date();
+      start = new Date(today.setHours(0, 0, 0, 0));
+      end = new Date(today.setHours(23, 59, 59, 999));
     }
+
     return await this.gamesRepository.find({
       where: {
-        start_date: Between(from, to),
+        start_date: Between(start, end),
       },
       relations: { admin: true, gameSession: true },
     });

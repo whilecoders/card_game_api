@@ -3,6 +3,7 @@ import { UpdateGameSessionDto } from './dto/update-game_session.input';
 import { GameSessionKqj } from './dbrepo/game_session.repository';
 import { GameSessionKqjService } from './game_session.service';
 import { PaginatedGameSessionKqjDto } from './dto/paginated-game-session-kqj';
+import { DateFilterDto } from 'src/common/model/date-filter.dto';
 
 @Resolver(() => GameSessionKqj)
 export class GameSessionKqjResolver {
@@ -40,12 +41,8 @@ export class GameSessionKqjResolver {
 
   @Query(() => [GameSessionKqj], { name: 'getGameSessionsByDateOrToday' })
   async getGameSessionsByDateOrToday(
-    @Args('startDate', { type: () => Date, nullable: true }) startDate?: Date,
-    @Args('endDate', { type: () => Date, nullable: true }) endDate?: Date,
+    @Args('filter', { type: () => DateFilterDto, nullable: true }) filter?: DateFilterDto,
   ): Promise<GameSessionKqj[]> {
-    return await this.gameSessionKqjService.getGameSessionsByDateOrToday(
-      startDate,
-      endDate,
-    );
+    return this.gameSessionKqjService.getGameSessionsByDateOrToday(filter);
   }
 }

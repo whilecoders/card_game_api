@@ -53,6 +53,11 @@ type DailyWinnersAndLosers {
   winners: Float!
 }
 
+input DateFilterDto {
+  endDate: DateTime
+  startDate: DateTime
+}
+
 """
 A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date-time format.
 """
@@ -200,25 +205,29 @@ type Query {
   getAllRecordsBy(SessionId: Int!): [RecordSessionKqj!]!
   getAllTransactionSessions: [TransactionSession!]!
   getAllUsers(skip: Int!, take: Int!): PaginatedUserDto!
+  getCurrentRunningSessions: [GameSession!]!
   getDailyWinnersAndLosers: DailyWinnersAndLosers!
   getFinishedSessionsToday: Float!
   getGameSessionBy(id: Int!): GameSession!
-  getGameSessionsByDateOrToday(endDate: DateTime, startDate: DateTime): [GameSession!]!
+  getGameSessionsByDateOrToday(filter: DateFilterDto): [GameSession!]!
   getGamesBy(id: Int!): Games!
-  getGamesByDate(from: DateTime!, to: DateTime!): [Games!]!
+  getGamesByDate(filter: DateFilterDto): [Games!]!
   getLiveGameSessions: [GameSession!]!
   getProfitAndLoss: ProfitAndLoss!
-  getRecordBy(SessionId: Int!): RecordSessionKqj!
   getRecordSessionBy(id: Int!): RecordSessionKqj!
   getRecordsBy(UserId: Int!): [RecordSessionKqj!]!
+  getRecordsByDate(filter: DateFilterDto): [RecordSessionKqj!]!
   getTotalSessionsToday: Float!
   getTotalTokensToday: Float!
   getTotalUsersToday: Float!
   getTransactionSessionBy(id: Int!): TransactionSession!
+  getTransactionsByDate(filter: DateFilterDto): [TransactionSession!]!
   getTransactionsByUserId(userId: Int!): [TransactionSession!]!
+  getUpcomingSessions: [GameSession!]!
   getUserById(id: Int!): User!
   getUserByRole(role: Float!): [User!]!
   getUsersByCreatedAt(date: DateTime!): [User!]!
+  searchUser(filters: UserFiltersInput!, skip: Int!, take: Int!): PaginatedUserDto!
   signIn(signInCredential: SignInCredential!): UserToken!
 }
 
@@ -387,6 +396,17 @@ type User {
   userTransactions: Transaction!
   username: String!
   wallet: Float!
+}
+
+input UserFiltersInput {
+  city: String
+  email: String
+  id: Int
+  name: String
+  phone_number: Int
+  role: Role
+  status: UserStatus
+  username: String
 }
 
 enum UserStatus {

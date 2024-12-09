@@ -10,8 +10,10 @@ import { RecordSessionKqj } from './dbrepo/record_session_kqj.repository';
 import { CreateRecordSessionKqjDto } from './dto/create-record_session_kqj.input';
 import { User } from 'src/user/dbrepo/user.repository';
 import { GameSessionKqj } from 'src/game_session_kqj/dbrepo/game_session.repository';
-import { RecordStatus } from 'src/common/constants';
+import { RecordStatus, TransactionType } from 'src/common/constants';
 import { DailyWinnersAndLosers } from '../dashboard/dto/Daily-Winner-Looser.input';
+import { DateFilterDto } from 'src/common/model/date-filter.dto';
+import { TransactionSession } from 'src/transaction_session/dbrepo/transaction_session.repository';
 
 @Injectable()
 export class RecordSessionKqjService {
@@ -22,6 +24,8 @@ export class RecordSessionKqjService {
     private readonly userRepository: Repository<User>,
     @Inject('GAME_SESSION_KQJ_REPOSITORY')
     private readonly gameSessionKqjRepository: Repository<GameSessionKqj>,
+    @Inject('TRANSACTION_SESSION_REPOSITORY')
+    private readonly transactionSessionRepository: Repository<TransactionSession>,
   ) {}
 
   async createRecordSession(
@@ -49,7 +53,17 @@ export class RecordSessionKqjService {
       game_session_id: gameSession,
       choosen_card: dto.choosen_card,
       record_status: dto.record_status,
+      createdAt: new Date(),
     });
+
+    if (dto.token) {
+      if (user.wallet < dto.token) {
+        throw new BadRequestException(
+          'Insufficient funds for this transaction.',
+        );
+      }
+      user.wallet -= dto.token;
+    }
 
     try {
       return await this.recordSessionKqjRepository.save(recordSession);
@@ -98,28 +112,6 @@ export class RecordSessionKqjService {
     } catch (error) {
       throw new BadRequestException(
         'Failed to retrieve records. Please try again later.',
-      );
-    }
-  }
-
-  async getRecordBySessionId(
-    sessionId: number,
-  ): Promise<RecordSessionKqj | null> {
-    try {
-      const record = await this.recordSessionKqjRepository.findOne({
-        where: { game_session_id: { id: sessionId } },
-        relations: ['user', 'game_session', 'transaction_session'],
-      });
-
-      if (!record) {
-        throw new NotFoundException(
-          `No record found for session ID ${sessionId}`,
-        );
-      }
-      return record;
-    } catch (error) {
-      throw new BadRequestException(
-        'Failed to retrieve record. Please try again later.',
       );
     }
   }
@@ -207,5 +199,87 @@ export class RecordSessionKqjService {
         'Failed to mark session as completed',
       );
     }
+  }
+
+  async getRecordsByDate(filter?: DateFilterDto): Promise<RecordSessionKqj[]> {
+    let start: Date;
+    let end: Date;
+
+    if (filter && filter.startDate && filter.endDate) {
+      start = new Date(filter.startDate);
+      end = new Date(filter.endDate);
+
+      if (isNaN(start.getTime()) || isNaN(end.getTime())) {
+        throw new BadRequestException(
+          'Invalid date format. Please provide valid ISO dates.',
+        );
+      }
+    } else {
+      const today = new Date();
+      start = new Date(today.setHours(0, 0, 0, 0));
+      end = new Date(today.setHours(23, 59, 59, 999));
+    }
+
+    return this.recordSessionKqjRepository.find({
+      where: {
+        createdAt: Between(start, end),
+      },
+      relations: ['game', 'user'],
+    });
+  }
+
+  async getResultBySessionId(sessionId: number): Promise<any[]> {
+    const records = await this.recordSessionKqjRepository.find({
+      where: { game_session_id: { id: sessionId } },
+      relations: ['user', 'game_session', 'transaction_session'],
+    });
+
+    if (!records.length) {
+      throw new NotFoundException(
+        `No records found for session ID ${sessionId}`,
+      );
+    }
+
+    const gameSession = records[0]?.game_session_id;
+    if (!gameSession) {
+      throw new NotFoundException(`Game session not found for ID ${sessionId}`);
+    }
+
+    const resultCard = gameSession.game_result_card;
+
+    if (!resultCard) {
+      throw new BadRequestException(
+        `Result card is not set for session ID ${sessionId}`,
+      );
+    }
+
+    const results = [];
+    for (const record of records) {
+      const isWinner = record.choosen_card === resultCard;
+      const prizeAmount = isWinner ? record.token * 2 : 0;
+
+      const transactionSession = this.transactionSessionRepository.create({
+        record_session_kqj: record,
+        type: isWinner ? TransactionType.CREDIT : TransactionType.DEBIT,
+        createdAt: new Date(),
+      });
+
+      if (isWinner) {
+        record.user.wallet += prizeAmount;
+      } else {
+      }
+
+      await this.userRepository.save(record.user);
+      await this.transactionSessionRepository.save(transactionSession);
+
+      results.push({
+        recordId: record.id,
+        choosen_card: record.choosen_card,
+        result_card: resultCard,
+        isWinner,
+        prizeAmount,
+      });
+    }
+    return results;
   }
 }

@@ -1,4 +1,4 @@
-import { Module, forwardRef } from '@nestjs/common';
+import { Module } from '@nestjs/common';
 import { GamesProviders } from './dbrepo/games.provider';
 import { UserModule } from 'src/user/user.module';
 import { GameSessionKqjModule } from 'src/game_session_kqj/game_session.module';

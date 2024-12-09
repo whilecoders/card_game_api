@@ -4,6 +4,7 @@ import { CreateRecordSessionKqjDto } from './dto/create-record_session_kqj.input
 import { RecordSessionKqjService } from './record_session_kqj.service';
 import { RecordStatus } from 'src/common/constants';
 import { DailyWinnersAndLosers } from '../dashboard/dto/Daily-Winner-Looser.input';
+import { DateFilterDto } from 'src/common/model/date-filter.dto';
 
 @Resolver(() => RecordSessionKqj)
 export class RecordSessionKqjResolver {
@@ -62,17 +63,17 @@ export class RecordSessionKqjResolver {
     return this.recordSessionKqjService.getRecordsByUserId(userId);
   }
 
-  @Query(() => RecordSessionKqj, { name: 'getRecordBy' })
-  async getRecordBySessionId(
-    @Args('SessionId', { type: () => Int }) sessionId: number,
-  ) {
-    return this.recordSessionKqjService.getRecordBySessionId(sessionId);
-  }
-
   @Query(() => [RecordSessionKqj], { name: 'getAllRecordsBy' })
   async getAllRecordsBySessionId(
     @Args('SessionId', { type: () => Int }) sessionId: number,
   ) {
     return this.recordSessionKqjService.getAllRecordsBySessionId(sessionId);
+  }
+
+  @Query(() => [RecordSessionKqj], { name: 'getRecordsByDate' })
+  async getRecordsByDate(
+    @Args('filter', { type: () => DateFilterDto, nullable: true }) filter?: DateFilterDto,
+  ): Promise<RecordSessionKqj[]> {
+    return this.recordSessionKqjService.getRecordsByDate(filter);
   }
 }

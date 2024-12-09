@@ -1,11 +1,18 @@
 import {
+  ConflictException,
   Inject,
   InternalServerErrorException,
   NotFoundException,
 } from '@nestjs/common';
 import { GameSessionKqj } from 'src/game_session_kqj/dbrepo/game_session.repository';
 import { Games } from 'src/games/dbrepo/games.repository';
-import { Between, LessThanOrEqual, MoreThanOrEqual, Repository } from 'typeorm';
+import {
+  Between,
+  LessThanOrEqual,
+  MoreThan,
+  MoreThanOrEqual,
+  Repository,
+} from 'typeorm';
 import { GameSessionStatus } from '../common/constants';
 import { DailyGame } from 'src/daily_game/dbrepo/daily_game.repository';
 import { Cron, SchedulerRegistry } from '@nestjs/schedule';
@@ -79,7 +86,27 @@ export class TaskScheduler {
     }
 
     const { games } = dailyGame;
-    const { start_time, game_duration, game_in_day } = games;
+    const { start_time, game_duration, game_in_day, start_date, end_date } = games;
+
+    // Check for overlapping game sessions
+    const overlappingGameSession = await this.gameSessionKqjRepository.findOne({
+      where: [
+        {
+          session_start_time: LessThanOrEqual(end_date),
+          session_end_time: MoreThan(start_date),
+        },
+        {
+          session_start_time: MoreThan(start_date),
+          session_end_time: LessThanOrEqual(end_date),
+        },
+      ],
+    });
+
+    if (overlappingGameSession) {
+      throw new ConflictException(
+        'A game session already exists within the specified time range.',
+      );
+    }
 
     // Helper function to add seconds to a time string and return a Date with both date and time
     const addSecondsToDateTime = (
