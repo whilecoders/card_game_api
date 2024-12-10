@@ -24,6 +24,6 @@ export class UserFiltersInput {
   @Field(() => String, { nullable: true })
   city?: string;
 
-  @Field(() => Int, { nullable: true })
-  phone_number?: number;
+  @Field(() => String, { nullable: true })
+  phone_number?: string;
 }

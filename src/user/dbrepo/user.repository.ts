@@ -18,6 +18,11 @@ export class User extends BaseEntity {
   name: string;
 
   @Field(() => String, { nullable: true })
+  @Column({ type: 'varchar', length: 60, nullable: true })
+  address: string;
+
+
+  @Field(() => String, { nullable: true })
   @Column({ type: 'varchar', length: 255, nullable: true })
   profile: string;
 
@@ -37,9 +42,9 @@ export class User extends BaseEntity {
   @Column({ type: 'varchar', length: 40, nullable: false })
   city: string;
 
-  @Field(() => Int)
+  @Field(() => String)
   @Column({ type: 'varchar', length: 40, nullable: false })
-  phone_number: number;
+  phone_number: string;
 
   @Field(() => Role)
   @Column({ type: 'enum', enum: Role, default: Role.USER, nullable: false })

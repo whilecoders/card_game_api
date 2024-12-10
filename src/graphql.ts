@@ -81,7 +81,7 @@ export interface AddUserDto {
     city: string;
     email: string;
     password: string;
-    phone_number: number;
+    phone_number: string;
     role: Role;
     username: string;
 }
@@ -133,7 +133,7 @@ export interface SignUpCredential {
     city: string;
     email: string;
     password: string;
-    phone_number: number;
+    phone_number: string;
     role: Role;
     username: string;
 }
@@ -161,10 +161,11 @@ export interface UpdateGamesDto {
 }
 
 export interface UpdateUserDto {
+    address?: Nullable<string>;
     city?: Nullable<string>;
     email?: Nullable<string>;
     name?: Nullable<string>;
-    phone_number?: Nullable<number>;
+    phone_number?: Nullable<string>;
     role?: Nullable<Role>;
     status?: Nullable<UserStatus>;
     username?: Nullable<string>;
@@ -175,7 +176,7 @@ export interface UserFiltersInput {
     email?: Nullable<string>;
     id?: Nullable<number>;
     name?: Nullable<string>;
-    phone_number?: Nullable<number>;
+    phone_number?: Nullable<string>;
     role?: Nullable<Role>;
     status?: Nullable<UserStatus>;
     username?: Nullable<string>;
@@ -396,6 +397,7 @@ export interface TransactionSession {
 }
 
 export interface User {
+    address?: Nullable<string>;
     city: string;
     createdAt: DateTime;
     createdBy: string;
@@ -406,7 +408,7 @@ export interface User {
     id: number;
     name?: Nullable<string>;
     password: string;
-    phone_number: number;
+    phone_number: string;
     profile?: Nullable<string>;
     record_session_kqj: RecordSessionKqj;
     role: Role;

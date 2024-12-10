@@ -6,7 +6,7 @@ input AddUserDto {
   city: String!
   email: String!
   password: String!
-  phone_number: Int!
+  phone_number: String!
   role: Role!
   username: String!
 }
@@ -290,7 +290,7 @@ input SignUpCredential {
   city: String!
   email: String!
   password: String!
-  phone_number: Int!
+  phone_number: String!
   role: Role!
   username: String!
 }
@@ -365,16 +365,18 @@ input UpdateGamesDto {
 }
 
 input UpdateUserDto {
+  address: String
   city: String
   email: String
   name: String
-  phone_number: Int
+  phone_number: String
   role: Role
   status: UserStatus
   username: String
 }
 
 type User {
+  address: String
   city: String!
   createdAt: DateTime!
   createdBy: String!
@@ -385,7 +387,7 @@ type User {
   id: Int!
   name: String
   password: String!
-  phone_number: Int!
+  phone_number: String!
   profile: String
   record_session_kqj: RecordSessionKqj!
   role: Role!
@@ -403,7 +405,7 @@ input UserFiltersInput {
   email: String
   id: Int
   name: String
-  phone_number: Int
+  phone_number: String
   role: Role
   status: UserStatus
   username: String
