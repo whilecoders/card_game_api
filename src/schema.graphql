@@ -225,7 +225,7 @@ type Query {
   getTransactionsByUserId(userId: Int!): [TransactionSession!]!
   getUpcomingSessions: [GameSession!]!
   getUserById(id: Int!): User!
-  getUserByRole(role: Float!): [User!]!
+  getUserByRole(role: String!): [User!]!
   getUsersByCreatedAt(date: DateTime!): [User!]!
   searchUser(filters: UserFiltersInput!, skip: Int!, take: Int!): PaginatedUserDto!
   signIn(signInCredential: SignInCredential!): UserToken!

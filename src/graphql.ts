@@ -328,7 +328,7 @@ export interface IQuery {
     getTransactionsByUserId(userId: number): TransactionSession[] | Promise<TransactionSession[]>;
     getUpcomingSessions(): GameSession[] | Promise<GameSession[]>;
     getUserById(id: number): User | Promise<User>;
-    getUserByRole(role: number): User[] | Promise<User[]>;
+    getUserByRole(role: string): User[] | Promise<User[]>;
     getUsersByCreatedAt(date: DateTime): User[] | Promise<User[]>;
     searchUser(filters: UserFiltersInput, skip: number, take: number): PaginatedUserDto | Promise<PaginatedUserDto>;
     signIn(signInCredential: SignInCredential): UserToken | Promise<UserToken>;

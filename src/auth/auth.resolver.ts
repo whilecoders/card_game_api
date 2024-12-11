@@ -42,6 +42,7 @@ export class AuthResolver {
 
     return this.authService.refreshToken(refreshToken, token);
   }
+
   @Mutation(() => String)
   async resetPassword(
     @Args('resetPasswordDto') resetPasswordDto: ResetPasswordDto,

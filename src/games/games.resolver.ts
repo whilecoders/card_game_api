@@ -5,11 +5,16 @@ import { Games } from './dbrepo/games.repository';
 import { UpdateGamesDto } from './dto/update-game.input';
 import { PaginatedGamesDto } from './dto/paginated-game.dto';
 import { DateFilterDto } from 'src/common/model/date-filter.dto';
+import { UseGuards } from '@nestjs/common';
+import { AuthGuard } from 'src/auth/auth.guard';
+import { RoleGuard } from 'src/auth/role.guard';
 
+@UseGuards(AuthGuard)
 @Resolver(() => Games)
 export class GamesResolver {
   constructor(private readonly GamesService: GamesService) {}
 
+  @UseGuards(new RoleGuard(['USER', 'ADMIN']))
   @Mutation(() => Games)
   async createGames(
     @Args('createGamesDto') createGamesDto: CreateGamesDto,
