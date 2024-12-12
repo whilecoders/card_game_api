@@ -44,9 +44,9 @@ export class AddUserDto {
   @IsNotEmpty({ message: 'City cannot be empty' })
   city: string;
 
-  @Field(() => Int)
+  @Field(() => String)
   @IsNotEmpty({ message: 'phone number cannot be empty' })
-  phone_number: number;
+  phone_number: string;
 
   @Field(() => Role)
   @IsNotEmpty({ message: 'Role Cannot be empty' })

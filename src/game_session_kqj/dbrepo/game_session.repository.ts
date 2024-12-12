@@ -42,7 +42,7 @@ export class GameSessionKqj extends BaseEntity {
     () => RecordSessionKqj,
     (recordSessionKqj) => recordSessionKqj.game_session_id,
     {
-      nullable: true,
+      nullable: false,
       onDelete: 'CASCADE',
     },
   )

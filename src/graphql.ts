@@ -81,7 +81,7 @@ export interface AddUserDto {
     city: string;
     email: string;
     password: string;
-    phone_number: number;
+    phone_number: string;
     role: Role;
     username: string;
 }
@@ -128,7 +128,7 @@ export interface SignUpCredential {
     city: string;
     email: string;
     password: string;
-    phone_number: number;
+    phone_number: string;
     role: Role;
     username: string;
 }
@@ -386,7 +386,7 @@ export interface User {
     id: number;
     name?: Nullable<string>;
     password: string;
-    phone_number: number;
+    phone_number: string;
     profile?: Nullable<string>;
     record_session_kqj: RecordSessionKqj;
     role: Role;

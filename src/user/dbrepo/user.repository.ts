@@ -37,9 +37,9 @@ export class User extends BaseEntity {
   @Column({ type: 'varchar', length: 40, nullable: false })
   city: string;
 
-  @Field(() => Int)
+  @Field(() => String)
   @Column({ type: 'varchar', length: 40, nullable: false })
-  phone_number: number;
+  phone_number: string;
 
   @Field(() => Role)
   @Column({ type: 'enum', enum: Role, default: Role.USER, nullable: false })
@@ -75,10 +75,10 @@ export class User extends BaseEntity {
     (recordSessionKqj) => recordSessionKqj.user,
   )
   record_session_kqj: RecordSessionKqj[];
+
   @Field(() => Room)
   @ManyToOne(() => Room, (room) => room.members)
   roomMember: Room;
-
 
   @OneToOne(() => Message, (message) => message.sender)
   @JoinColumn({ name: "sender" })

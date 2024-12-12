@@ -6,7 +6,7 @@ import { PaginatedGameSessionKqjDto } from './dto/paginated-game-session-kqj';
 
 @Resolver(() => GameSessionKqj)
 export class GameSessionKqjResolver {
-  constructor(private readonly gameSessionKqjService: GameSessionKqjService) {}
+  constructor(private readonly gameSessionKqjService: GameSessionKqjService) { }
 
   @Mutation(() => GameSessionKqj)
   async updateGameSession(
@@ -33,11 +33,21 @@ export class GameSessionKqjResolver {
   ): Promise<PaginatedGameSessionKqjDto> {
     return this.gameSessionKqjService.getAllGameSessions(skip, take);
   }
-  
+
   @Query(() => [GameSessionKqj], { name: 'getLiveGameSessions' })
   async getLiveGameSessions(): Promise<GameSessionKqj[]> {
     return await this.gameSessionKqjService.getLiveGameSessions();
   }
+
+  // @Query(() => [GameSessionKqj], { name: 'getSessionByStatus' })
+  // async getSessionByStatus(
+  //   @Args('status', { type: () => String, nullable: false }) status: String,
+  // ): Promise<GameSessionKqj[]> {
+  //   return await this.gameSessionKqjService.getGameSessionsByDateOrToday(
+  //     startDate,
+  //     endDate,
+  //   );
+  // };
 
   @Query(() => [GameSessionKqj], { name: 'getGameSessionsByDateOrToday' })
   async getGameSessionsByDateOrToday(

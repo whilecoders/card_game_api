@@ -102,6 +102,9 @@ export class GameSessionKqjService {
         relations: ['game', 'record_session_kqj'],
       });
 
+      console.log(sessions[0].record_session_kqj);
+      
+
       if (!sessions.length) {
         throw new NotFoundException(
           startDate && endDate

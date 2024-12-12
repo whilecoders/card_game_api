@@ -22,12 +22,14 @@ export class TaskScheduler {
     private schedulerRegistry: SchedulerRegistry,
   ) {}
 
-  @Cron('25 22 * * *', { name: 'createDailyGame' })
+  @Cron('26 18 * * *', { name: 'createDailyGame' })
   async createDailyGame(): Promise<void> {
     console.log('creating game sessions');
 
     try {
       const currentDate = new Date();
+      console.log(currentDate);
+      
 
       const game = await this.gamesRepository.findOne({
         where: {
