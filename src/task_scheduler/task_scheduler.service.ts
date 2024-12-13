@@ -180,11 +180,7 @@ export class TaskScheduler {
             );
             this.gamesocketGateway.broadcastEvent('gameStart', {
               sessionId: session.id,
-              status: GameSessionStatus.LIVE,
             });
-            // startSession.then((updatedSession) => {
-            //   console.log('successfully updated =>', updatedSession);
-            // });
           },
         );
         startJob.runOnce = true;
@@ -198,13 +194,10 @@ export class TaskScheduler {
               session.id,
               { session_status: GameSessionStatus.END },
             );
+
             this.gamesocketGateway.broadcastEvent('gameEnd', {
               sessionId: session.id,
-              status: GameSessionStatus.END,
             });
-            // startSession.then((updatedSession) => {
-            //   console.log('successfully updated =>', updatedSession);
-            // });
           },
         );
         endJob.runOnce = true;

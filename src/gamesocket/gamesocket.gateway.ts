@@ -2,6 +2,7 @@ import { WebSocketGateway, SubscribeMessage, MessageBody, WebSocketServer, Conne
 import { GamesocketService } from './gamesocket.service';
 import { Server, Socket } from 'socket.io';
 import { Bind, Injectable } from '@nestjs/common';
+import { GameSessionStatus } from 'src/common/constants';
 
 
 @WebSocketGateway({
@@ -48,25 +49,24 @@ export class GamesocketGateway {
   @Bind(MessageBody(), ConnectedSocket())
   @SubscribeMessage('gameStart')
   async handleJoinRoom(
-    @MessageBody() data: { roomId: string },
+    @MessageBody() data: { sessionId: number },
     @ConnectedSocket() client: Socket,
   ) {
-    // console.log("Room joined -> ", client.rooms);
-    // await client.join(data.roomId.toString());
-    // client.emit('joinedRoom', `You have joined room ${data.roomId}`);
+    this.server.emit('gameStarted', data);
   }
 
 
   @Bind(MessageBody(), ConnectedSocket())
   @SubscribeMessage('gameEnd')
   async handleLeaveRoom(
-    @MessageBody() data: { roomId: string },
+    @MessageBody() data: { sessionId: number },
     @ConnectedSocket() client: Socket,
   ) {
-    // await client.leave(data.roomId.toString());
-    // client.emit('leaveRoom', `You have joined room ${data.roomId}`);
+
+    // game end calculations
+    // if result not exist create result
+    // add data in transaction session
+    // add data in transaction
+    this.server.emit('gameEnded', data);
   }
-
-
-
 }
