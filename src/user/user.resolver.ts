@@ -7,6 +7,7 @@ import { AddUserDto } from './dto/add_user.dto';
 import { UpdateUserDto } from './dto/update_user.dto';
 import { SuspendUserDto } from './dto/suspend_user.dto';
 import { PaginatedUserDto } from './dto/paginated-user.dto';
+import { UserFiltersInput } from './dto/user_filter.dto';
 
 @Resolver(() => User)
 export class UserResolver {
@@ -92,5 +93,19 @@ export class UserResolver {
   ): Promise<boolean> {
     await this.userService.deleteUser(userId, adminId);
     return true;
+  }
+
+  @Query(() => PaginatedUserDto, { name: 'searchUser' })
+  async searchUser(
+    @Args('filters', { type: () => UserFiltersInput })
+    filters: UserFiltersInput,
+    @Args('skip', { type: () => Int }) skip: number,
+    @Args('take', { type: () => Int }) take: number,
+  ): Promise<PaginatedUserDto> {
+    try {
+      return await this.userService.searchUser(filters, skip, take);
+    } catch (error) {
+      throw new NotFoundException(error.message);
+    }
   }
 }

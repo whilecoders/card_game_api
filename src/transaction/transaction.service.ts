@@ -4,11 +4,12 @@ import {
   BadRequestException,
   Inject,
 } from '@nestjs/common';
-import { Repository } from 'typeorm';
+import { Between, Repository } from 'typeorm';
 import { User } from 'src/user/dbrepo/user.repository';
 import { Transaction } from 'src/transaction/dbrepo/transaction.repository';
 import { TransactionType } from 'src/common/constants';
 import { WalletDto } from './dto/wallet.dto';
+import { DateFilterDto } from 'src/common/model/date-filter.dto';
 
 @Injectable()
 export class TransactionService {
@@ -42,10 +43,37 @@ export class TransactionService {
       admin: { id: admin.id },
       amount: walletDto.token,
       type: walletDto.type,
+      createdAt: new Date(),
+      createdBy: admin.username,
     });
 
     await this.transactionRepository.save(transaction);
 
     return transaction;
+  }
+
+  async getTransactionsByDate(dateFilter: DateFilterDto): Promise<Transaction[]> {
+    let start: Date;
+    let end: Date;
+
+    if (dateFilter && dateFilter.startDate && dateFilter.endDate) {
+      start = new Date(dateFilter.startDate);
+      end = new Date(dateFilter.endDate);
+
+      if (isNaN(start.getTime()) || isNaN(end.getTime())) {
+        throw new BadRequestException('Invalid date format. Please provide valid ISO dates.');
+      }
+    } else {
+      const today = new Date();
+      start = new Date(today.setHours(0, 0, 0, 0)); 
+      end = new Date(today.setHours(23, 59, 59, 999));
+    }
+
+    return this.transactionRepository.find({
+      where: {
+        createdAt: Between(start, end), 
+      },
+      relations: ['user', 'admin'], 
+    });
   }
 }

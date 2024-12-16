@@ -7,17 +7,17 @@ export class JWTService {
   constructor(private jwtService: JwtService) {}
 
   // Generate Access Token
-  async generateAccessToken(userId: number): Promise<string> {
+  async generateAccessToken(userId: number, role: string): Promise<string> {
     return this.jwtService.signAsync(
-      { sub: userId },
+      { sub: userId, role: role },
       { secret: EnvKeyConstants.JWT_SECRET, expiresIn: '1h' },
     );
   }
 
   // Generate Refresh Token
-  async generateRefreshToken(userId: number): Promise<string> {
+  async generateRefreshToken(userId: number, role: string): Promise<string> {
     return this.jwtService.signAsync(
-      { sub: userId },
+      { sub: userId, role: role },
       { secret: EnvKeyConstants.JWT_REFRESH_SECRET, expiresIn: '1d' },
     );
   }

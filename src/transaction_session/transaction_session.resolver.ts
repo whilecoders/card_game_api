@@ -3,6 +3,7 @@ import { TransactionSessionService } from './transaction_session.service';
 import { TransactionSession } from './dbrepo/transaction_session.repository';
 import { CreateTransactionSessionDto } from './dto/create-transaction_session.input';
 import { ProfitAndLoss } from '../dashboard/dto/profite-loss.input';
+import { DateFilterDto } from 'src/common/model/date-filter.dto';
 
 @Resolver(() => TransactionSession)
 export class TransactionSessionResolver {
@@ -37,5 +38,13 @@ export class TransactionSessionResolver {
     @Args('userId', { type: () => Int }) userId: number,
   ): Promise<TransactionSession[]> {
     return this.transactionSessionService.getTransactionsByUserId(userId);
+  }
+
+
+  @Query(() => [TransactionSession], { name: 'getTransactionsByDate' })
+  async getTransactionsByDate(
+    @Args('filter', { type: () => DateFilterDto, nullable: true }) filter?: DateFilterDto,
+  ): Promise<TransactionSession[]> {
+    return this.transactionSessionService.getTransactionsByDate(filter);
   }
 }

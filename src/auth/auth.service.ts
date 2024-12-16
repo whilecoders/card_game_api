@@ -108,8 +108,14 @@ export class AuthService {
     );
     if (!isPasswordValid) throw new UnauthorizedException('Invalid password');
 
-    const access_token = await this.jwtService.generateAccessToken(user.id);
-    const refresh_token = await this.jwtService.generateRefreshToken(user.id);
+    const access_token = await this.jwtService.generateAccessToken(
+      user.id,
+      user.role,
+    );
+    const refresh_token = await this.jwtService.generateRefreshToken(
+      user.id,
+      user.role,
+    );
     const data: UserTokenType = {
       user: user,
       access_token: access_token,
@@ -149,7 +155,10 @@ export class AuthService {
       throw new UnauthorizedException('User not found. Please login again.');
     }
 
-    const newAccessToken = await this.jwtService.generateAccessToken(user.id);
+    const newAccessToken = await this.jwtService.generateAccessToken(
+      user.id,
+      user.role,
+    );
     console.log('new token -> ', newAccessToken);
 
     const tokens: TokenType = {

@@ -1,4 +1,4 @@
-import { Field, ObjectType, registerEnumType } from '@nestjs/graphql';
+import { Field, Int, ObjectType, registerEnumType } from '@nestjs/graphql';
 import { GameKqjCards, RecordStatus, TokenValues } from 'src/common/constants';
 import { BaseEntity } from 'src/common/repository/base.repository';
 import { GameSessionKqj } from 'src/game_session_kqj/dbrepo/game_session.repository';
@@ -12,7 +12,7 @@ registerEnumType(RecordStatus, { name: 'RecordSessionStatus' });
 @Entity({ name: 'record_session_kqj' })
 export class RecordSessionKqj extends BaseEntity {
   length: any;
-  forEach(arg0: (record: any) => void) {
+  forEach(arg: (record: any) => void) {
     throw new Error('Method not implemented.');
   }
   @Field(() => GameKqjCards, { nullable: false })
@@ -30,8 +30,16 @@ export class RecordSessionKqj extends BaseEntity {
   @Column({ type: 'enum', enum: TokenValues, nullable: false })
   token: TokenValues;
 
-  @Field(() => RecordStatus, { nullable: false ,defaultValue: RecordStatus.ACTIVE})
-  @Column({ type: 'enum', enum: RecordStatus, nullable: false ,default: RecordStatus.ACTIVE,})
+  @Field(() => RecordStatus, {
+    nullable: false,
+    defaultValue: RecordStatus.ACTIVE,
+  })
+  @Column({
+    type: 'enum',
+    enum: RecordStatus,
+    nullable: false,
+    default: RecordStatus.ACTIVE,
+  })
   record_status: RecordStatus;
 
   @Field(() => GameSessionKqj, { nullable: false })
@@ -55,9 +63,18 @@ export class RecordSessionKqj extends BaseEntity {
       onDelete: 'CASCADE',
     },
   )
-  
   @JoinColumn({ name: 'transaction_session' })
   @OneToOne(() => TransactionSession, (trans) => trans.record_session_kqj)
   @Field(() => TransactionSession)
   transaction_session: TransactionSession;
+}
+
+
+@ObjectType()
+export class RecordSessionKqjPagination {
+  @Field(() => [RecordSessionKqj], { nullable: false })
+  data: RecordSessionKqj[]
+
+  @Field(() => Int, { nullable: false })
+  totalSize: number
 }

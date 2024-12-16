@@ -16,6 +16,11 @@ export class UpdateUserDto {
   @IsOptional()
   name?: string;
 
+  @Field(() => String, { nullable: true })
+  @IsString()
+  @IsOptional()
+  address?: string;
+
   @Field(() => Role, { nullable: true })
   @IsEnum(Role)
   @IsOptional()
@@ -25,9 +30,9 @@ export class UpdateUserDto {
   @IsOptional()
   city?: string;
 
-  @Field(() => Int, { nullable: true })
+  @Field(() => String, { nullable: true })
   @IsOptional()
-  phone_number?: number;
+  phone_number?: string;
 
   @Field(() => String, { nullable: true })
   @IsOptional()

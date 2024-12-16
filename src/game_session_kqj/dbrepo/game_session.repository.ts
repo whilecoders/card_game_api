@@ -13,7 +13,7 @@ registerEnumType(GameSessionStatus, { name: 'GameSessionStatus' });
   name: 'game_session_kqj',
 })
 export class GameSessionKqj extends BaseEntity {
-  @Field(() => Games,{nullable:false})
+  @Field(() => Games, { nullable: false })
   @ManyToOne(() => Games, (game) => game.gameSession, {
     nullable: false,
     onDelete: 'CASCADE',
@@ -21,23 +21,23 @@ export class GameSessionKqj extends BaseEntity {
   @JoinColumn({ name: 'game' })
   game: Games;
 
-  @Field(() => GameKqjCards,{nullable:true})
+  @Field(() => GameKqjCards, { nullable: true })
   @Column({ type: 'enum', enum: GameKqjCards, nullable: true })
   game_result_card: GameKqjCards;
 
-  @Field(() => Date,{nullable:true})
+  @Field(() => Date, { nullable: true })
   @Column({ type: 'timestamp', nullable: true })
   session_start_time: Date;
 
-  @Field(() => Date,{nullable:true})
+  @Field(() => Date, { nullable: true })
   @Column({ type: 'timestamp', nullable: true })
   session_end_time: Date;
 
-  @Field(() => GameKqjCards,{nullable:false})
-  @Column({ type: 'enum', enum: GameSessionStatus, nullable: false})
+  @Field(() => GameSessionStatus, { nullable: false })
+  @Column({ type: 'enum', enum: GameSessionStatus, nullable: false })
   session_status: GameSessionStatus;
 
-  @Field(() => RecordSessionKqj,{nullable:true})
+  @Field(() => RecordSessionKqj, { nullable: true })
   @OneToMany(
     () => RecordSessionKqj,
     (recordSessionKqj) => recordSessionKqj.game_session_id,

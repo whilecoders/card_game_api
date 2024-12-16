@@ -6,7 +6,14 @@ import { Message } from 'src/message/dbrepo/message.repository';
 import { RecordSessionKqj } from 'src/record_session_kqj/dbrepo/record_session_kqj.repository';
 import { Room } from 'src/room/dbrepo/room.repository';
 import { Transaction } from 'src/transaction/dbrepo/transaction.repository';
-import { Column, Entity, JoinColumn, ManyToOne, OneToMany, OneToOne } from 'typeorm';
+import {
+  Column,
+  Entity,
+  JoinColumn,
+  ManyToOne,
+  OneToMany,
+  OneToOne,
+} from 'typeorm';
 
 registerEnumType(Role, { name: 'Role' });
 registerEnumType(UserStatus, { name: 'UserStatus' });
@@ -16,6 +23,10 @@ export class User extends BaseEntity {
   @Field(() => String, { nullable: true })
   @Column({ type: 'varchar', length: 60, nullable: true })
   name: string;
+
+  @Field(() => String, { nullable: true })
+  @Column({ type: 'varchar', length: 60, nullable: true })
+  address: string;
 
   @Field(() => String, { nullable: true })
   @Column({ type: 'varchar', length: 255, nullable: true })
@@ -42,7 +53,12 @@ export class User extends BaseEntity {
   phone_number: string;
 
   @Field(() => Role)
-  @Column({ type: 'enum', enum: Role, default: Role.USER, nullable: false })
+  @Column({
+    type: 'enum',
+    enum: Role,
+    default: Role.USER,
+    nullable: false,
+  })
   role: Role;
 
   @Field(() => Number)
@@ -81,6 +97,6 @@ export class User extends BaseEntity {
   roomMember: Room;
 
   @OneToOne(() => Message, (message) => message.sender)
-  @JoinColumn({ name: "sender" })
-  sender: Message
+  @JoinColumn({ name: 'sender' })
+  sender: Message;
 }

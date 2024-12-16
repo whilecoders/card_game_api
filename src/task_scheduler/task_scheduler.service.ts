@@ -1,15 +1,24 @@
 import {
+  ConflictException,
   Inject,
   InternalServerErrorException,
   NotFoundException,
 } from '@nestjs/common';
 import { GameSessionKqj } from 'src/game_session_kqj/dbrepo/game_session.repository';
 import { Games } from 'src/games/dbrepo/games.repository';
-import { Between, LessThanOrEqual, MoreThanOrEqual, Repository } from 'typeorm';
+import {
+  Between,
+  IsNull,
+  LessThanOrEqual,
+  MoreThan,
+  MoreThanOrEqual,
+  Repository,
+} from 'typeorm';
 import { GameSessionStatus } from '../common/constants';
 import { DailyGame } from 'src/daily_game/dbrepo/daily_game.repository';
 import { Cron, SchedulerRegistry } from '@nestjs/schedule';
 import { CronJob } from 'cron';
+import { GamesocketGateway } from 'src/gamesocket/gamesocket.gateway';
 
 export class TaskScheduler {
   constructor(
@@ -20,37 +29,33 @@ export class TaskScheduler {
     @Inject('DAILY_GAME_REPOSITORY')
     private readonly dailyGameRepository: Repository<DailyGame>,
     private schedulerRegistry: SchedulerRegistry,
-  ) {}
+    private gamesocketGateway: GamesocketGateway,
+  ) { }
 
-  @Cron('26 18 * * *', { name: 'createDailyGame' })
+  @Cron('10 16 * * *', { name: 'createDailyGame' })
   async createDailyGame(): Promise<void> {
-    console.log('creating game sessions');
-
     try {
       const currentDate = new Date();
-      console.log(currentDate);
-      
-
-      const game = await this.gamesRepository.findOne({
+      console.log(currentDate); 
+      const game: Games | null = await this.gamesRepository.findOne({
         where: {
           start_date: LessThanOrEqual(currentDate),
           end_date: MoreThanOrEqual(currentDate),
         },
       });
-
-      if (!game) {
+      if (game === null) {
         throw new NotFoundException('No game found for the current date.');
       }
-
       const dailyGameToCreate = {
         games: game,
         createdAt: currentDate,
         updatedAt: currentDate,
       };
-
       await this.dailyGameRepository.save(dailyGameToCreate);
       await this.createGameSessions();
     } catch (error) {
+      console.log(error);
+      
       if (error instanceof NotFoundException) {
         throw error;
       } else {
@@ -79,7 +84,27 @@ export class TaskScheduler {
     }
 
     const { games } = dailyGame;
-    const { start_time, game_duration, game_in_day } = games;
+    const { start_time, game_duration, game_in_day, start_date, end_date } = games;
+
+    // Check for overlapping game sessions
+    const overlappingGameSession = await this.gameSessionKqjRepository.findOne({
+      where: [
+        {
+          session_start_time: LessThanOrEqual(end_date),
+          session_end_time: MoreThan(start_date),
+        },
+        {
+          session_start_time: MoreThan(start_date),
+          session_end_time: LessThanOrEqual(end_date),
+        },
+      ],
+    });
+
+    if (overlappingGameSession) {
+      throw new ConflictException(
+        'A game session already exists within the specified time range.',
+      );
+    }
 
     // Helper function to add seconds to a time string and return a Date with both date and time
     const addSecondsToDateTime = (
@@ -95,20 +120,24 @@ export class TaskScheduler {
     };
 
     // Create session start and end times
-    const sessionsToCreate: { start_time: Date; end_time: Date }[] = [];
+    const sessionsToCreate: { start_time: Date; end_time: Date, session_status: GameSessionStatus }[] = [];
     let currentStartTime = addSecondsToDateTime(startOfDay, start_time); // Initial session start time at game start time
+    const currentTime = new Date()
 
-    // Iterate to create the sessions
     for (let i = 0; i < game_in_day; i++) {
-      // Calculate the end time for each session based on the game duration
       const endTime = new Date(currentStartTime);
       endTime.setSeconds(currentStartTime.getSeconds() + game_duration); // Add game_duration in seconds to get the end time
-
       sessionsToCreate.push({
         start_time: currentStartTime,
         end_time: endTime,
+        session_status: 
+         (currentTime.getTime() < endTime.getTime() && 
+          currentTime.getTime() > currentStartTime.getTime())
+            ?  GameSessionStatus.LIVE 
+            :  currentTime.getTime() < currentStartTime.getTime() 
+              ?  GameSessionStatus.UPCOMING
+              :  GameSessionStatus.END,
       });
-
       currentStartTime = endTime; // Update to the next session's start time
     }
 
@@ -116,16 +145,14 @@ export class TaskScheduler {
     const gameSessions = this.gameSessionKqjRepository.create(
       sessionsToCreate.map((session) => ({
         game: games,
-        session_start_time: session.start_time.toISOString(), // Store in ISO 8601 format (YYYY-MM-DDTHH:MM:SS)
-        session_end_time: session.end_time.toISOString(), // Store in ISO 8601 format (YYYY-MM-DDTHH:MM:SS)
-        session_status: GameSessionStatus.UPCOMING,
+        session_start_time: session.start_time.toISOString(),
+        session_end_time: session.end_time.toISOString(), 
+        session_status: session.session_status,
       })),
     );
 
     try {
-      const createdSession =
-        await this.gameSessionKqjRepository.save(gameSessions);
-
+      const createdSession = await this.gameSessionKqjRepository.save(gameSessions);
       for (const session of gameSessions) {
         let start = session.session_start_time;
         let end = session.session_end_time;
@@ -145,15 +172,15 @@ export class TaskScheduler {
         }
         const startJob: CronJob = new CronJob(
           `${start.getMinutes()} ${start.getHours()} ${start.getDate()} ${start.getMonth() + 1} *`,
-          () => {
+          async () => {
             console.log('stating game session ');
 
-            const startSession = this.gameSessionKqjRepository.update(
+            const startSession = await this.gameSessionKqjRepository.update(
               session.id,
               { session_status: GameSessionStatus.LIVE },
             );
-            startSession.then((updatedSession) => {
-              console.log('successfully updated =>', updatedSession);
+            this.gamesocketGateway.broadcastEvent('gameStart', {
+              sessionId: session.id,
             });
           },
         );
@@ -161,15 +188,16 @@ export class TaskScheduler {
 
         const endJob: CronJob = new CronJob(
           `${end.getMinutes()} ${end.getHours()} ${end.getDate()} ${end.getMonth() + 1} *`,
-          () => {
+          async () => {
             console.log('stating game session ');
 
-            const startSession = this.gameSessionKqjRepository.update(
+            const startSession = await this.gameSessionKqjRepository.update(
               session.id,
               { session_status: GameSessionStatus.END },
             );
-            startSession.then((updatedSession) => {
-              console.log('successfully updated =>', updatedSession);
+
+            this.gamesocketGateway.broadcastEvent('gameEnd', {
+              sessionId: session.id,
             });
           },
         );

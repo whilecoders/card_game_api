@@ -1,15 +1,17 @@
 import { Resolver, Query, Mutation, Args, Int } from '@nestjs/graphql';
-import { RecordSessionKqj } from './dbrepo/record_session_kqj.repository';
+import { RecordSessionKqj, RecordSessionKqjPagination } from './dbrepo/record_session_kqj.repository';
 import { CreateRecordSessionKqjDto } from './dto/create-record_session_kqj.input';
 import { RecordSessionKqjService } from './record_session_kqj.service';
 import { RecordStatus } from 'src/common/constants';
 import { DailyWinnersAndLosers } from '../dashboard/dto/Daily-Winner-Looser.input';
+import { DateFilterDto } from 'src/common/model/date-filter.dto';
+import { PaginationMetadataDto } from 'src/common/model';
 
 @Resolver(() => RecordSessionKqj)
 export class RecordSessionKqjResolver {
   constructor(
     private readonly recordSessionKqjService: RecordSessionKqjService,
-  ) {}
+  ) { }
 
   @Mutation(() => RecordSessionKqj)
   async createRecordSession(
@@ -43,6 +45,25 @@ export class RecordSessionKqjResolver {
     return true;
   }
 
+  @Mutation(() => Boolean)
+  async removeUserFromGame(
+    @Args('deleteBy', { type: () => Int }) deleteBy: number,
+    @Args('userId', { type: () => Int }) userId: number,
+    @Args('gameSessionId', { type: () => Int }) gameSessionId: number,
+  ): Promise<boolean> {
+    await this.recordSessionKqjService.removeFromGame(userId, gameSessionId, deleteBy);
+    return true;
+  }
+
+  @Mutation(() => Boolean)
+  async removeSessionFromGame(
+    @Args('deleteBy', { type: () => Int }) deleteBy: number,
+    @Args('gameSessionId', { type: () => Int }) gameSessionId: number,
+  ): Promise<boolean> {
+    await this.recordSessionKqjService.removeSessionFromGame(gameSessionId, deleteBy);
+    return true;
+  }
+
   @Query(() => RecordSessionKqj, { name: 'getRecordSessionBy' })
   async getRecordSessionById(
     @Args({ name: 'id', type: () => Int }) id: number,
@@ -62,17 +83,29 @@ export class RecordSessionKqjResolver {
     return this.recordSessionKqjService.getRecordsByUserId(userId);
   }
 
-  @Query(() => RecordSessionKqj, { name: 'getRecordBy' })
-  async getRecordBySessionId(
-    @Args('SessionId', { type: () => Int }) sessionId: number,
-  ) {
-    return this.recordSessionKqjService.getRecordBySessionId(sessionId);
+  @Query(() => RecordSessionKqjPagination, { name: 'searchRecords' })
+  async searchRecords(
+    @Args('sessionId', { type: () => Int }) sessionId: number,
+    @Args('searchTerm', { type: () => String }) searchTerm: string,
+    @Args('offset', { type: () => PaginationMetadataDto }) offset: PaginationMetadataDto
+  ): Promise<RecordSessionKqjPagination> {
+    return await this.recordSessionKqjService.searchRecords(sessionId, searchTerm, offset);
+    // return { records, total };
   }
 
-  @Query(() => [RecordSessionKqj], { name: 'getAllRecordsBy' })
+
+  @Query(() => RecordSessionKqjPagination, { name: 'getAllRecordsBySessionId' })
   async getAllRecordsBySessionId(
-    @Args('SessionId', { type: () => Int }) sessionId: number,
+    @Args('sessionId', { type: () => Int, nullable: false }) sessionId: number,
+    @Args('offset', { type: () => PaginationMetadataDto, nullable: false }) offset: PaginationMetadataDto,
   ) {
-    return this.recordSessionKqjService.getAllRecordsBySessionId(sessionId);
+    return this.recordSessionKqjService.getAllRecordsBySessionId(sessionId, offset);
+  }
+
+  @Query(() => [RecordSessionKqj], { name: 'getRecordsByDate' })
+  async getRecordsByDate(
+    @Args('filter', { type: () => DateFilterDto, nullable: true }) filter?: DateFilterDto,
+  ): Promise<RecordSessionKqj[]> {
+    return this.recordSessionKqjService.getRecordsByDate(filter);
   }
 }

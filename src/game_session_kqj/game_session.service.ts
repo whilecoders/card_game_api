@@ -10,6 +10,7 @@ import { UpdateGameSessionDto } from './dto/update-game_session.input';
 import { GameSessionKqj } from './dbrepo/game_session.repository';
 import { GameSessionStatus } from 'src/common/constants';
 import { PaginatedGameSessionKqjDto } from './dto/paginated-game-session-kqj';
+import { DateFilterDto } from 'src/common/model/date-filter.dto';
 
 @Injectable()
 export class GameSessionKqjService {
@@ -73,52 +74,40 @@ export class GameSessionKqjService {
   }
 
   async getGameSessionsByDateOrToday(
-    startDate?: Date,
-    endDate?: Date,
+    filter?: DateFilterDto,
   ): Promise<GameSessionKqj[]> {
     try {
       let start: Date;
       let end: Date;
 
-      if (startDate && endDate) {
-        start = new Date(startDate);
-        end = new Date(endDate);
-
+      if (filter && filter.startDate && filter.endDate) {
+        start = new Date(filter.startDate);
+        end = new Date(filter.endDate);
         if (isNaN(start.getTime()) || isNaN(end.getTime())) {
-          throw new BadRequestException(
-            'Invalid date format. Please provide valid ISO dates.',
-          );
+          throw new BadRequestException('Invalid date format. Please provide valid ISO dates.');
         }
       } else {
         const today = new Date();
         start = new Date(today.setHours(0, 0, 0, 0));
         end = new Date(today.setHours(23, 59, 59, 999));
       }
-
       const sessions = await this.gameSessionKqjRepository.find({
-        where: {
-          session_start_time: Between(start, end),
-        },
+        where: { session_start_time: Between(start, end) },
         relations: ['game', 'record_session_kqj'],
       });
-
-      console.log(sessions[0].record_session_kqj);
-      
-
+      console.log(sessions);
       if (!sessions.length) {
-        throw new NotFoundException(
-          startDate && endDate
-            ? `No game sessions found between ${startDate} and ${endDate}.`
-            : 'No game sessions found for today.',
-        );
+        return [];
+        // throw new NotFoundException(
+        //   filter && filter.startDate && filter.endDate
+        //     ? `No game sessions found between ${filter.startDate} and ${filter.endDate}.`
+        //     : 'No game sessions found for today.',
+        // );
       }
-
       return sessions;
     } catch (error) {
       console.error('Error retrieving game sessions:', error);
-      throw new InternalServerErrorException(
-        'Failed to retrieve game sessions.',
-      );
+      throw new InternalServerErrorException('Failed to retrieve game sessions.');
     }
   }
 }

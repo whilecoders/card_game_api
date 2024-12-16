@@ -3,13 +3,18 @@ import { CreateGamesDto } from './dto/create-game.input';
 import { GamesService } from './games.service';
 import { Games } from './dbrepo/games.repository';
 import { UpdateGamesDto } from './dto/update-game.input';
-import { GameSessionKqj } from 'src/game_session_kqj/dbrepo/game_session.repository';
 import { PaginatedGamesDto } from './dto/paginated-game.dto';
+import { DateFilterDto } from 'src/common/model/date-filter.dto';
+import { UseGuards } from '@nestjs/common';
+import { AuthGuard } from 'src/auth/auth.guard';
+import { RoleGuard } from 'src/auth/role.guard';
 
+// @UseGuards(AuthGuard)
 @Resolver(() => Games)
 export class GamesResolver {
   constructor(private readonly GamesService: GamesService) {}
 
+  // @UseGuards(new RoleGuard(['USER', 'ADMIN']))
   @Mutation(() => Games)
   async createGames(
     @Args('createGamesDto') createGamesDto: CreateGamesDto,
@@ -49,9 +54,9 @@ export class GamesResolver {
 
   @Query(() => [Games], { name: 'getGamesByDate' })
   async getGamesByDate(
-    @Args({ name: 'from', type: () => Date }) from: Date,
-    @Args({ name: 'to', type: () => Date }) to: Date,
+    @Args('filter', { type: () => DateFilterDto, nullable: true })
+    filter?: DateFilterDto,
   ): Promise<Games[]> {
-    return await this.GamesService.getGamesByDate(from, to);
+    return await this.GamesService.getGamesByDate(filter);
   }
 }
