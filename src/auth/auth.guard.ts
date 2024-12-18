@@ -21,12 +21,16 @@ export class AuthGuard implements CanActivate {
     if (!accessToken) {
       throw new UnauthorizedException();
     }
+    console.log(accessToken);
+
     try {
       const payload = await this.jwtService.verifyAsync(accessToken, {
-        secret: EnvKeyConstants.JWT_REFRESH_SECRET,
+        secret: EnvKeyConstants.JWT_SECRET,
       });
+      console.log(payload);
       ctx.user = payload;
-    } catch {
+    } catch (error) {
+      console.error(error);
       throw new UnauthorizedException();
     }
     return true;
@@ -36,6 +40,7 @@ export class AuthGuard implements CanActivate {
     // console.log(request.headers);
     // const [type, token] = request.headers.authorization?.split(' ') ?? [];
     // return type === 'Bearer' ? token : undefined;
+    console.log(request.headers.authorization);
     return request.headers.authorization;
   }
 }

@@ -1,5 +1,5 @@
 import { InputType, Field, Int } from '@nestjs/graphql';
-import { IsEnum, IsNumber, IsOptional, Validate } from 'class-validator';
+import { IsEnum, IsNotEmpty, IsNumber, IsOptional, Validate } from 'class-validator';
 import { GameStatus, GameType } from 'src/common/constants';
 import {
   IsFullDateString,
@@ -55,6 +55,7 @@ export class UpdateGamesDto {
   admin_id: number;
 
   @Field(() => Int, { nullable: false })
+  @IsNotEmpty()
   game_id: number;
 
   @Field(() => GameStatus, { nullable: true })

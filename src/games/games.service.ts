@@ -94,6 +94,8 @@ export class GamesService {
 
   async updateGame(updateGameDto: UpdateGameDto): Promise<Games> {
     try {
+      console.log(updateGameDto);
+      
       const game = await this.gamesRepository.findOne({
         where: { id: updateGameDto.game_id },
         relations: { admin: true, gameSession: true },
@@ -205,10 +207,40 @@ export class GamesService {
     }
   }
 
+  async getGamesByDateOrToday(filter?: DateFilterDto): Promise<Games[]> {
+    try {
+      let start: Date;
+      let end: Date;
+      if (filter && filter.startDate && filter.endDate) {
+        start = new Date(filter.startDate);
+        end = new Date(filter.endDate);
+        if (isNaN(start.getTime()) || isNaN(end.getTime())) {
+          throw new BadRequestException('Invalid date format. Please provide valid ISO dates.');
+        }
+      } else {
+        const today = new Date();
+        start = new Date(today.setDate(today.getDate() - 7));
+        end = new Date(today.setDate(today.getDate() + 14));
+      }
+      console.log(Between(start, end));
+      
+      const games = await this.gamesRepository.find({
+        where: { start_date: Between(start, end)},
+        relations: ['gameSession'],
+      });
+      if (!games.length) {
+        return [];
+      }
+      return games;
+    } catch (error) {
+      console.error('Error retrieving game sessions:', error);
+      throw new InternalServerErrorException('Failed to retrieve game sessions.');
+    }
+  }
+
   async getGamesByDate(filter?: DateFilterDto): Promise<Games[]> {
     let start: Date;
     let end: Date;
-
     if (filter && filter.startDate && filter.endDate) {
       start = new Date(filter.startDate);
       end = new Date(filter.endDate);

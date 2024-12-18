@@ -32,7 +32,7 @@ export class TaskScheduler {
     private gamesocketGateway: GamesocketGateway,
   ) { }
 
-  @Cron('10 16 * * *', { name: 'createDailyGame' })
+  @Cron('02 19 * * *', { name: 'createDailyGame' })
   async createDailyGame(): Promise<void> {
     try {
       const currentDate = new Date();

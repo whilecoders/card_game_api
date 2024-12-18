@@ -9,12 +9,12 @@ import { UseGuards } from '@nestjs/common';
 import { AuthGuard } from 'src/auth/auth.guard';
 import { RoleGuard } from 'src/auth/role.guard';
 
-// @UseGuards(AuthGuard)
+@UseGuards(AuthGuard)
 @Resolver(() => Games)
 export class GamesResolver {
-  constructor(private readonly GamesService: GamesService) {}
+  constructor(private readonly GamesService: GamesService) { }
 
-  // @UseGuards(new RoleGuard(['USER', 'ADMIN']))
+  @UseGuards(new RoleGuard(['USER', 'ADMIN']))
   @Mutation(() => Games)
   async createGames(
     @Args('createGamesDto') createGamesDto: CreateGamesDto,
@@ -58,5 +58,13 @@ export class GamesResolver {
     filter?: DateFilterDto,
   ): Promise<Games[]> {
     return await this.GamesService.getGamesByDate(filter);
+  }
+
+  // @UseGuards(new RoleGuard(['USER', 'ADMIN']))
+  @Query(() => [Games], { name: 'getGamesByDateOrToday' })
+  async getGamesByDateOrToday(
+    @Args('filter', { type: () => DateFilterDto, nullable: true }) filter?: DateFilterDto,
+  ): Promise<Games[]> {
+    return this.GamesService.getGamesByDateOrToday(filter);
   }
 }

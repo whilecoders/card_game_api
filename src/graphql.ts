@@ -330,6 +330,7 @@ export interface IQuery {
     getGameSessionsByDateOrToday(filter?: Nullable<DateFilterDto>): GameSession[] | Promise<GameSession[]>;
     getGamesBy(id: number): Games | Promise<Games>;
     getGamesByDate(filter?: Nullable<DateFilterDto>): Games[] | Promise<Games[]>;
+    getGamesByDateOrToday(filter?: Nullable<DateFilterDto>): Games[] | Promise<Games[]>;
     getLiveGameSessions(): GameSession[] | Promise<GameSession[]>;
     getProfitAndLoss(): ProfitAndLoss | Promise<ProfitAndLoss>;
     getRecordSessionBy(id: number): RecordSessionKqj | Promise<RecordSessionKqj>;
