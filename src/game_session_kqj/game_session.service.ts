@@ -17,7 +17,7 @@ export class GameSessionKqjService {
   constructor(
     @Inject('GAME_SESSION_KQJ_REPOSITORY')
     private readonly gameSessionKqjRepository: Repository<GameSessionKqj>,
-  ) {}
+  ) { }
 
   async updateGameSession(
     id: number,
@@ -110,4 +110,11 @@ export class GameSessionKqjService {
       throw new InternalServerErrorException('Failed to retrieve game sessions.');
     }
   }
+
+
+  async setSessionResult(sessionId: number, result: string): Promise<string | null> {
+    return "";
+  }
+
+  async generateResult() {}
 }

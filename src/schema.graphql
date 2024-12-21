@@ -214,7 +214,7 @@ type ProfitAndLoss {
 }
 
 type Query {
-  getAllGameSessions(skip: Int!, take: Int!): PaginatedGameSessionKqjDto!
+  getAllGameSessions(result: String!, sessionId: Int!): PaginatedGameSessionKqjDto!
   getAllGameses(skip: Int!, take: Int!): PaginatedGamesDto!
   getAllRecordSessions: [RecordSessionKqj!]!
   getAllRecordsBySessionId(offset: PaginationMetadataDto!, sessionId: Int!): RecordSessionKqjPagination!
