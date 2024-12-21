@@ -95,7 +95,7 @@ export class GameSessionKqjService {
         where: { session_start_time: Between(start, end) },
         relations: ['game', 'record_session_kqj'],
       });
-      console.log(sessions);
+      // console.log(sessions);
       if (!sessions.length) {
         return [];
         // throw new NotFoundException(

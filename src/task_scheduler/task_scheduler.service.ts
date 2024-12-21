@@ -32,7 +32,7 @@ export class TaskScheduler {
     private gamesocketGateway: GamesocketGateway,
   ) { }
 
-  @Cron('02 19 * * *', { name: 'createDailyGame' })
+  @Cron('01 18 * * *', { name: 'createDailyGame' })
   async createDailyGame(): Promise<void> {
     try {
       const currentDate = new Date();
@@ -66,12 +66,10 @@ export class TaskScheduler {
 
   private async createGameSessions(): Promise<GameSessionKqj[]> {
     const currentDate = new Date();
-
     // Set the current date (today) without the time component
     const startOfDay = new Date(currentDate.setHours(0, 0, 0, 0));
     const currentDateWithTime = new Date(currentDate.setHours(23, 59, 59, 999));
 
-    // Fetch today's DailyGame
     const dailyGame = await this.dailyGameRepository.findOne({
       where: {
         createdAt: Between(startOfDay, currentDateWithTime),

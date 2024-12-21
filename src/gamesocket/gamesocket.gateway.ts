@@ -1,4 +1,4 @@
-import { WebSocketGateway, SubscribeMessage, MessageBody, WebSocketServer, ConnectedSocket } from '@nestjs/websockets';
+import { WebSocketGateway, SubscribeMessage, MessageBody, WebSocketServer, ConnectedSocket, OnGatewayConnection } from '@nestjs/websockets';
 import { GamesocketService } from './gamesocket.service';
 import { Server, Socket } from 'socket.io';
 import { Bind, Injectable } from '@nestjs/common';
@@ -11,18 +11,16 @@ import { GameSessionStatus } from 'src/common/constants';
   },
 })
 @Injectable()
-export class GamesocketGateway {
+export class GamesocketGateway implements OnGatewayConnection {
   constructor(private readonly gamesocketService: GamesocketService) { }
-
   private userSocketMap = new Map<string, Socket>();
 
   @WebSocketServer() server: Server;
-
   afterInit(server: Socket) {
   }
 
   handleConnection(socket: Socket) {
-    let userId = socket.handshake.query.userId;
+    let userId = socket.id;
     if (Array.isArray(userId)) {
       userId = userId[0]; // Use the first element of the array
     }
@@ -52,6 +50,7 @@ export class GamesocketGateway {
     @MessageBody() data: { sessionId: number },
     @ConnectedSocket() client: Socket,
   ) {
+    console.log("game is started");
     this.server.emit('gameStarted', data);
   }
 
