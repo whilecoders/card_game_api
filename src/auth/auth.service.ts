@@ -24,7 +24,7 @@ export class AuthService {
     @Inject('USER_REPOSITORY')
     private readonly userRepository: Repository<User>,
     private jwtService: JWTService,
-  ) {}
+  ) { }
   async AdminSignUp(signUpCredential: SignUpCredential) {
     const { username, email, password, role, city, phone_number } =
       signUpCredential;
@@ -63,46 +63,47 @@ export class AuthService {
 
   async UserSignUp(signUpCredential: SignUpCredential) {
     const { username, email, password, city, phone_number } = signUpCredential;
-    const hashedPassword = await PasswordHashService.hashPassword(password);
-
-    const existingUser = await this.userRepository.findOne({
-      where: [{ username }, { email }],
-    });
-
-    if (existingUser) {
-      if (existingUser.username === username) {
-        throw new ConflictException('Username already exists');
-      }
-      if (existingUser.email === email) {
-        throw new ConflictException('Email already exists');
-      }
-    }
-
-    const user = this.userRepository.create({
-      username,
-      email,
-      city,
-      phone_number,
-      password: hashedPassword,
-      role: Role.USER,
-    });
+    const hashedPassword: string = PasswordHashService.hashPassword(password);
 
     try {
+      const existingUser = await this.userRepository.findOne({
+        where: [{ username }, { email }],
+      });
+
+      if (existingUser) {
+        if (existingUser.username === username) {
+          throw new ConflictException('Username already exists');
+        }
+        if (existingUser.email === email) {
+          throw new ConflictException('Email already exists');
+        }
+      }
+
+      const user = this.userRepository.create({
+        username,
+        email,
+        city,
+        phone_number,
+        password: hashedPassword,
+        role: Role.USER,
+      });
+
       await this.userRepository.save(user);
-    } catch (error) {
+      return user;
+    } catch {
       throw new InternalServerErrorException('Error creating user');
     }
 
-    return user;
   }
 
   async SignIn(signInCredential: SignInCredential) {
+
     const { username, password } = signInCredential;
 
     const user = await this.userRepository.findOne({ where: { username } });
     if (!user) throw new NotFoundException('User not found');
 
-    const isPasswordValid = await PasswordHashService.verifyPassword(
+    const isPasswordValid: boolean = PasswordHashService.verifyPassword(
       password,
       user.password,
     );
@@ -199,4 +200,14 @@ export class AuthService {
       throw new InternalServerErrorException('Failed to reset password');
     }
   }
+}
+
+
+{
+
+  // create game
+
+  // daily game 
+
+  // result create  
 }
