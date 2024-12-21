@@ -46,7 +46,7 @@ export class GamesocketGateway implements OnGatewayConnection {
 
   @Bind(MessageBody(), ConnectedSocket())
   @SubscribeMessage('gameStart')
-  async handleJoinRoom(
+  async handleGameStart(
     @MessageBody() data: { sessionId: number },
     @ConnectedSocket() client: Socket,
   ) {
@@ -57,7 +57,7 @@ export class GamesocketGateway implements OnGatewayConnection {
 
   @Bind(MessageBody(), ConnectedSocket())
   @SubscribeMessage('gameEnd')
-  async handleLeaveRoom(
+  async handleGameEnd(
     @MessageBody() data: { sessionId: number },
     @ConnectedSocket() client: Socket,
   ) {
@@ -67,5 +67,20 @@ export class GamesocketGateway implements OnGatewayConnection {
     // add data in transaction session
     // add data in transaction
     this.server.emit('gameEnded', data);
+  }
+
+
+  @Bind(MessageBody(), ConnectedSocket())
+  @SubscribeMessage('gameResult')
+  async handleGameResult(
+    @MessageBody() data: { sessionId: number },
+    @ConnectedSocket() client: Socket,
+  ) {
+
+    // game end calculations
+    // if result not exist create result
+    // add data in transaction session
+    // add data in transaction
+    this.server.emit('showResult', data);
   }
 }

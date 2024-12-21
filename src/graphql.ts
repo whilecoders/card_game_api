@@ -317,7 +317,7 @@ export interface ProfitAndLoss {
 }
 
 export interface IQuery {
-    getAllGameSessions(skip: number, take: number): PaginatedGameSessionKqjDto | Promise<PaginatedGameSessionKqjDto>;
+    getAllGameSessions(result: string, sessionId: number): PaginatedGameSessionKqjDto | Promise<PaginatedGameSessionKqjDto>;
     getAllGameses(skip: number, take: number): PaginatedGamesDto | Promise<PaginatedGamesDto>;
     getAllRecordSessions(): RecordSessionKqj[] | Promise<RecordSessionKqj[]>;
     getAllRecordsBySessionId(offset: PaginationMetadataDto, sessionId: number): RecordSessionKqjPagination | Promise<RecordSessionKqjPagination>;

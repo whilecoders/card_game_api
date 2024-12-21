@@ -40,20 +40,20 @@ export class GameSessionKqjResolver {
     return await this.gameSessionKqjService.getLiveGameSessions();
   }
 
-  // @Query(() => [GameSessionKqj], { name: 'getSessionByStatus' })
-  // async getSessionByStatus(
-  //   @Args('status', { type: () => String, nullable: false }) status: String,
-  // ): Promise<GameSessionKqj[]> {
-  //   return await this.gameSessionKqjService.getGameSessionsByDateOrToday(
-  //     startDate,
-  //     endDate,
-  //   );
-  // };
 
   @Query(() => [GameSessionKqj], { name: 'getGameSessionsByDateOrToday' })
   async getGameSessionsByDateOrToday(
     @Args('filter', { type: () => DateFilterDto, nullable: true }) filter?: DateFilterDto,
   ): Promise<GameSessionKqj[]> {
     return this.gameSessionKqjService.getGameSessionsByDateOrToday(filter);
+  }
+
+
+  @Query(() => PaginatedGameSessionKqjDto, { name: 'getAllGameSessions' })
+  async setSessionResult(
+    @Args('sessionId', { type: () => Int }) sessionId: number,
+    @Args('result', { type: () => String }) result: string,
+  ): Promise<string | null> {
+    return this.gameSessionKqjService.setSessionResult(sessionId, result);
   }
 }
