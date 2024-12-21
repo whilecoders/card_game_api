@@ -91,6 +91,7 @@ export class User extends BaseEntity {
     (recordSessionKqj) => recordSessionKqj.user,
   )
   record_session_kqj: RecordSessionKqj[];
+
   @Field(() => Room)
   @ManyToOne(() => Room, (room) => room.members)
   roomMember: Room;

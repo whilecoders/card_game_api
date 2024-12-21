@@ -5,8 +5,8 @@ import {
   Inject,
   InternalServerErrorException,
 } from '@nestjs/common';
-import { Between, Repository } from 'typeorm';
-import { RecordSessionKqj } from './dbrepo/record_session_kqj.repository';
+import { Between, ILike, Repository } from 'typeorm';
+import { RecordSessionKqj, RecordSessionKqjPagination } from './dbrepo/record_session_kqj.repository';
 import { CreateRecordSessionKqjDto } from './dto/create-record_session_kqj.input';
 import { User } from 'src/user/dbrepo/user.repository';
 import { GameSessionKqj } from 'src/game_session_kqj/dbrepo/game_session.repository';
@@ -14,6 +14,8 @@ import { RecordStatus, TransactionType } from 'src/common/constants';
 import { DailyWinnersAndLosers } from '../dashboard/dto/Daily-Winner-Looser.input';
 import { DateFilterDto } from 'src/common/model/date-filter.dto';
 import { TransactionSession } from 'src/transaction_session/dbrepo/transaction_session.repository';
+import { PaginationMetadataDto } from 'src/common/model';
+import { off } from 'process';
 
 @Injectable()
 export class RecordSessionKqjService {
@@ -26,7 +28,7 @@ export class RecordSessionKqjService {
     private readonly gameSessionKqjRepository: Repository<GameSessionKqj>,
     @Inject('TRANSACTION_SESSION_REPOSITORY')
     private readonly transactionSessionRepository: Repository<TransactionSession>,
-  ) {}
+  ) { }
 
   async createRecordSession(
     dto: CreateRecordSessionKqjDto,
@@ -56,6 +58,7 @@ export class RecordSessionKqjService {
       createdAt: new Date(),
     });
 
+
     if (dto.token) {
       if (user.wallet < dto.token) {
         throw new BadRequestException(
@@ -66,7 +69,9 @@ export class RecordSessionKqjService {
     }
 
     try {
-      return await this.recordSessionKqjRepository.save(recordSession);
+      const savedSession = await this.recordSessionKqjRepository.save(recordSession);
+      const findCreatedSession = await this.recordSessionKqjRepository.findOne({ where: { id: savedSession.id } })
+      return findCreatedSession
     } catch (error) {
       throw new BadRequestException('Failed to create record session');
     }
@@ -74,7 +79,7 @@ export class RecordSessionKqjService {
 
   async getRecordSessionById(id: number): Promise<RecordSessionKqj> {
     const recordSession = await this.recordSessionKqjRepository.findOne({
-      where: { id },
+      where: { id, deletedAt: null, deletedBy: null },
       relations: ['user', 'game_session', 'transaction_session'],
     });
     if (!recordSession) {
@@ -86,6 +91,9 @@ export class RecordSessionKqjService {
   async getAllRecordSessions(): Promise<RecordSessionKqj[]> {
     try {
       return await this.recordSessionKqjRepository.find({
+        where: {
+          deletedAt: null, deletedBy: null
+        },
         relations: {
           user: true,
           game_session_id: true,
@@ -101,7 +109,7 @@ export class RecordSessionKqjService {
   async getRecordsByUserId(userId: number): Promise<RecordSessionKqj[]> {
     try {
       const records = await this.recordSessionKqjRepository.find({
-        where: { user: { id: userId } },
+        where: { user: { id: userId }, deletedAt: null, deletedBy: null },
         relations: ['user', 'game_session', 'transaction_session'],
       });
 
@@ -110,28 +118,59 @@ export class RecordSessionKqjService {
       }
       return records;
     } catch (error) {
+      console.error(error);
       throw new BadRequestException(
         'Failed to retrieve records. Please try again later.',
       );
     }
   }
 
-  async getAllRecordsBySessionId(
+  async searchRecords(
     sessionId: number,
-  ): Promise<RecordSessionKqj[]> {
+    searchTerm: string,
+    offset: PaginationMetadataDto
+  ): Promise<RecordSessionKqjPagination> {
     try {
-      const records = await this.recordSessionKqjRepository.find({
-        where: { game_session_id: { id: sessionId } },
-        relations: ['user', 'game_session', 'transaction_session'],
+      let whereCondition = {
+        game_session_id: { id: sessionId },
+        deletedAt: null,
+        deletedBy: null,
+      };
+      if (!isNaN(Number(searchTerm))) whereCondition["user"] = { id: Number(searchTerm) };
+      else whereCondition["user"] = { username: ILike(`%${searchTerm}%`) };
+      const [data, totalSize] = await this.recordSessionKqjRepository.findAndCount({
+        where: whereCondition,
+        relations: ['user', 'game_session_id', 'transaction_session'],
+        skip: offset.skip,
+        take: offset.take,
       });
 
-      if (!records.length) {
-        throw new NotFoundException(
-          `No records found for session ID ${sessionId}`,
-        );
-      }
-      return records;
+      return { data, totalSize };
     } catch (error) {
+      console.error(error);
+      throw new BadRequestException(
+        'Failed to search records. Please try again later.',
+      );
+    }
+  }
+
+
+  async getAllRecordsBySessionId(
+    sessionId: number,
+    offset?: PaginationMetadataDto
+  ): Promise<RecordSessionKqjPagination> {
+    try {
+      console.log(offset);
+
+      const [data, totalSize] = await this.recordSessionKqjRepository.findAndCount({
+        where: { game_session_id: { id: sessionId }, deletedAt: null, deletedBy: null },
+        skip: offset.skip,
+        take: offset.take,
+        relations: ['user', 'game_session_id', 'transaction_session'],
+      });
+      return { data, totalSize };
+    } catch (error) {
+      console.error(error);
       throw new BadRequestException(
         'Failed to retrieve records. Please try again later.',
       );
@@ -179,17 +218,14 @@ export class RecordSessionKqjService {
       const recordSessions = await this.recordSessionKqjRepository.find({
         where: { game_session_id: { id: gameSessionId } },
       });
-
       if (!recordSessions.length) {
         throw new NotFoundException(
           `No records found for gameSessionId ${gameSessionId}`,
         );
       }
-
       for (const record of recordSessions) {
         record.record_status = RecordStatus.COMPLETED;
       }
-
       await this.recordSessionKqjRepository.save(recordSessions);
     } catch (error) {
       if (error instanceof NotFoundException) {
@@ -198,6 +234,56 @@ export class RecordSessionKqjService {
       throw new InternalServerErrorException(
         'Failed to mark session as completed',
       );
+    }
+  }
+
+  async removeFromGame(userId: number, gameSessionId: number, deleteBy: number) {
+    try {
+      const recordSession = await this.recordSessionKqjRepository.find({
+        where: { user: { id: userId }, game_session_id: { id: gameSessionId } },
+      });
+      if (!recordSession || recordSession.length === 0) {
+        throw new NotFoundException(
+          `RecordSession for userId ${userId} and gameSessionId ${gameSessionId} not found`,
+        );
+      }
+      for (const session of recordSession) {
+        session.deletedAt = new Date()
+        session.deletedBy = deleteBy.toString()
+      }
+      return await this.recordSessionKqjRepository.save(recordSession);
+    } catch (error) {
+      console.error(error);
+      if (
+        error instanceof NotFoundException ||
+        error instanceof BadRequestException
+      ) {
+        throw error;
+      }
+      throw new InternalServerErrorException('Failed to update record status');
+    }
+  }
+
+  async removeSessionFromGame(id: number, deleteBy: number) {
+    try {
+      const recordSession = await this.recordSessionKqjRepository.find({
+        where: { id: id },
+      });
+      if (!recordSession || recordSession.length === 0) {
+        throw new NotFoundException(
+          `RecordSession for userId ${id} not found`,
+        );
+      }
+      for (const session of recordSession) {
+        session.deletedAt = new Date()
+        session.deletedBy = deleteBy.toString()
+      }
+      return await this.recordSessionKqjRepository.save(recordSession);
+    } catch (error) {
+      console.error(error);
+      if (error instanceof NotFoundException ||
+        error instanceof BadRequestException) throw error;
+      throw new InternalServerErrorException('Failed to update record status');
     }
   }
 
@@ -223,6 +309,8 @@ export class RecordSessionKqjService {
     return this.recordSessionKqjRepository.find({
       where: {
         createdAt: Between(start, end),
+        deletedAt: null,
+        deletedBy: null
       },
       relations: ['game', 'user'],
     });

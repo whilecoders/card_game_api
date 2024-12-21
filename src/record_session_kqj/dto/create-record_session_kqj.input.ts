@@ -4,6 +4,7 @@ import { GameKqjCards, TokenValues, RecordStatus } from 'src/common/constants';
 
 @InputType()
 export class CreateRecordSessionKqjDto {
+  @IsNotEmpty()
   @Field(() => GameKqjCards)
   choosen_card: GameKqjCards;
 
@@ -11,6 +12,7 @@ export class CreateRecordSessionKqjDto {
   @Field(() => Int)
   userId: number;
 
+  @IsNotEmpty()
   @Field(() => TokenValues)
   token: TokenValues;
 

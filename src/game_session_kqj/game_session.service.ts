@@ -83,7 +83,6 @@ export class GameSessionKqjService {
       if (filter && filter.startDate && filter.endDate) {
         start = new Date(filter.startDate);
         end = new Date(filter.endDate);
-
         if (isNaN(start.getTime()) || isNaN(end.getTime())) {
           throw new BadRequestException('Invalid date format. Please provide valid ISO dates.');
         }
@@ -92,20 +91,19 @@ export class GameSessionKqjService {
         start = new Date(today.setHours(0, 0, 0, 0));
         end = new Date(today.setHours(23, 59, 59, 999));
       }
-
       const sessions = await this.gameSessionKqjRepository.find({
         where: { session_start_time: Between(start, end) },
         relations: ['game', 'record_session_kqj'],
       });
-
+      console.log(sessions);
       if (!sessions.length) {
-        throw new NotFoundException(
-          filter && filter.startDate && filter.endDate
-            ? `No game sessions found between ${filter.startDate} and ${filter.endDate}.`
-            : 'No game sessions found for today.',
-        );
+        return [];
+        // throw new NotFoundException(
+        //   filter && filter.startDate && filter.endDate
+        //     ? `No game sessions found between ${filter.startDate} and ${filter.endDate}.`
+        //     : 'No game sessions found for today.',
+        // );
       }
-
       return sessions;
     } catch (error) {
       console.error('Error retrieving game sessions:', error);

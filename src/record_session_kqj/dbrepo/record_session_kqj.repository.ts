@@ -1,4 +1,4 @@
-import { Field, ObjectType, registerEnumType } from '@nestjs/graphql';
+import { Field, Int, ObjectType, registerEnumType } from '@nestjs/graphql';
 import { GameKqjCards, RecordStatus, TokenValues } from 'src/common/constants';
 import { BaseEntity } from 'src/common/repository/base.repository';
 import { GameSessionKqj } from 'src/game_session_kqj/dbrepo/game_session.repository';
@@ -67,4 +67,14 @@ export class RecordSessionKqj extends BaseEntity {
   @OneToOne(() => TransactionSession, (trans) => trans.record_session_kqj)
   @Field(() => TransactionSession)
   transaction_session: TransactionSession;
+}
+
+
+@ObjectType()
+export class RecordSessionKqjPagination {
+  @Field(() => [RecordSessionKqj], { nullable: false })
+  data: RecordSessionKqj[]
+
+  @Field(() => Int, { nullable: false })
+  totalSize: number
 }

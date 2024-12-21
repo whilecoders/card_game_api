@@ -23,6 +23,13 @@ export enum GameKqjCards {
     QUEEN_OF_SPADES = "QUEEN_OF_SPADES"
 }
 
+export enum GameSessionStatus {
+    END = "END",
+    INACTIVE = "INACTIVE",
+    LIVE = "LIVE",
+    UPCOMING = "UPCOMING"
+}
+
 export enum GameStatus {
     AVAILABLE = "AVAILABLE",
     FINISHED = "FINISHED",
@@ -115,6 +122,12 @@ export interface CreateTransactionSessionDto {
 export interface DateFilterDto {
     endDate?: Nullable<DateTime>;
     startDate?: Nullable<DateTime>;
+}
+
+export interface PaginationMetadataDto {
+    count?: Nullable<number>;
+    skip: number;
+    take: number;
 }
 
 export interface ResetPasswordDto {
@@ -214,7 +227,7 @@ export interface GameSession {
     record_session_kqj?: Nullable<RecordSessionKqj>;
     session_end_time?: Nullable<DateTime>;
     session_start_time?: Nullable<DateTime>;
-    session_status: GameKqjCards;
+    session_status: GameSessionStatus;
     updatedAt: DateTime;
     updatedBy: string;
 }
@@ -264,6 +277,8 @@ export interface IMutation {
     deleteUser(adminId: number, userId: number): boolean | Promise<boolean>;
     markSessionAsCompleted(gameSessionId: number): boolean | Promise<boolean>;
     refreshAccessToken(refreshToken: string, token: string): Token | Promise<Token>;
+    removeSessionFromGame(deleteBy: number, gameSessionId: number): boolean | Promise<boolean>;
+    removeUserFromGame(deleteBy: number, gameSessionId: number, userId: number): boolean | Promise<boolean>;
     resetPassword(resetPasswordDto: ResetPasswordDto): string | Promise<string>;
     suspendUser(suspendUserDto: SuspendUserDto): User | Promise<User>;
     updateGameSession(id: number, updateGameSessionDto: UpdateGameSessionDto): GameSession | Promise<GameSession>;
@@ -305,7 +320,7 @@ export interface IQuery {
     getAllGameSessions(skip: number, take: number): PaginatedGameSessionKqjDto | Promise<PaginatedGameSessionKqjDto>;
     getAllGameses(skip: number, take: number): PaginatedGamesDto | Promise<PaginatedGamesDto>;
     getAllRecordSessions(): RecordSessionKqj[] | Promise<RecordSessionKqj[]>;
-    getAllRecordsBy(SessionId: number): RecordSessionKqj[] | Promise<RecordSessionKqj[]>;
+    getAllRecordsBySessionId(offset: PaginationMetadataDto, sessionId: number): RecordSessionKqjPagination | Promise<RecordSessionKqjPagination>;
     getAllTransactionSessions(): TransactionSession[] | Promise<TransactionSession[]>;
     getAllUsers(skip: number, take: number): PaginatedUserDto | Promise<PaginatedUserDto>;
     getCurrentRunningSessions(): GameSession[] | Promise<GameSession[]>;
@@ -315,6 +330,7 @@ export interface IQuery {
     getGameSessionsByDateOrToday(filter?: Nullable<DateFilterDto>): GameSession[] | Promise<GameSession[]>;
     getGamesBy(id: number): Games | Promise<Games>;
     getGamesByDate(filter?: Nullable<DateFilterDto>): Games[] | Promise<Games[]>;
+    getGamesByDateOrToday(filter?: Nullable<DateFilterDto>): Games[] | Promise<Games[]>;
     getLiveGameSessions(): GameSession[] | Promise<GameSession[]>;
     getProfitAndLoss(): ProfitAndLoss | Promise<ProfitAndLoss>;
     getRecordSessionBy(id: number): RecordSessionKqj | Promise<RecordSessionKqj>;
@@ -330,6 +346,7 @@ export interface IQuery {
     getUserById(id: number): User | Promise<User>;
     getUserByRole(role: string): User[] | Promise<User[]>;
     getUsersByCreatedAt(date: DateTime): User[] | Promise<User[]>;
+    searchRecords(offset: PaginationMetadataDto, searchTerm: string, sessionId: number): RecordSessionKqjPagination | Promise<RecordSessionKqjPagination>;
     searchUser(filters: UserFiltersInput, skip: number, take: number): PaginatedUserDto | Promise<PaginatedUserDto>;
     signIn(signInCredential: SignInCredential): UserToken | Promise<UserToken>;
 }
@@ -348,6 +365,11 @@ export interface RecordSessionKqj {
     updatedAt: DateTime;
     updatedBy: string;
     user: User;
+}
+
+export interface RecordSessionKqjPagination {
+    data: RecordSessionKqj[];
+    totalSize: number;
 }
 
 export interface Room {

@@ -89,9 +89,16 @@ type GameSession {
   record_session_kqj: RecordSessionKqj
   session_end_time: DateTime
   session_start_time: DateTime
-  session_status: GameKqjCards!
+  session_status: GameSessionStatus!
   updatedAt: DateTime!
   updatedBy: String!
+}
+
+enum GameSessionStatus {
+  END
+  INACTIVE
+  LIVE
+  UPCOMING
 }
 
 enum GameStatus {
@@ -161,6 +168,8 @@ type Mutation {
   deleteUser(adminId: Float!, userId: Float!): Boolean!
   markSessionAsCompleted(gameSessionId: Int!): Boolean!
   refreshAccessToken(refreshToken: String!, token: String!): Token!
+  removeSessionFromGame(deleteBy: Int!, gameSessionId: Int!): Boolean!
+  removeUserFromGame(deleteBy: Int!, gameSessionId: Int!, userId: Int!): Boolean!
   resetPassword(resetPasswordDto: ResetPasswordDto!): String!
   suspendUser(suspendUserDto: SuspendUserDto!): User!
   updateGameSession(id: Int!, updateGameSessionDto: UpdateGameSessionDto!): GameSession!
@@ -192,6 +201,12 @@ type PaginatedUserDto {
   take: Int!
 }
 
+input PaginationMetadataDto {
+  count: Int
+  skip: Int!
+  take: Int!
+}
+
 type ProfitAndLoss {
   loss: Float!
   net: Float!
@@ -202,7 +217,7 @@ type Query {
   getAllGameSessions(skip: Int!, take: Int!): PaginatedGameSessionKqjDto!
   getAllGameses(skip: Int!, take: Int!): PaginatedGamesDto!
   getAllRecordSessions: [RecordSessionKqj!]!
-  getAllRecordsBy(SessionId: Int!): [RecordSessionKqj!]!
+  getAllRecordsBySessionId(offset: PaginationMetadataDto!, sessionId: Int!): RecordSessionKqjPagination!
   getAllTransactionSessions: [TransactionSession!]!
   getAllUsers(skip: Int!, take: Int!): PaginatedUserDto!
   getCurrentRunningSessions: [GameSession!]!
@@ -212,6 +227,7 @@ type Query {
   getGameSessionsByDateOrToday(filter: DateFilterDto): [GameSession!]!
   getGamesBy(id: Int!): Games!
   getGamesByDate(filter: DateFilterDto): [Games!]!
+  getGamesByDateOrToday(filter: DateFilterDto): [Games!]!
   getLiveGameSessions: [GameSession!]!
   getProfitAndLoss: ProfitAndLoss!
   getRecordSessionBy(id: Int!): RecordSessionKqj!
@@ -227,6 +243,7 @@ type Query {
   getUserById(id: Int!): User!
   getUserByRole(role: String!): [User!]!
   getUsersByCreatedAt(date: DateTime!): [User!]!
+  searchRecords(offset: PaginationMetadataDto!, searchTerm: String!, sessionId: Int!): RecordSessionKqjPagination!
   searchUser(filters: UserFiltersInput!, skip: Int!, take: Int!): PaginatedUserDto!
   signIn(signInCredential: SignInCredential!): UserToken!
 }
@@ -245,6 +262,11 @@ type RecordSessionKqj {
   updatedAt: DateTime!
   updatedBy: String!
   user: User!
+}
+
+type RecordSessionKqjPagination {
+  data: [RecordSessionKqj!]!
+  totalSize: Int!
 }
 
 enum RecordSessionStatus {
