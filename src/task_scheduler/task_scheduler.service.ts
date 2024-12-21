@@ -170,6 +170,8 @@ export class TaskScheduler {
           );
           continue;
         }
+
+        // start game
         const startJob: CronJob = new CronJob(
           `${start.getMinutes()} ${start.getHours()} ${start.getDate()} ${start.getMonth() + 1} *`,
           async () => {
@@ -186,6 +188,8 @@ export class TaskScheduler {
         );
         startJob.runOnce = true;
 
+
+        // end game
         const endJob: CronJob = new CronJob(
           `${end.getMinutes()} ${end.getHours()} ${end.getDate()} ${end.getMonth() + 1} *`,
           async () => {
@@ -203,8 +207,23 @@ export class TaskScheduler {
         );
         endJob.runOnce = true;
 
+        // game result
+        // show result before one min
+        const resultJob: CronJob = new CronJob(
+          `${end.getMinutes() -1 } ${end.getHours()} ${end.getDate()} ${end.getMonth() + 1} *`,
+          async () => {
+            console.log('show game session result');
+
+            this.gamesocketGateway.broadcastEvent('gameResult', {
+              sessionId: session.id,
+            });
+          },
+        );
+        resultJob.runOnce = true;
+
         this.schedulerRegistry.addCronJob(`session start ${start}`, startJob);
         this.schedulerRegistry.addCronJob(`session end ${end}`, endJob);
+        this.schedulerRegistry.addCronJob(`session result ${end}`, resultJob);
 
         startJob.start();
         endJob.start();
