@@ -8,7 +8,6 @@ import { GameSessionKqj } from 'src/game_session_kqj/dbrepo/game_session.reposit
 import { Games } from 'src/games/dbrepo/games.repository';
 import {
   Between,
-  IsNull,
   LessThanOrEqual,
   MoreThan,
   MoreThanOrEqual,
@@ -30,32 +29,35 @@ export class TaskScheduler {
     private readonly dailyGameRepository: Repository<DailyGame>,
     private schedulerRegistry: SchedulerRegistry,
     private gamesocketGateway: GamesocketGateway,
-  ) { }
+  ) {}
 
-  @Cron('27 17 * * *', { name: 'createDailyGame' })
+  @Cron('27 22 * * *', { name: 'createDailyGame' })
   async createDailyGame(): Promise<void> {
+    console.log('creating game sessions');
+
     try {
       const currentDate = new Date();
-      console.log(currentDate);
-      const game: Games | null = await this.gamesRepository.findOne({
+
+      const game = await this.gamesRepository.findOne({
         where: {
           start_date: LessThanOrEqual(currentDate),
           end_date: MoreThanOrEqual(currentDate),
         },
       });
-      if (game === null) {
+
+      if (!game) {
         throw new NotFoundException('No game found for the current date.');
       }
+
       const dailyGameToCreate = {
         games: game,
         createdAt: currentDate,
         updatedAt: currentDate,
       };
+
       await this.dailyGameRepository.save(dailyGameToCreate);
       await this.createGameSessions();
     } catch (error) {
-      console.log(error);
-
       if (error instanceof NotFoundException) {
         throw error;
       } else {
@@ -66,11 +68,12 @@ export class TaskScheduler {
 
   private async createGameSessions(): Promise<GameSessionKqj[]> {
     const currentDate = new Date();
+
+    // Set the current date (today) without the time component
     const startOfDay = new Date(currentDate.setHours(0, 0, 0, 0));
     const currentDateWithTime = new Date(currentDate.setHours(23, 59, 59, 999));
-    console.log(startOfDay);
-    
 
+    // Fetch today's DailyGame
     const dailyGame = await this.dailyGameRepository.findOne({
       where: {
         createdAt: Between(startOfDay, currentDateWithTime),
@@ -83,24 +86,21 @@ export class TaskScheduler {
     }
 
     const { games } = dailyGame;
-    const { start_time, game_duration, game_in_day, start_date, end_date } = games;
+    const { start_time, game_duration, game_in_day, start_date, end_date } =
+      games;
 
     // Check for overlapping game sessions
     const overlappingGameSession = await this.gameSessionKqjRepository.findOne({
-      where: {
-        session_start_time: Between(startOfDay, currentDateWithTime),
-        session_end_time: Between(startOfDay, currentDateWithTime),
-      }
-      // where: [
-      // {
-      //   session_start_time: LessThanOrEqual(end_date),
-      //   session_end_time: MoreThan(start_date),
-      // },
-      // {
-      //   session_start_time: MoreThan(start_date),
-      //   session_end_time: LessThanOrEqual(end_date),
-      // },
-      // ],
+      where: [
+        {
+          session_start_time: LessThanOrEqual(end_date),
+          session_end_time: MoreThan(start_date),
+        },
+        {
+          session_start_time: MoreThan(start_date),
+          session_end_time: LessThanOrEqual(end_date),
+        },
+      ],
     });
 
     if (overlappingGameSession) {
@@ -108,6 +108,8 @@ export class TaskScheduler {
         'A game session already exists within the specified time range.',
       );
     }
+
+    // Helper function to add seconds to a time string and return a Date with both date and time
     const addSecondsToDateTime = (
       date: Date,
       time: string,
@@ -121,19 +123,25 @@ export class TaskScheduler {
     };
 
     // Create session start and end times
-    const sessionsToCreate: { start_time: Date; end_time: Date, session_status: GameSessionStatus }[] = [];
+    const sessionsToCreate: {
+      start_time: Date;
+      end_time: Date;
+      session_status: GameSessionStatus;
+    }[] = [];
     let currentStartTime = addSecondsToDateTime(startOfDay, start_time); // Initial session start time at game start time
-    const currentTime = new Date()
-
+    const currentTime = new Date();
+    // Iterate to create the sessions
     for (let i = 0; i < game_in_day; i++) {
+      // Calculate the end time for each session based on the game duration
       const endTime = new Date(currentStartTime);
       endTime.setSeconds(currentStartTime.getSeconds() + game_duration); // Add game_duration in seconds to get the end time
+
       sessionsToCreate.push({
         start_time: currentStartTime,
         end_time: endTime,
         session_status:
-          (currentTime.getTime() < endTime.getTime() &&
-            currentTime.getTime() > currentStartTime.getTime())
+          currentTime.getTime() < endTime.getTime() &&
+          currentTime.getTime() > currentStartTime.getTime()
             ? GameSessionStatus.LIVE
             : currentTime.getTime() < currentStartTime.getTime()
               ? GameSessionStatus.UPCOMING
@@ -146,17 +154,19 @@ export class TaskScheduler {
     const gameSessions = this.gameSessionKqjRepository.create(
       sessionsToCreate.map((session) => ({
         game: games,
-        session_start_time: session.start_time.toISOString(),
-        session_end_time: session.end_time.toISOString(),
-        session_status: session.session_status,
+        session_start_time: session.start_time.toISOString(), // Store in ISO 8601 format (YYYY-MM-DDTHH:MM:SS)
+        session_end_time: session.end_time.toISOString(), // Store in ISO 8601 format (YYYY-MM-DDTHH:MM:SS)
+        session_status: GameSessionStatus.UPCOMING,
       })),
     );
 
     try {
-      const createdSession = await this.gameSessionKqjRepository.save(gameSessions);
+      const createdSession =
+        await this.gameSessionKqjRepository.save(gameSessions);
+
       for (const session of gameSessions) {
         let start = session.session_start_time;
-        let end = session.session_end_time;
+        let end = session.session_start_time;
 
         if (typeof start === 'string' || typeof end == 'string') {
           start = new Date(start);
@@ -164,22 +174,26 @@ export class TaskScheduler {
         }
         // Validate Date
         if (isNaN(start.getTime()) || isNaN(end.getTime())) {
-          console.error('Invalid date for session_start_time:', session.session_start_time);
+          console.error(
+            'Invalid date for session_start_time:',
+            session.session_start_time,
+          );
           continue;
         }
-        const toMinmiumDigit = (value: number) => `${value < 10 ? `0${value}` : value}`
-        console.log("Session start at ->", `${toMinmiumDigit(start.getMinutes())} ${toMinmiumDigit(start.getHours())} ${toMinmiumDigit(start.getDate())} ${toMinmiumDigit(start.getMonth() + 1)} *`);
-        console.log("Session end at ->", `${toMinmiumDigit(end.getMinutes())} ${toMinmiumDigit(end.getHours())} ${toMinmiumDigit(end.getDate())} ${toMinmiumDigit(end.getMonth() + 1)} *`);
-
+        const toMinmiumDigit = (value: number) =>
+          `${value < 10 ? `0${value}` : value}`;
         // start game
         const startJob: CronJob = new CronJob(
           `${toMinmiumDigit(start.getMinutes())} ${toMinmiumDigit(start.getHours())} ${toMinmiumDigit(start.getDate())} ${toMinmiumDigit(start.getMonth() + 1)} *`,
           async () => {
             console.log('stating game session ');
             const startSession = await this.gameSessionKqjRepository.update(
-              session.id, { session_status: GameSessionStatus.LIVE },
+              session.id,
+              { session_status: GameSessionStatus.LIVE },
             );
-            this.gamesocketGateway.broadcastEvent('gameStart', { sessionId: session.id });
+            this.gamesocketGateway.broadcastEvent('gameStart', {
+              sessionId: session.id,
+            });
           },
         );
         startJob.runOnce = true;
@@ -204,9 +218,14 @@ export class TaskScheduler {
           `${toMinmiumDigit(end.getMinutes() - 1)} ${toMinmiumDigit(end.getHours())} ${toMinmiumDigit(end.getDate())} ${toMinmiumDigit(end.getMonth() + 1)} *`,
           async () => {
             console.log('show game session result');
-            let game_result: GameKqjCards = session.game_result_card ? session.game_result_card : generateResult(GameKqjCards);
+            let game_result: GameKqjCards = session.game_result_card
+              ? session.game_result_card
+              : generateResult(GameKqjCards);
             // console.log("game ka result -> ", session);
-            this.gamesocketGateway.broadcastEvent('gameResult', { sessionId: session.id, game_result });
+            this.gamesocketGateway.broadcastEvent('gameResult', {
+              sessionId: session.id,
+              game_result,
+            });
           },
         );
         resultJob.runOnce = true;
