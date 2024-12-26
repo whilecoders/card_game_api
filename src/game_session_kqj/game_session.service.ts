@@ -66,11 +66,13 @@ export class GameSessionKqjService {
     };
   }
 
-  async getLiveGameSessions(): Promise<GameSessionKqj[]> {
-    return await this.gameSessionKqjRepository.find({
-      where: { session_status: GameSessionStatus.LIVE },
+  async getLiveGameSessions(): Promise<GameSessionKqj> {
+    const finded = await this.gameSessionKqjRepository.findOne({
+      where: { session_status: GameSessionStatus.LIVE, createdAt: new Date() },
       relations: ['game', 'record_session_kqj'],
     });
+    // console.log(finded);
+    return finded
   }
 
   async getGameSessionsByDateOrToday(

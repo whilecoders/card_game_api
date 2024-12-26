@@ -223,12 +223,12 @@ type Query {
   getCurrentRunningSessions: [GameSession!]!
   getDailyWinnersAndLosers: DailyWinnersAndLosers!
   getFinishedSessionsToday: Float!
-  getGameSessionBy(id: Int!): GameSession!
+  getGameSessionById(id: Int!): GameSession!
   getGameSessionsByDateOrToday(filter: DateFilterDto): [GameSession!]!
   getGamesBy(id: Int!): Games!
   getGamesByDate(filter: DateFilterDto): [Games!]!
   getGamesByDateOrToday(filter: DateFilterDto): [Games!]!
-  getLiveGameSessions: [GameSession!]!
+  getLiveGameSessions: GameSession
   getProfitAndLoss: ProfitAndLoss!
   getRecordSessionBy(id: Int!): RecordSessionKqj!
   getRecordsBy(UserId: Int!): [RecordSessionKqj!]!

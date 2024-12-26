@@ -326,12 +326,12 @@ export interface IQuery {
     getCurrentRunningSessions(): GameSession[] | Promise<GameSession[]>;
     getDailyWinnersAndLosers(): DailyWinnersAndLosers | Promise<DailyWinnersAndLosers>;
     getFinishedSessionsToday(): number | Promise<number>;
-    getGameSessionBy(id: number): GameSession | Promise<GameSession>;
+    getGameSessionById(id: number): GameSession | Promise<GameSession>;
     getGameSessionsByDateOrToday(filter?: Nullable<DateFilterDto>): GameSession[] | Promise<GameSession[]>;
     getGamesBy(id: number): Games | Promise<Games>;
     getGamesByDate(filter?: Nullable<DateFilterDto>): Games[] | Promise<Games[]>;
     getGamesByDateOrToday(filter?: Nullable<DateFilterDto>): Games[] | Promise<Games[]>;
-    getLiveGameSessions(): GameSession[] | Promise<GameSession[]>;
+    getLiveGameSessions(): Nullable<GameSession> | Promise<Nullable<GameSession>>;
     getProfitAndLoss(): ProfitAndLoss | Promise<ProfitAndLoss>;
     getRecordSessionBy(id: number): RecordSessionKqj | Promise<RecordSessionKqj>;
     getRecordsBy(UserId: number): RecordSessionKqj[] | Promise<RecordSessionKqj[]>;
