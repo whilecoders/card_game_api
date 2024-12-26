@@ -20,7 +20,7 @@ export class GameSessionKqjResolver {
     );
   }
 
-  @Query(() => GameSessionKqj, { name: 'getGameSessionBy' })
+  @Query(() => GameSessionKqj, { name: 'getGameSessionById' })
   async getGameSessionById(
     @Args({ name: 'id', type: () => Int }) id: number,
   ): Promise<GameSessionKqj> {
@@ -35,8 +35,8 @@ export class GameSessionKqjResolver {
     return this.gameSessionKqjService.getAllGameSessions(skip, take);
   }
 
-  @Query(() => [GameSessionKqj], { name: 'getLiveGameSessions' })
-  async getLiveGameSessions(): Promise<GameSessionKqj[]> {
+  @Query(() => GameSessionKqj, { name: 'getLiveGameSessions', nullable: true })
+  async getLiveGameSessions(): Promise<GameSessionKqj> {
     return await this.gameSessionKqjService.getLiveGameSessions();
   }
 
