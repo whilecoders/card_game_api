@@ -76,3 +76,15 @@ export enum TokenValues {
 export enum GameType {
   KQJ = 'KQJ',
 }
+
+export enum NotificationType {
+  MESSAGE = 'MESSAGE',
+  SYSTEM = 'SYSTEM',
+  COMMENT = 'COMMENT',
+  LIKE = 'LIKE',
+}
+
+export enum NotificationStatus {
+  READ = 'READ',
+  UNREAD = 'UNREAD',
+}

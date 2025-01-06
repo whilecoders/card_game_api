@@ -25,6 +25,7 @@ import { DashboardModule } from './dashboard/dashboard.module';
 import { GamesocketModule } from './gamesocket/gamesocket.module';
 import { TaskScheduler } from './task_scheduler/task_scheduler.service';
 import { GamesocketGateway } from './gamesocket/gamesocket.gateway';
+import { NotificationModule } from './notification/notification.module';
 
 @Module({
   imports: [
@@ -61,6 +62,7 @@ import { GamesocketGateway } from './gamesocket/gamesocket.gateway';
     TaskSchedulerModule,
     DashboardModule,
     GamesocketModule,
+    NotificationModule,
   ],
   controllers: [AppController],
   providers: [AppService, JWTService],
