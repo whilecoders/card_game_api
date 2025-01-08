@@ -133,7 +133,7 @@ export interface PaginationMetadataDto {
 export interface ResetPasswordDto {
     confirmPassword: string;
     currentPassword: string;
-    email: string;
+    id: number;
     newPassword: string;
 }
 
@@ -177,11 +177,13 @@ export interface UpdateUserDto {
     address?: Nullable<string>;
     city?: Nullable<string>;
     email?: Nullable<string>;
+    first_time_password_reset?: Nullable<boolean>;
     name?: Nullable<string>;
     phone_number?: Nullable<string>;
     role?: Nullable<Role>;
     status?: Nullable<UserStatus>;
     username?: Nullable<string>;
+    wallet_limit?: Nullable<number>;
 }
 
 export interface UserFiltersInput {
@@ -427,6 +429,7 @@ export interface User {
     deletedAt: DateTime;
     deletedBy: string;
     email: string;
+    first_time_password_reset: boolean;
     id: number;
     name?: Nullable<string>;
     password: string;
@@ -441,6 +444,7 @@ export interface User {
     userTransactions: Transaction;
     username: string;
     wallet: number;
+    wallet_limit: number;
 }
 
 export interface UserToken {
