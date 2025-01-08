@@ -1,13 +1,13 @@
 import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
-import { EnvKeyConstants } from '../constants/index';
+import { EnvKeyConstants, Role } from '../constants/index';
 
 @Injectable()
 export class JWTService {
   constructor(private jwtService: JwtService) {}
 
   // Generate Access Token
-  async generateAccessToken(userId: number, role: string): Promise<string> {
+  async generateAccessToken(userId: number, role: Role): Promise<string> {
     return this.jwtService.signAsync(
       { sub: userId, role: role },
       { secret: EnvKeyConstants.JWT_SECRET, expiresIn: '1h' },
@@ -15,7 +15,7 @@ export class JWTService {
   }
 
   // Generate Refresh Token
-  async generateRefreshToken(userId: number, role: string): Promise<string> {
+  async generateRefreshToken(userId: number, role: Role): Promise<string> {
     return this.jwtService.signAsync(
       { sub: userId, role: role },
       { secret: EnvKeyConstants.JWT_REFRESH_SECRET, expiresIn: '1d' },

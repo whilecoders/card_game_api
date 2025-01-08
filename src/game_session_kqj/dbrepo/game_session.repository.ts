@@ -26,11 +26,11 @@ export class GameSessionKqj extends BaseEntity {
   game_result_card: GameKqjCards;
 
   @Field(() => Date, { nullable: true })
-  @Column({ type: 'timestamp', nullable: true })
+  @Column({ type: 'timestamp', precision: 3, nullable: true })
   session_start_time: Date;
 
   @Field(() => Date, { nullable: true })
-  @Column({ type: 'timestamp', nullable: true })
+  @Column({ type: 'timestamp', precision: 3, nullable: true })
   session_end_time: Date;
 
   @Field(() => GameSessionStatus, { nullable: false })

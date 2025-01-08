@@ -25,6 +25,11 @@ import { DashboardModule } from './dashboard/dashboard.module';
 import { GamesocketModule } from './gamesocket/gamesocket.module';
 import { TaskScheduler } from './task_scheduler/task_scheduler.service';
 import { GamesocketGateway } from './gamesocket/gamesocket.gateway';
+import { AuditLogModule } from './audit-log/audit-log.module';
+import { PermissionModule } from './permission/permission.module';
+import { APP_GUARD, APP_INTERCEPTOR } from '@nestjs/core';
+import { PermissionGuard } from './permission/permission.guard';
+import { AuditLogInterceptor } from './audit-log/audit-log.interceptor';
 
 @Module({
   imports: [
@@ -61,9 +66,18 @@ import { GamesocketGateway } from './gamesocket/gamesocket.gateway';
     TaskSchedulerModule,
     DashboardModule,
     GamesocketModule,
+    AuditLogModule,
+    PermissionModule,
   ],
   controllers: [AppController],
-  providers: [AppService, JWTService],
+  providers: [
+    AppService,
+    JWTService,
+    // {
+    //   provide: APP_INTERCEPTOR,
+    //   useClass: AuditLogInterceptor,
+    // },
+  ],
   exports: [JWTService, JwtModule],
 })
-export class AppModule { }
+export class AppModule {}

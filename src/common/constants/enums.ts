@@ -76,3 +76,17 @@ export enum TokenValues {
 export enum GameType {
   KQJ = 'KQJ',
 }
+
+export enum AuditActionType {
+  CREATE = 'CREATE',
+  UPDATE = 'UPDATE',
+  DELETE = 'DELETE',
+}
+
+export enum AuditEntityType {
+  User = 'User',
+  Game = 'Game',
+  DailyGame = 'DailyGame',
+  GameSession = 'GameSession',
+  Transaction = 'Transaction',
+}

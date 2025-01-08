@@ -3,7 +3,9 @@ import { DashboardService } from './dashboard.service';
 import { DailyWinnersAndLosers } from './dto/Daily-Winner-Looser.input';
 import { ProfitAndLoss } from './dto/profite-loss.input';
 import { GameSessionKqj } from 'src/game_session_kqj/dbrepo/game_session.repository';
-
+import { UseGuards } from '@nestjs/common';
+import { AuthGuard } from 'src/auth/auth.guard';
+@UseGuards(AuthGuard)
 @Resolver()
 export class DashboardResolver {
   constructor(private readonly dashboardService: DashboardService) {}
@@ -18,11 +20,6 @@ export class DashboardResolver {
     return this.dashboardService.getFinishedSessionsToday();
   }
 
-  // upcomming session
-  // current running session
-
-
-  
   @Query(() => Number)
   async getTotalUsersToday(): Promise<number> {
     return this.dashboardService.getTotalUsersToday();
@@ -52,5 +49,4 @@ export class DashboardResolver {
   async getCurrentRunningSessions(): Promise<GameSessionKqj[]> {
     return await this.dashboardService.getLiveSessions();
   }
-  
 }

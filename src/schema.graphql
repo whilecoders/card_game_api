@@ -11,6 +11,34 @@ input AddUserDto {
   username: String!
 }
 
+enum AuditActionType {
+  CREATE
+  DELETE
+  UPDATE
+}
+
+enum AuditEntityType {
+  DailyGame
+  Game
+  GameSession
+  Transaction
+  User
+}
+
+type AuditLog {
+  action: AuditActionType!
+  createdAt: DateTime!
+  createdBy: String!
+  deletedAt: DateTime!
+  deletedBy: String!
+  details: String
+  entity: AuditEntityType!
+  id: Int!
+  updatedAt: DateTime!
+  updatedBy: String!
+  user_id: User
+}
+
 input CreateGamesDto {
   admin_id: Int!
   end_date: DateTime!
@@ -21,6 +49,13 @@ input CreateGamesDto {
   game_type: GameType!
   start_date: DateTime!
   start_time: String!
+}
+
+input CreatePermissionInput {
+  action: String!
+  allowed: Boolean!
+  role: Role
+  userId: String
 }
 
 input CreateRecordSessionKqjDto {
@@ -163,6 +198,9 @@ type Mutation {
   addUser(addUserDto: AddUserDto!): User!
   adminSignUp(signUpCredential: SignUpCredential!): User!
   createGames(createGamesDto: CreateGamesDto!): Games!
+
+  """Create a new permission"""
+  createPermission(createPermissionInput: CreatePermissionInput!): Permission!
   createRecordSession(createRecordSessionKqjDto: CreateRecordSessionKqjDto!): RecordSessionKqj!
   createTransactionSession(createTransactionSessionDto: CreateTransactionSessionDto!): TransactionSession!
   deleteUser(adminId: Float!, userId: Float!): Boolean!
@@ -171,13 +209,22 @@ type Mutation {
   removeSessionFromGame(deleteBy: Int!, gameSessionId: Int!): Boolean!
   removeUserFromGame(deleteBy: Int!, gameSessionId: Int!, userId: Int!): Boolean!
   resetPassword(resetPasswordDto: ResetPasswordDto!): String!
+  restrictUserAction(action: String!, userId: Float!): String!
   suspendUser(suspendUserDto: SuspendUserDto!): User!
+  unrestrictUserAction(action: String!, userId: Float!): String!
   updateGameSession(id: Int!, updateGameSessionDto: UpdateGameSessionDto!): GameSession!
   updateGames(updateGamesDto: UpdateGamesDto!): Games!
   updateUser(id: Int!, updateUserDto: UpdateUserDto!): User!
   updateUserRecordStatus(gameSessionId: Int!, recordStatus: RecordSessionStatus!, userId: Int!): RecordSessionKqj!
   updateWallet(adminId: Float!, userId: Float!, walletData: WalletDto!): Transaction!
   userSignUp(signUpCredential: SignUpCredential!): User!
+}
+
+type PaginatedAuditLogDto {
+  count: Int!
+  data: [AuditLog!]!
+  skip: Int!
+  take: Int!
 }
 
 type PaginatedGameSessionKqjDto {
@@ -207,6 +254,20 @@ input PaginationMetadataDto {
   take: Int!
 }
 
+type Permission {
+  action: String!
+  allowed: Boolean
+  createdAt: DateTime!
+  createdBy: String!
+  deletedAt: DateTime!
+  deletedBy: String!
+  id: Int!
+  role: Role
+  updatedAt: DateTime!
+  updatedBy: String!
+  user: User
+}
+
 type ProfitAndLoss {
   loss: Float!
   net: Float!
@@ -214,7 +275,7 @@ type ProfitAndLoss {
 }
 
 type Query {
-  getAllGameSessions(result: String!, sessionId: Int!): PaginatedGameSessionKqjDto!
+  getAllGameSessions(skip: Int!, take: Int!): PaginatedAuditLogDto!
   getAllGameses(skip: Int!, take: Int!): PaginatedGamesDto!
   getAllRecordSessions: [RecordSessionKqj!]!
   getAllRecordsBySessionId(offset: PaginationMetadataDto!, sessionId: Int!): RecordSessionKqjPagination!
@@ -399,6 +460,7 @@ input UpdateUserDto {
 
 type User {
   address: String
+  audit_log_id: AuditLog!
   city: String!
   createdAt: DateTime!
   createdBy: String!
@@ -409,6 +471,7 @@ type User {
   id: Int!
   name: String
   password: String!
+  permissions: Permission!
   phone_number: String!
   profile: String
   record_session_kqj: RecordSessionKqj!

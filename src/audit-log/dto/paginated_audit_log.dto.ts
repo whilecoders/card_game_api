@@ -1,10 +1,10 @@
 import { Field, Int, ObjectType } from '@nestjs/graphql';
-import { GameSessionKqj } from '../dbrepo/game_session.repository';
+import { AuditLog } from '../dbrepo/audit_log.repository';
 
 @ObjectType()
-export class PaginatedGameSessionKqjDto {
-  @Field(() => [GameSessionKqj])
-  data: GameSessionKqj[];
+export class PaginatedAuditLogDto {
+  @Field(() => [AuditLog])
+  data: AuditLog[];
 
   @Field(() => Int)
   count: number;

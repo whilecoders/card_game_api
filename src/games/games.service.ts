@@ -10,19 +10,21 @@ import {
   Between,
   LessThanOrEqual,
   MoreThan,
-  MoreThanOrEqual,
   Not,
   Repository,
 } from 'typeorm';
-import { GameSessionKqj } from 'src/game_session_kqj/dbrepo/game_session.repository';
 import { User } from 'src/user/dbrepo/user.repository';
 import { Games } from './dbrepo/games.repository';
 import { CreateGamesDto } from './dto/create-game.input';
 import { UpdateGamesDto as UpdateGameDto } from './dto/update-game.input';
-import { GameSessionStatus } from 'src/common/constants';
-import { DailyGame } from 'src/daily_game/dbrepo/daily_game.repository';
+import {
+  AuditActionType,
+  AuditDetails,
+  AuditEntityType,
+} from 'src/common/constants';
 import { PaginatedGamesDto } from './dto/paginated-game.dto';
 import { DateFilterDto } from 'src/common/model/date-filter.dto';
+import { AuditLog } from 'src/audit-log/dbrepo/audit_log.repository';
 
 @Injectable()
 export class GamesService {
@@ -30,14 +32,11 @@ export class GamesService {
     @Inject('GAMES_REPOSITORY')
     private readonly gamesRepository: Repository<Games>,
 
-    @Inject('GAME_SESSION_KQJ_REPOSITORY')
-    private readonly gameSessionKqjRepository: Repository<GameSessionKqj>,
-
     @Inject('USER_REPOSITORY')
     private readonly userRepository: Repository<User>,
 
-    @Inject('DAILY_GAME_REPOSITORY')
-    private readonly dailyGameRepository: Repository<DailyGame>,
+    @Inject('AUDIT_LOG_REPOSITORY')
+    private readonly auditLogRepository: Repository<AuditLog>,
   ) {}
 
   async createGame(createGameDto: CreateGamesDto): Promise<Games> {
@@ -85,6 +84,18 @@ export class GamesService {
           'Failed to create GameLaunch. Please try again.',
         );
       }
+      const auditDetails = AuditDetails.create(
+        game_created.createdAt,
+        game_created.admin.username,
+        AuditEntityType.Game,
+      );
+      const audit = this.auditLogRepository.create({
+        action: AuditActionType.CREATE,
+        entity: AuditEntityType.Game,
+        user_id: admin,
+        details: auditDetails,
+      });
+      await this.auditLogRepository.save(audit);
       return game_created;
     } catch (error) {
       console.log(error);
@@ -95,7 +106,7 @@ export class GamesService {
   async updateGame(updateGameDto: UpdateGameDto): Promise<Games> {
     try {
       console.log(updateGameDto);
-      
+
       const game = await this.gamesRepository.findOne({
         where: { id: updateGameDto.game_id },
         relations: { admin: true, gameSession: true },
@@ -215,7 +226,9 @@ export class GamesService {
         start = new Date(filter.startDate);
         end = new Date(filter.endDate);
         if (isNaN(start.getTime()) || isNaN(end.getTime())) {
-          throw new BadRequestException('Invalid date format. Please provide valid ISO dates.');
+          throw new BadRequestException(
+            'Invalid date format. Please provide valid ISO dates.',
+          );
         }
       } else {
         const today = new Date();
@@ -223,9 +236,9 @@ export class GamesService {
         end = new Date(today.setDate(today.getDate() + 14));
       }
       console.log(Between(start, end));
-      
+
       const games = await this.gamesRepository.find({
-        where: { start_date: Between(start, end)},
+        where: { start_date: Between(start, end) },
         relations: ['gameSession'],
       });
       if (!games.length) {
@@ -234,7 +247,9 @@ export class GamesService {
       return games;
     } catch (error) {
       console.error('Error retrieving game sessions:', error);
-      throw new InternalServerErrorException('Failed to retrieve game sessions.');
+      throw new InternalServerErrorException(
+        'Failed to retrieve game sessions.',
+      );
     }
   }
 

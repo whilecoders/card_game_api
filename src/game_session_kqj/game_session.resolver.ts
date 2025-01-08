@@ -4,11 +4,20 @@ import { GameSessionKqj } from './dbrepo/game_session.repository';
 import { GameSessionKqjService } from './game_session.service';
 import { PaginatedGameSessionKqjDto } from './dto/paginated-game-session-kqj';
 import { DateFilterDto } from 'src/common/model/date-filter.dto';
+import { UseGuards } from '@nestjs/common';
+import { AuthGuard } from 'src/auth/auth.guard';
+import { RoleGuard } from 'src/auth/role.guard';
+import { Role } from 'src/graphql';
+import { PermissionGuard } from 'src/permission/permission.guard';
 
+@UseGuards(AuthGuard)
 @Resolver(() => GameSessionKqj)
 export class GameSessionKqjResolver {
-  constructor(private readonly gameSessionKqjService: GameSessionKqjService) { }
-
+  constructor(private readonly gameSessionKqjService: GameSessionKqjService) {}
+  @UseGuards(
+    new RoleGuard([Role.MASTER, Role.ADMIN, Role.SYSTEM, Role.SUPERADMIN]),
+    PermissionGuard,
+  )
   @Mutation(() => GameSessionKqj)
   async updateGameSession(
     @Args({ name: 'id', type: () => Int }) id: number,
@@ -40,20 +49,11 @@ export class GameSessionKqjResolver {
     return await this.gameSessionKqjService.getLiveGameSessions();
   }
 
-
   @Query(() => [GameSessionKqj], { name: 'getGameSessionsByDateOrToday' })
   async getGameSessionsByDateOrToday(
-    @Args('filter', { type: () => DateFilterDto, nullable: true }) filter?: DateFilterDto,
+    @Args('filter', { type: () => DateFilterDto, nullable: true })
+    filter?: DateFilterDto,
   ): Promise<GameSessionKqj[]> {
     return this.gameSessionKqjService.getGameSessionsByDateOrToday(filter);
-  }
-
-
-  @Query(() => PaginatedGameSessionKqjDto, { name: 'getAllGameSessions' })
-  async setSessionResult(
-    @Args('sessionId', { type: () => Int }) sessionId: number,
-    @Args('result', { type: () => String }) result: string,
-  ): Promise<string | null> {
-    return this.gameSessionKqjService.setSessionResult(sessionId, result);
   }
 }

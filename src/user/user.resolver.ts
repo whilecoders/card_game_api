@@ -1,14 +1,17 @@
 import { Resolver, Query, Mutation, Args, Int } from '@nestjs/graphql';
 import { UserService } from './user.service';
 import { User } from './dbrepo/user.repository';
-import { NotFoundException } from '@nestjs/common';
+import { NotFoundException, UseGuards } from '@nestjs/common';
 import { Role } from 'src/common/constants/enums';
 import { AddUserDto } from './dto/add_user.dto';
 import { UpdateUserDto } from './dto/update_user.dto';
 import { SuspendUserDto } from './dto/suspend_user.dto';
 import { PaginatedUserDto } from './dto/paginated-user.dto';
 import { UserFiltersInput } from './dto/user_filter.dto';
-
+import { AuthGuard } from 'src/auth/auth.guard';
+import { RoleGuard } from 'src/auth/role.guard';
+import { PermissionGuard } from 'src/permission/permission.guard';
+@UseGuards(AuthGuard)
 @Resolver(() => User)
 export class UserResolver {
   constructor(private readonly userService: UserService) {}
@@ -54,6 +57,10 @@ export class UserResolver {
     }
   }
 
+  @UseGuards(
+    new RoleGuard([Role.ADMIN, Role.SYSTEM, Role.SUPERADMIN, Role.MASTER]),
+    PermissionGuard,
+  )
   @Mutation(() => User)
   async addUser(@Args('addUserDto') addUserDto: AddUserDto): Promise<User> {
     try {
@@ -63,6 +70,10 @@ export class UserResolver {
     }
   }
 
+  @UseGuards(
+    new RoleGuard([Role.ADMIN, Role.SYSTEM, Role.SUPERADMIN, Role.MASTER]),
+    PermissionGuard,
+  )
   @Mutation(() => User)
   async updateUser(
     @Args('id', { type: () => Int }) id: number,
@@ -75,6 +86,10 @@ export class UserResolver {
     }
   }
 
+  @UseGuards(
+    new RoleGuard([Role.SYSTEM, Role.SUPERADMIN, Role.MASTER]),
+    PermissionGuard,
+  )
   @Mutation(() => User)
   async suspendUser(
     @Args('suspendUserDto') suspendUserDto: SuspendUserDto,
@@ -86,6 +101,10 @@ export class UserResolver {
     }
   }
 
+  @UseGuards(
+    new RoleGuard([Role.SYSTEM, Role.SUPERADMIN, Role.MASTER]),
+    PermissionGuard,
+  )
   @Mutation(() => Boolean, { name: 'deleteUser' })
   async deleteUser(
     @Args('userId') userId: number,

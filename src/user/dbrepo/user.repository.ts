@@ -1,8 +1,10 @@
 import { Field, Int, ObjectType, registerEnumType } from '@nestjs/graphql';
+import { AuditLog } from 'src/audit-log/dbrepo/audit_log.repository';
 import { Role, UserStatus } from 'src/common/constants/enums';
 import { BaseEntity } from 'src/common/repository/base.repository';
 import { Games } from 'src/games/dbrepo/games.repository';
 import { Message } from 'src/message/dbrepo/message.repository';
+import { Permission } from 'src/permission/dbrepo/permission.repository';
 import { RecordSessionKqj } from 'src/record_session_kqj/dbrepo/record_session_kqj.repository';
 import { Room } from 'src/room/dbrepo/room.repository';
 import { Transaction } from 'src/transaction/dbrepo/transaction.repository';
@@ -99,4 +101,14 @@ export class User extends BaseEntity {
   @OneToOne(() => Message, (message) => message.sender)
   @JoinColumn({ name: 'sender' })
   sender: Message;
+
+  @Field(() => AuditLog)
+  @OneToMany(() => AuditLog, (audit) => audit.user_id)
+  @JoinColumn({ name: 'user_id' })
+  audit_log_id: AuditLog;
+
+  @Field(() => Permission)
+  @OneToMany(() => Permission, (permission) => permission.user)
+  @JoinColumn({ name: 'user' })
+  permissions: Permission[];
 }

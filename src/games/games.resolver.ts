@@ -8,13 +8,18 @@ import { DateFilterDto } from 'src/common/model/date-filter.dto';
 import { UseGuards } from '@nestjs/common';
 import { AuthGuard } from 'src/auth/auth.guard';
 import { RoleGuard } from 'src/auth/role.guard';
+import { Role } from 'src/common/constants';
+import { PermissionGuard } from 'src/permission/permission.guard';
 
 @UseGuards(AuthGuard)
 @Resolver(() => Games)
 export class GamesResolver {
-  constructor(private readonly GamesService: GamesService) { }
+  constructor(private readonly GamesService: GamesService) {}
 
-  @UseGuards(new RoleGuard(['USER', 'ADMIN']))
+  @UseGuards(
+    new RoleGuard([Role.MASTER, Role.SYSTEM, Role.SUPERADMIN]),
+    PermissionGuard,
+  )
   @Mutation(() => Games)
   async createGames(
     @Args('createGamesDto') createGamesDto: CreateGamesDto,
@@ -22,6 +27,10 @@ export class GamesResolver {
     return await this.GamesService.createGame(createGamesDto);
   }
 
+  @UseGuards(
+    new RoleGuard([Role.MASTER, Role.SYSTEM, Role.SUPERADMIN]),
+    PermissionGuard,
+  )
   @Mutation(() => Games)
   async updateGames(
     @Args('updateGamesDto') updateGamesDto: UpdateGamesDto,
@@ -29,6 +38,10 @@ export class GamesResolver {
     return await this.GamesService.updateGame(updateGamesDto);
   }
 
+  @UseGuards(
+    new RoleGuard([Role.MASTER, Role.SYSTEM, Role.SUPERADMIN]),
+    PermissionGuard,
+  )
   @Mutation(() => Boolean)
   async DeleteGames(
     @Args({ name: 'id', type: () => Int }) id: number,
@@ -37,6 +50,9 @@ export class GamesResolver {
     return true;
   }
 
+  @UseGuards(
+    PermissionGuard,
+  )
   @Query(() => PaginatedGamesDto, { name: 'getAllGameses' })
   async getAllGameses(
     @Args('skip', { type: () => Int }) skip: number,
@@ -63,7 +79,8 @@ export class GamesResolver {
   // @UseGuards(new RoleGuard(['USER', 'ADMIN']))
   @Query(() => [Games], { name: 'getGamesByDateOrToday' })
   async getGamesByDateOrToday(
-    @Args('filter', { type: () => DateFilterDto, nullable: true }) filter?: DateFilterDto,
+    @Args('filter', { type: () => DateFilterDto, nullable: true })
+    filter?: DateFilterDto,
   ): Promise<Games[]> {
     return this.GamesService.getGamesByDateOrToday(filter);
   }

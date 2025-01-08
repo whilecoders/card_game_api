@@ -11,11 +11,9 @@ import { CreateRecordSessionKqjDto } from './dto/create-record_session_kqj.input
 import { User } from 'src/user/dbrepo/user.repository';
 import { GameSessionKqj } from 'src/game_session_kqj/dbrepo/game_session.repository';
 import { RecordStatus, TransactionType } from 'src/common/constants';
-import { DailyWinnersAndLosers } from '../dashboard/dto/Daily-Winner-Looser.input';
 import { DateFilterDto } from 'src/common/model/date-filter.dto';
 import { TransactionSession } from 'src/transaction_session/dbrepo/transaction_session.repository';
 import { PaginationMetadataDto } from 'src/common/model';
-import { off } from 'process';
 
 @Injectable()
 export class RecordSessionKqjService {

@@ -17,7 +17,7 @@ export class GameSessionKqjService {
   constructor(
     @Inject('GAME_SESSION_KQJ_REPOSITORY')
     private readonly gameSessionKqjRepository: Repository<GameSessionKqj>,
-  ) { }
+  ) {}
 
   async updateGameSession(
     id: number,
@@ -72,7 +72,7 @@ export class GameSessionKqjService {
       relations: ['game', 'record_session_kqj'],
     });
     // console.log(finded);
-    return finded
+    return finded;
   }
 
   async getGameSessionsByDateOrToday(
@@ -86,7 +86,9 @@ export class GameSessionKqjService {
         start = new Date(filter.startDate);
         end = new Date(filter.endDate);
         if (isNaN(start.getTime()) || isNaN(end.getTime())) {
-          throw new BadRequestException('Invalid date format. Please provide valid ISO dates.');
+          throw new BadRequestException(
+            'Invalid date format. Please provide valid ISO dates.',
+          );
         }
       } else {
         const today = new Date();
@@ -100,22 +102,14 @@ export class GameSessionKqjService {
       // console.log(sessions);
       if (!sessions.length) {
         return [];
-        // throw new NotFoundException(
-        //   filter && filter.startDate && filter.endDate
-        //     ? `No game sessions found between ${filter.startDate} and ${filter.endDate}.`
-        //     : 'No game sessions found for today.',
-        // );
       }
       return sessions;
     } catch (error) {
       console.error('Error retrieving game sessions:', error);
-      throw new InternalServerErrorException('Failed to retrieve game sessions.');
+      throw new InternalServerErrorException(
+        'Failed to retrieve game sessions.',
+      );
     }
-  }
-
-
-  async setSessionResult(sessionId: number, result: string): Promise<string | null> {
-    return "";
   }
 
   async generateResult() {}

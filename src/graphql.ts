@@ -8,6 +8,20 @@
 /* tslint:disable */
 /* eslint-disable */
 
+export enum AuditActionType {
+    CREATE = "CREATE",
+    DELETE = "DELETE",
+    UPDATE = "UPDATE"
+}
+
+export enum AuditEntityType {
+    DailyGame = "DailyGame",
+    Game = "Game",
+    GameSession = "GameSession",
+    Transaction = "Transaction",
+    User = "User"
+}
+
 export enum GameKqjCards {
     JACK_OF_CLUBS = "JACK_OF_CLUBS",
     JACK_OF_DIAMONDS = "JACK_OF_DIAMONDS",
@@ -105,6 +119,13 @@ export interface CreateGamesDto {
     start_time: string;
 }
 
+export interface CreatePermissionInput {
+    action: string;
+    allowed: boolean;
+    role?: Nullable<Role>;
+    userId?: Nullable<string>;
+}
+
 export interface CreateRecordSessionKqjDto {
     choosen_card: GameKqjCards;
     gameSessionId: number;
@@ -200,6 +221,20 @@ export interface WalletDto {
     type: TransactionType;
 }
 
+export interface AuditLog {
+    action: AuditActionType;
+    createdAt: DateTime;
+    createdBy: string;
+    deletedAt: DateTime;
+    deletedBy: string;
+    details?: Nullable<string>;
+    entity: AuditEntityType;
+    id: number;
+    updatedAt: DateTime;
+    updatedBy: string;
+    user_id?: Nullable<User>;
+}
+
 export interface DailyGame {
     createdAt: DateTime;
     createdBy: string;
@@ -272,6 +307,7 @@ export interface IMutation {
     addUser(addUserDto: AddUserDto): User | Promise<User>;
     adminSignUp(signUpCredential: SignUpCredential): User | Promise<User>;
     createGames(createGamesDto: CreateGamesDto): Games | Promise<Games>;
+    createPermission(createPermissionInput: CreatePermissionInput): Permission | Promise<Permission>;
     createRecordSession(createRecordSessionKqjDto: CreateRecordSessionKqjDto): RecordSessionKqj | Promise<RecordSessionKqj>;
     createTransactionSession(createTransactionSessionDto: CreateTransactionSessionDto): TransactionSession | Promise<TransactionSession>;
     deleteUser(adminId: number, userId: number): boolean | Promise<boolean>;
@@ -280,13 +316,22 @@ export interface IMutation {
     removeSessionFromGame(deleteBy: number, gameSessionId: number): boolean | Promise<boolean>;
     removeUserFromGame(deleteBy: number, gameSessionId: number, userId: number): boolean | Promise<boolean>;
     resetPassword(resetPasswordDto: ResetPasswordDto): string | Promise<string>;
+    restrictUserAction(action: string, userId: number): string | Promise<string>;
     suspendUser(suspendUserDto: SuspendUserDto): User | Promise<User>;
+    unrestrictUserAction(action: string, userId: number): string | Promise<string>;
     updateGameSession(id: number, updateGameSessionDto: UpdateGameSessionDto): GameSession | Promise<GameSession>;
     updateGames(updateGamesDto: UpdateGamesDto): Games | Promise<Games>;
     updateUser(id: number, updateUserDto: UpdateUserDto): User | Promise<User>;
     updateUserRecordStatus(gameSessionId: number, recordStatus: RecordSessionStatus, userId: number): RecordSessionKqj | Promise<RecordSessionKqj>;
     updateWallet(adminId: number, userId: number, walletData: WalletDto): Transaction | Promise<Transaction>;
     userSignUp(signUpCredential: SignUpCredential): User | Promise<User>;
+}
+
+export interface PaginatedAuditLogDto {
+    count: number;
+    data: AuditLog[];
+    skip: number;
+    take: number;
 }
 
 export interface PaginatedGameSessionKqjDto {
@@ -310,6 +355,20 @@ export interface PaginatedUserDto {
     take: number;
 }
 
+export interface Permission {
+    action: string;
+    allowed?: Nullable<boolean>;
+    createdAt: DateTime;
+    createdBy: string;
+    deletedAt: DateTime;
+    deletedBy: string;
+    id: number;
+    role?: Nullable<Role>;
+    updatedAt: DateTime;
+    updatedBy: string;
+    user?: Nullable<User>;
+}
+
 export interface ProfitAndLoss {
     loss: number;
     net: number;
@@ -317,7 +376,7 @@ export interface ProfitAndLoss {
 }
 
 export interface IQuery {
-    getAllGameSessions(result: string, sessionId: number): PaginatedGameSessionKqjDto | Promise<PaginatedGameSessionKqjDto>;
+    getAllGameSessions(skip: number, take: number): PaginatedAuditLogDto | Promise<PaginatedAuditLogDto>;
     getAllGameses(skip: number, take: number): PaginatedGamesDto | Promise<PaginatedGamesDto>;
     getAllRecordSessions(): RecordSessionKqj[] | Promise<RecordSessionKqj[]>;
     getAllRecordsBySessionId(offset: PaginationMetadataDto, sessionId: number): RecordSessionKqjPagination | Promise<RecordSessionKqjPagination>;
@@ -420,6 +479,7 @@ export interface TransactionSession {
 
 export interface User {
     address?: Nullable<string>;
+    audit_log_id: AuditLog;
     city: string;
     createdAt: DateTime;
     createdBy: string;
@@ -430,6 +490,7 @@ export interface User {
     id: number;
     name?: Nullable<string>;
     password: string;
+    permissions: Permission;
     phone_number: string;
     profile?: Nullable<string>;
     record_session_kqj: RecordSessionKqj;
