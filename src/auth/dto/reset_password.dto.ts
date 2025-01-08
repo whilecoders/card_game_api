@@ -1,4 +1,4 @@
-import { Field, InputType } from '@nestjs/graphql';
+import { Field, InputType, Int } from '@nestjs/graphql';
 import {
   IsNotEmpty,
   IsString,
@@ -9,8 +9,8 @@ import {
 
 @InputType()
 export class ResetPasswordDto {
-  @Field(() => String)
-  email: string;
+  @Field(() => Int)
+  id: number;
 
   @Field(() => String)
   @IsNotEmpty({ message: 'Current Password cannot be empty' })

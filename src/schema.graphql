@@ -339,7 +339,7 @@ enum RecordSessionStatus {
 input ResetPasswordDto {
   confirmPassword: String!
   currentPassword: String!
-  email: String!
+  id: Int!
   newPassword: String!
 }
 
@@ -451,11 +451,13 @@ input UpdateUserDto {
   address: String
   city: String
   email: String
+  first_time_password_reset: Boolean
   name: String
   phone_number: String
   role: Role
   status: UserStatus
   username: String
+  wallet_limit: Float
 }
 
 type User {
@@ -468,6 +470,7 @@ type User {
   deletedAt: DateTime!
   deletedBy: String!
   email: String!
+  first_time_password_reset: Boolean!
   id: Int!
   name: String
   password: String!
@@ -483,6 +486,7 @@ type User {
   userTransactions: Transaction!
   username: String!
   wallet: Float!
+  wallet_limit: Float!
 }
 
 input UserFiltersInput {

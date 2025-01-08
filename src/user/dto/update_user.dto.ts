@@ -1,7 +1,9 @@
 import { InputType, Field, Int } from '@nestjs/graphql';
 import {
+  IsBoolean,
   IsEmail,
   IsEnum,
+  IsNumber,
   IsOptional,
   IsString,
   MaxLength,
@@ -50,4 +52,14 @@ export class UpdateUserDto {
   @IsEnum(UserStatus)
   @IsOptional()
   status?: UserStatus;
+
+  @Field(() => Boolean, { nullable: true })
+  @IsBoolean()
+  @IsOptional()
+  first_time_password_reset?: boolean;
+
+  @Field(() => Number, { nullable: true })
+  @IsNumber()
+  @IsOptional()
+  wallet_limit?: Number;
 }

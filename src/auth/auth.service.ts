@@ -171,7 +171,7 @@ export class AuthService {
   }
 
   async resetPassword(resetPasswordDto: ResetPasswordDto): Promise<string> {
-    const { email, currentPassword, newPassword, confirmPassword } =
+    const { id, currentPassword, newPassword, confirmPassword } =
       resetPasswordDto;
     if (newPassword !== confirmPassword) {
       throw new BadRequestException(
@@ -179,11 +179,11 @@ export class AuthService {
       );
     }
     try {
-      const user = await this.userRepository.findOne({ where: { email } });
+      const user = await this.userRepository.findOne({ where: { id, deletedAt: null, deletedBy: null } });
       if (!user) {
-        throw new NotFoundException(`User with email ${email} not found`);
+        throw new NotFoundException(`User with id ${id} not exist`);
       }
-      const isCurrentPasswordValid = await PasswordHashService.verifyPassword(
+      const isCurrentPasswordValid = PasswordHashService.verifyPassword(
         currentPassword,
         user.password,
       );
@@ -191,8 +191,9 @@ export class AuthService {
         throw new BadRequestException('Current password is incorrect');
       }
       const hashedPassword =
-        await PasswordHashService.hashPassword(newPassword);
+        PasswordHashService.hashPassword(newPassword);
       user.password = hashedPassword;
+      user.first_time_password_reset = true;
 
       await this.userRepository.save(user);
       return 'Password reset successful';
@@ -202,12 +203,3 @@ export class AuthService {
   }
 }
 
-
-{
-
-  // create game
-
-  // daily game 
-
-  // result create  
-}

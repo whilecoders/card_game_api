@@ -63,9 +63,17 @@ export class User extends BaseEntity {
   })
   role: Role;
 
+  @Field(() => Boolean)
+  @Column({ type: 'boolean', default: false })
+  first_time_password_reset: boolean;
+
   @Field(() => Number)
   @Column({ type: 'decimal', precision: 10, scale: 2, default: 0 })
   wallet: number;
+
+  @Field(() => Number)
+  @Column({ type: 'decimal', precision: 10, scale: 2, default: 0 })
+  wallet_limit: number
 
   @Field(() => UserStatus)
   @Column({

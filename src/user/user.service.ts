@@ -19,7 +19,7 @@ export class UserService {
   constructor(
     @Inject('USER_REPOSITORY')
     private readonly userRepository: Repository<User>,
-  ) {}
+  ) { }
 
   async getAllUsers(skip: number, take: number): Promise<PaginatedUserDto> {
     try {
@@ -105,7 +105,8 @@ export class UserService {
 
   async updateUser(id: number, updateUserDto: UpdateUserDto): Promise<User> {
     try {
-      const user = await this.userRepository.findOne({ where: { id } });
+
+      const user = await this.userRepository.findOne({ where: { id, deletedAt: null, deletedBy: null } });
       if (!user) {
         throw new NotFoundException(`User with ID ${id} not found`);
       }
