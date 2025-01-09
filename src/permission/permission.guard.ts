@@ -20,7 +20,7 @@ export class PermissionGuard implements CanActivate {
       throw new UnauthorizedException('User not authenticated');
     }
 
-    const action = this.getActionFromContext(context);
+    const action = this.extractActionFromHeader(ctx.req);
     if (!action) {
       throw new ForbiddenException('Action is undefined');
     }
@@ -40,9 +40,11 @@ export class PermissionGuard implements CanActivate {
     return true;
   }
 
-  private getActionFromContext(context: ExecutionContext): string | undefined {
-    const gqlContext = GqlExecutionContext.create(context).getInfo();
-    console.log(gqlContext)
-    return gqlContext.fieldName;
+  private extractActionFromHeader(request: Request): string {
+    const action = request.headers['x-action']; 
+    if (!action) {
+      throw new Error('Action header is missing'); 
+    }
+    return action;
   }
 }
