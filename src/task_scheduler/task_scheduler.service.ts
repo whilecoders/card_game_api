@@ -154,8 +154,8 @@ export class TaskScheduler {
     const gameSessions = this.gameSessionKqjRepository.create(
       sessionsToCreate.map((session) => ({
         game: games,
-        session_start_time: session.start_time.toISOString(), // Store in ISO 8601 format (YYYY-MM-DDTHH:MM:SS)
-        session_end_time: session.end_time.toISOString(), // Store in ISO 8601 format (YYYY-MM-DDTHH:MM:SS)
+        session_start_time: session.start_time,
+        session_end_time: session.end_time,
         session_status: GameSessionStatus.UPCOMING,
       })),
     );
@@ -165,10 +165,18 @@ export class TaskScheduler {
         await this.gameSessionKqjRepository.save(gameSessions);
 
       for (const session of gameSessions) {
-        let start = session.session_start_time;
-        let end = session.session_start_time;
+        let start = new Date(session.session_start_time);
+        let end = new Date(session.session_end_time);
 
-        if (typeof start === 'string' || typeof end == 'string') {
+        // Convert to IST and reassign to the same variables
+        start = new Date(
+          start.toLocaleString('en-US', { timeZone: 'Asia/Kolkata' }),
+        );
+        end = new Date(
+          end.toLocaleString('en-US', { timeZone: 'Asia/Kolkata' }),
+        );
+
+        if (typeof start === 'string' || typeof end === 'string') {
           start = new Date(start);
           end = new Date(end);
         }
