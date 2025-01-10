@@ -109,10 +109,18 @@ export class TransactionSessionService {
     }
 
     try {
-      return await this.transactionSessionRepository.find({
-        relations: ['record_session_kqj', 'record_session_kqj.user'],
+      const userResult = await this.transactionSessionRepository.find({
+        relations: [
+          'record_session_kqj',
+          'record_session_kqj.user',
+          'record_session_kqj.game_session_id',
+        ],
         where: { record_session_kqj: { user: { id: userId } } },
       });
+      if (!userResult) {
+        throw new NotFoundException(`records with userId ${userId} not found`);
+      }
+      return userResult;
     } catch (error) {
       console.error(`Error fetching transactions for user ${userId}:`, error);
       throw new InternalServerErrorException(

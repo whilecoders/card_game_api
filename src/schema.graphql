@@ -284,6 +284,7 @@ type Query {
   getCurrentRunningSessions: [GameSession!]!
   getDailyWinnersAndLosers: DailyWinnersAndLosers!
   getFinishedSessionsToday: Float!
+  getGameResultByUserId(userId: Int!): [TransactionSession!]!
   getGameSessionById(id: Int!): GameSession!
   getGameSessionsByDateOrToday(filter: DateFilterDto): [GameSession!]!
   getGamesBy(id: Int!): Games!
@@ -299,7 +300,6 @@ type Query {
   getTotalUsersToday: Float!
   getTransactionSessionBy(id: Int!): TransactionSession!
   getTransactionsByDate(filter: DateFilterDto): [TransactionSession!]!
-  getTransactionsByUserId(userId: Int!): [TransactionSession!]!
   getUpcomingSessions: [GameSession!]!
   getUserById(id: Int!): User!
   getUserByRole(role: String!): [User!]!

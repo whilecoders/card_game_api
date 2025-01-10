@@ -314,10 +314,10 @@ export class RecordSessionKqjService {
     });
   }
 
-  async getResultBySessionId(sessionId: number): Promise<any[]> {
+  async drawResultBySessionId(sessionId: number): Promise<any[]> {
     const records = await this.recordSessionKqjRepository.find({
       where: { game_session_id: { id: sessionId } },
-      relations: ['user', 'game_session', 'transaction_session'],
+      relations: ['user', 'game_session_id', 'transaction_session'],
     });
 
     if (!records.length) {
@@ -346,6 +346,7 @@ export class RecordSessionKqjService {
 
       const transactionSession = this.transactionSessionRepository.create({
         record_session_kqj: record,
+        token:prizeAmount,
         type: isWinner ? TransactionType.CREDIT : TransactionType.DEBIT,
         createdAt: new Date(),
       });
@@ -353,6 +354,7 @@ export class RecordSessionKqjService {
       if (isWinner) {
         record.user.wallet += prizeAmount;
       } else {
+        record.user.wallet -= prizeAmount;
       }
 
       await this.userRepository.save(record.user);

@@ -387,6 +387,7 @@ export interface IQuery {
     getCurrentRunningSessions(): GameSession[] | Promise<GameSession[]>;
     getDailyWinnersAndLosers(): DailyWinnersAndLosers | Promise<DailyWinnersAndLosers>;
     getFinishedSessionsToday(): number | Promise<number>;
+    getGameResultByUserId(userId: number): TransactionSession[] | Promise<TransactionSession[]>;
     getGameSessionById(id: number): GameSession | Promise<GameSession>;
     getGameSessionsByDateOrToday(filter?: Nullable<DateFilterDto>): GameSession[] | Promise<GameSession[]>;
     getGamesBy(id: number): Games | Promise<Games>;
@@ -402,7 +403,6 @@ export interface IQuery {
     getTotalUsersToday(): number | Promise<number>;
     getTransactionSessionBy(id: number): TransactionSession | Promise<TransactionSession>;
     getTransactionsByDate(filter?: Nullable<DateFilterDto>): TransactionSession[] | Promise<TransactionSession[]>;
-    getTransactionsByUserId(userId: number): TransactionSession[] | Promise<TransactionSession[]>;
     getUpcomingSessions(): GameSession[] | Promise<GameSession[]>;
     getUserById(id: number): User | Promise<User>;
     getUserByRole(role: string): User[] | Promise<User[]>;

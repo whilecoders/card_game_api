@@ -42,7 +42,7 @@ export class TransactionSessionResolver {
   }
 
   @Query(() => [TransactionSession])
-  async getTransactionsByUserId(
+  async getGameResultByUserId(
     @Args('userId', { type: () => Int }) userId: number,
   ): Promise<TransactionSession[]> {
     return this.transactionSessionService.getTransactionsByUserId(userId);
