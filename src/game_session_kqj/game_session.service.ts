@@ -67,8 +67,15 @@ export class GameSessionKqjService {
   }
 
   async getLiveGameSessions(): Promise<GameSessionKqj> {
+    
+    const today = new Date();
+    const to = new Date(today.setHours(0, 0, 0, 0));
+    const from = new Date(today.setHours(23, 59, 59, 999));
+
+    console.log({ session_status: GameSessionStatus.LIVE, to, from });
+    
     const finded = await this.gameSessionKqjRepository.findOne({
-      where: { session_status: GameSessionStatus.LIVE, createdAt: new Date() },
+      where: { session_status: GameSessionStatus.LIVE },
       relations: ['game', 'record_session_kqj'],
     });
     // console.log(finded);
@@ -95,11 +102,12 @@ export class GameSessionKqjService {
         start = new Date(today.setHours(0, 0, 0, 0));
         end = new Date(today.setHours(23, 59, 59, 999));
       }
+      console.log("fetch today's game session  ->", start, end, filter);
       const sessions = await this.gameSessionKqjRepository.find({
         where: { session_start_time: Between(start, end) },
         relations: ['game', 'record_session_kqj'],
       });
-      // console.log(sessions);
+      console.log("fetched game session  ->", sessions);
       if (!sessions.length) {
         return [];
       }

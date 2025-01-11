@@ -29,14 +29,14 @@ export class TaskScheduler {
     private readonly dailyGameRepository: Repository<DailyGame>,
     private schedulerRegistry: SchedulerRegistry,
     private gamesocketGateway: GamesocketGateway,
-  ) {}
+  ) { }
 
-  @Cron('27 22 * * *', { name: 'createDailyGame' })
-  async createDailyGame(): Promise<void> {
-    console.log('creating game sessions');
+  @Cron('0 20 * * *', { name: 'createDailyGame' })
+  async creaeDailyGame(): Promise<void> {
 
     try {
       const currentDate = new Date();
+      console.log(currentDate);
 
       const game = await this.gamesRepository.findOne({
         where: {
@@ -72,6 +72,7 @@ export class TaskScheduler {
     // Set the current date (today) without the time component
     const startOfDay = new Date(currentDate.setHours(0, 0, 0, 0));
     const currentDateWithTime = new Date(currentDate.setHours(23, 59, 59, 999));
+    console.log('creating game sessions', startOfDay);
 
     // Fetch today's DailyGame
     const dailyGame = await this.dailyGameRepository.findOne({
@@ -86,21 +87,22 @@ export class TaskScheduler {
     }
 
     const { games } = dailyGame;
-    const { start_time, game_duration, game_in_day, start_date, end_date } =
+    const { start_time, game_duration, game_in_day, start_date, end_date, id } =
       games;
 
     // Check for overlapping game sessions
     const overlappingGameSession = await this.gameSessionKqjRepository.findOne({
-      where: [
-        {
-          session_start_time: LessThanOrEqual(end_date),
-          session_end_time: MoreThan(start_date),
-        },
-        {
-          session_start_time: MoreThan(start_date),
-          session_end_time: LessThanOrEqual(end_date),
-        },
-      ],
+      where: { createdAt: Between(startOfDay, currentDateWithTime), game: { id: id } }
+      // where: [
+      //   {
+      //     session_start_time: LessThanOrEqual(end_date),
+      //     session_end_time: MoreThan(start_date),
+      //   },
+      //   {
+      //     session_start_time: MoreThan(start_date),
+      //     session_end_time: LessThanOrEqual(end_date),
+      //   },
+      // ],
     });
 
     if (overlappingGameSession) {
@@ -141,13 +143,13 @@ export class TaskScheduler {
         end_time: endTime,
         session_status:
           currentTime.getTime() < endTime.getTime() &&
-          currentTime.getTime() > currentStartTime.getTime()
+            currentTime.getTime() > currentStartTime.getTime()
             ? GameSessionStatus.LIVE
             : currentTime.getTime() < currentStartTime.getTime()
               ? GameSessionStatus.UPCOMING
               : GameSessionStatus.END,
       });
-      currentStartTime = endTime; // Update to the next session's start time
+      currentStartTime = endTime;
     }
 
     // Map the sessions to the GameSessionKqj format
@@ -156,7 +158,7 @@ export class TaskScheduler {
         game: games,
         session_start_time: session.start_time,
         session_end_time: session.end_time,
-        session_status: GameSessionStatus.UPCOMING,
+        session_status: session.session_status,
       })),
     );
 

@@ -21,11 +21,12 @@ export class RecordSessionKqjResolver {
     private readonly recordSessionKqjService: RecordSessionKqjService,
   ) {}
 
-  @UseGuards(new RoleGuard([Role.USER, Role.SYSTEM]), PermissionGuard)
+  // @UseGuards(new RoleGuard([Role.USER, Role.SYSTEM]), PermissionGuard)
+  @UseGuards(new RoleGuard([Role.USER, Role.SYSTEM]))
   @Mutation(() => RecordSessionKqj)
   async createRecordSession(
     @Args('createRecordSessionKqjDto')
-    createRecordSessionKqjDto: CreateRecordSessionKqjDto,
+    createRecordSessionKqjDto: CreateRecordSessionKqjDto, 
   ): Promise<RecordSessionKqj> {
     return await this.recordSessionKqjService.createRecordSession(
       createRecordSessionKqjDto,

@@ -39,7 +39,7 @@ export class RecordSessionKqjService {
     }
     const gameSession = await this.gameSessionKqjRepository.findOne({
       where: { id: dto.gameSessionId },
-    });
+    }); 
 
     if (!gameSession) {
       throw new NotFoundException(
@@ -68,6 +68,7 @@ export class RecordSessionKqjService {
 
     try {
       const savedSession = await this.recordSessionKqjRepository.save(recordSession);
+      this.userRepository.save(user);
       const findCreatedSession = await this.recordSessionKqjRepository.findOne({ where: { id: savedSession.id } })
       return findCreatedSession
     } catch (error) {
