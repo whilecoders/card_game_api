@@ -10,7 +10,6 @@ async function bootstrap() {
     origin: true,
     credentials: true,
   });
-  // app.useGlobalGuards(new PermissionGuard(new Reflector()));
-  await app.listen(3030);
+  await app.listen(3000);
 }
 bootstrap();

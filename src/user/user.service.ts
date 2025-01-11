@@ -23,8 +23,7 @@ export class UserService {
 
   async getAllUsers(skip: number, take: number): Promise<PaginatedUserDto> {
     try {
-      const count = await this.userRepository.count();
-      const data = await this.userRepository.find({ skip, take });
+      const [data,count] = await this.userRepository.findAndCount({ skip, take });
 
       return {
         count,
