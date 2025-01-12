@@ -1,33 +1,46 @@
-import { Query, Resolver } from '@nestjs/graphql';
+import { Args, Query, Resolver } from '@nestjs/graphql';
 import { DashboardService } from './dashboard.service';
 import { DailyWinnersAndLosers } from './dto/Daily-Winner-Looser.input';
 import { ProfitAndLoss } from './dto/profite-loss.input';
 import { GameSessionKqj } from 'src/game_session_kqj/dbrepo/game_session.repository';
 import { UseGuards } from '@nestjs/common';
 import { AuthGuard } from 'src/auth/auth.guard';
+import { DateFilterDto } from 'src/common/model/date-filter.dto';
 @UseGuards(AuthGuard)
 @Resolver()
 export class DashboardResolver {
   constructor(private readonly dashboardService: DashboardService) {}
 
   @Query(() => Number)
-  async getTotalSessionsToday(): Promise<number> {
-    return this.dashboardService.getTotalSessionsToday();
+  async getTotalSessionsDateOrToday(
+    @Args('filter', { type: () => DateFilterDto, nullable: true })
+    filter?: DateFilterDto,
+  ): Promise<number> {
+    return this.dashboardService.getTotalSessionsDateOrToday(filter);
   }
 
   @Query(() => Number)
-  async getFinishedSessionsToday(): Promise<number> {
-    return this.dashboardService.getFinishedSessionsToday();
+  async getFinishedSessionsByDateOrToday(
+    @Args('filter', { type: () => DateFilterDto, nullable: true })
+    filter?: DateFilterDto,
+  ): Promise<number> {
+    return this.dashboardService.getFinishedSessionsByDateOrToday(filter);
   }
 
   @Query(() => Number)
-  async getTotalUsersToday(): Promise<number> {
-    return this.dashboardService.getTotalUsersToday();
+  async getTotalUsersByDateOrToday(
+    @Args('filter', { type: () => DateFilterDto, nullable: true })
+    filter?: DateFilterDto,
+  ): Promise<number> {
+    return this.dashboardService.getTotalUsersByDateOrToday(filter);
   }
 
   @Query(() => Number)
-  async getTotalTokensToday(): Promise<number> {
-    return this.dashboardService.getTotalTokensToday();
+  async getTotalTokensToday(
+    @Args('filter', { type: () => DateFilterDto, nullable: true })
+    filter?: DateFilterDto,
+  ): Promise<number> {
+    return this.dashboardService.getTotalTokensByDateOrToday(filter);
   }
 
   @Query(() => DailyWinnersAndLosers)

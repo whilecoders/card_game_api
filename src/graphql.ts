@@ -386,7 +386,7 @@ export interface IQuery {
     getAllUsers(skip: number, take: number): PaginatedUserDto | Promise<PaginatedUserDto>;
     getCurrentRunningSessions(): GameSession[] | Promise<GameSession[]>;
     getDailyWinnersAndLosers(): DailyWinnersAndLosers | Promise<DailyWinnersAndLosers>;
-    getFinishedSessionsToday(): number | Promise<number>;
+    getFinishedSessionsByDateOrToday(filter?: Nullable<DateFilterDto>): number | Promise<number>;
     getGameResultByUserId(userId: number): TransactionSession[] | Promise<TransactionSession[]>;
     getGameSessionById(id: number): GameSession | Promise<GameSession>;
     getGameSessionsByDateOrToday(filter?: Nullable<DateFilterDto>): GameSession[] | Promise<GameSession[]>;
@@ -398,9 +398,9 @@ export interface IQuery {
     getRecordSessionBy(id: number): RecordSessionKqj | Promise<RecordSessionKqj>;
     getRecordsBy(UserId: number): RecordSessionKqj[] | Promise<RecordSessionKqj[]>;
     getRecordsByDate(filter?: Nullable<DateFilterDto>): RecordSessionKqj[] | Promise<RecordSessionKqj[]>;
-    getTotalSessionsToday(): number | Promise<number>;
-    getTotalTokensToday(): number | Promise<number>;
-    getTotalUsersToday(): number | Promise<number>;
+    getTotalSessionsDateOrToday(filter?: Nullable<DateFilterDto>): number | Promise<number>;
+    getTotalTokensToday(filter?: Nullable<DateFilterDto>): number | Promise<number>;
+    getTotalUsersByDateOrToday(filter?: Nullable<DateFilterDto>): number | Promise<number>;
     getTransactionSessionBy(id: number): TransactionSession | Promise<TransactionSession>;
     getTransactionsByDate(filter?: Nullable<DateFilterDto>): TransactionSession[] | Promise<TransactionSession[]>;
     getUpcomingSessions(): GameSession[] | Promise<GameSession[]>;

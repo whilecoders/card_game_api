@@ -1,4 +1,9 @@
-import { Inject, Injectable, InternalServerErrorException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Inject,
+  Injectable,
+  InternalServerErrorException,
+} from '@nestjs/common';
 import { GameSessionStatus, TransactionType } from 'src/common/constants';
 import { GameSessionKqj } from 'src/game_session_kqj/dbrepo/game_session.repository';
 import { RecordSessionKqj } from 'src/record_session_kqj/dbrepo/record_session_kqj.repository';
@@ -7,6 +12,7 @@ import { Between, Repository } from 'typeorm';
 import { DailyWinnersAndLosers } from './dto/Daily-Winner-Looser.input';
 import { TransactionSession } from 'src/transaction_session/dbrepo/transaction_session.repository';
 import { ProfitAndLoss } from './dto/profite-loss.input';
+import { DateFilterDto } from 'src/common/model/date-filter.dto';
 
 @Injectable()
 export class DashboardService {
@@ -21,11 +27,23 @@ export class DashboardService {
     private readonly transactionSessionRepository: Repository<TransactionSession>,
   ) {}
 
-  async getTotalSessionsToday(): Promise<number> {
-    const start = new Date();
-    start.setHours(0, 0, 0, 0);
-    const end = new Date();
-    end.setHours(23, 59, 59, 999);
+  async getTotalSessionsDateOrToday(filter?: DateFilterDto): Promise<number> {
+    let start: Date;
+    let end: Date;
+
+    if (filter && filter.startDate && filter.endDate) {
+      start = new Date(filter.startDate);
+      end = new Date(filter.endDate);
+      if (isNaN(start.getTime()) || isNaN(end.getTime())) {
+        throw new BadRequestException(
+          'Invalid date format. Please provide valid ISO dates.',
+        );
+      }
+    } else {
+      const today = new Date();
+      start = new Date(today.setDate(today.getDate() - 7));
+      end = new Date(today.setDate(today.getDate() + 14));
+    }
 
     const sessions = await this.gameSessionKqjRepository.find({
       where: {
@@ -36,11 +54,25 @@ export class DashboardService {
     return sessions.length;
   }
 
-  async getFinishedSessionsToday(): Promise<number> {
-    const start = new Date();
-    start.setHours(0, 0, 0, 0);
-    const end = new Date();
-    end.setHours(23, 59, 59, 999);
+  async getFinishedSessionsByDateOrToday(
+    filter?: DateFilterDto,
+  ): Promise<number> {
+    let start: Date;
+    let end: Date;
+
+    if (filter && filter.startDate && filter.endDate) {
+      start = new Date(filter.startDate);
+      end = new Date(filter.endDate);
+      if (isNaN(start.getTime()) || isNaN(end.getTime())) {
+        throw new BadRequestException(
+          'Invalid date format. Please provide valid ISO dates.',
+        );
+      }
+    } else {
+      const today = new Date();
+      start = new Date(today.setDate(today.getDate() - 7));
+      end = new Date(today.setDate(today.getDate() + 14));
+    }
 
     const finishedSessions = await this.gameSessionKqjRepository.find({
       where: {
@@ -52,12 +84,24 @@ export class DashboardService {
     return finishedSessions.length;
   }
 
-  async getTotalUsersToday(): Promise<number> {
+  async getTotalUsersByDateOrToday(filter?: DateFilterDto): Promise<number> {
     try {
-      const start = new Date();
-      start.setHours(0, 0, 0, 0);
-      const end = new Date();
-      end.setHours(23, 59, 59, 999);
+      let start: Date;
+      let end: Date;
+
+      if (filter && filter.startDate && filter.endDate) {
+        start = new Date(filter.startDate);
+        end = new Date(filter.endDate);
+        if (isNaN(start.getTime()) || isNaN(end.getTime())) {
+          throw new BadRequestException(
+            'Invalid date format. Please provide valid ISO dates.',
+          );
+        }
+      } else {
+        const today = new Date();
+        start = new Date(today.setDate(today.getDate() - 7));
+        end = new Date(today.setDate(today.getDate() + 14));
+      }
 
       const records = await this.recordSessionKqjRepository.find({
         where: {
@@ -75,12 +119,24 @@ export class DashboardService {
     }
   }
 
-  async getTotalTokensToday(): Promise<number> {
+  async getTotalTokensByDateOrToday(filter?: DateFilterDto): Promise<number> {
     try {
-      const start = new Date();
-      start.setHours(0, 0, 0, 0);
-      const end = new Date();
-      end.setHours(23, 59, 59, 999);
+      let start: Date;
+      let end: Date;
+
+      if (filter && filter.startDate && filter.endDate) {
+        start = new Date(filter.startDate);
+        end = new Date(filter.endDate);
+        if (isNaN(start.getTime()) || isNaN(end.getTime())) {
+          throw new BadRequestException(
+            'Invalid date format. Please provide valid ISO dates.',
+          );
+        }
+      } else {
+        const today = new Date();
+        start = new Date(today.setDate(today.getDate() - 7));
+        end = new Date(today.setDate(today.getDate() + 14));
+      }
 
       const records = await this.recordSessionKqjRepository.find({
         where: {
@@ -182,16 +238,18 @@ export class DashboardService {
 
       const endOfDay = new Date();
       endOfDay.setHours(23, 59, 59, 999);
-  
+
       return await this.gameSessionKqjRepository.find({
         where: {
-          session_start_time: Between(startOfDay,endOfDay),
+          session_start_time: Between(startOfDay, endOfDay),
           session_status: GameSessionStatus.UPCOMING,
         },
       });
     } catch (error) {
       console.error('Error fetching upcoming sessions:', error);
-      throw new InternalServerErrorException('Failed to fetch upcoming sessions.');
+      throw new InternalServerErrorException(
+        'Failed to fetch upcoming sessions.',
+      );
     }
   }
 
@@ -202,17 +260,18 @@ export class DashboardService {
 
       const endOfDay = new Date();
       endOfDay.setHours(23, 59, 59, 999);
-  
+
       return await this.gameSessionKqjRepository.find({
         where: {
-          session_start_time: Between(startOfDay,endOfDay),
+          session_start_time: Between(startOfDay, endOfDay),
           session_status: GameSessionStatus.LIVE,
         },
       });
     } catch (error) {
       console.error('Error fetching running sessions:', error);
-      throw new InternalServerErrorException('Failed to fetch running sessions.');
+      throw new InternalServerErrorException(
+        'Failed to fetch running sessions.',
+      );
     }
   }
-   
 }
