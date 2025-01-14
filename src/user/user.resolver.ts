@@ -11,7 +11,7 @@ import { UserFiltersInput } from './dto/user_filter.dto';
 import { AuthGuard } from 'src/auth/auth.guard';
 import { RoleGuard } from 'src/auth/role.guard';
 import { PermissionGuard } from 'src/permission/permission.guard';
-@UseGuards(AuthGuard)
+// @UseGuards(AuthGuard)
 @Resolver(() => User)
 export class UserResolver {
   constructor(private readonly userService: UserService) {}
@@ -57,10 +57,10 @@ export class UserResolver {
     }
   }
 
-  @UseGuards(
-    new RoleGuard([Role.ADMIN, Role.SYSTEM, Role.SUPERADMIN, Role.MASTER]),
-    PermissionGuard,
-  )
+  // @UseGuards(
+  //   new RoleGuard([Role.ADMIN, Role.SYSTEM, Role.SUPERADMIN, Role.MASTER]),
+  //   PermissionGuard,
+  // )
   @Mutation(() => User)
   async addUser(@Args('addUserDto') addUserDto: AddUserDto): Promise<User> {
     try {

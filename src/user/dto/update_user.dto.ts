@@ -38,6 +38,10 @@ export class UpdateUserDto {
 
   @Field(() => String, { nullable: true })
   @IsOptional()
+  otp?: string;
+
+  @Field(() => String, { nullable: true })
+  @IsOptional()
   @IsEmail()
   email?: string;
 

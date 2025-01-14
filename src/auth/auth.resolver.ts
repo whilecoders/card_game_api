@@ -10,7 +10,7 @@ import { ResetPasswordDto } from './dto/reset_password.dto';
 
 @Resolver(() => User)
 export class AuthResolver {
-  constructor(private readonly authService: AuthService) {}
+  constructor(private readonly authService: AuthService) { }
 
   @Mutation(() => User)
   async adminSignUp(
@@ -48,5 +48,20 @@ export class AuthResolver {
     @Args('resetPasswordDto') resetPasswordDto: ResetPasswordDto,
   ): Promise<string> {
     return await this.authService.resetPassword(resetPasswordDto);
+  }
+
+  @Mutation(() => String)
+  async verifyOtp(
+    @Args('mobile') mobile: string,
+    @Args('otp') otp: string,
+  ): Promise<string> {
+    return await this.authService.verifyOtp(mobile, otp);
+  }
+
+  @Mutation(() => String)
+  async sendOtp(
+    @Args('mobile') mobile: string,
+  ): Promise<string> {
+    return await this.authService.sendOtp(mobile);
   }
 }

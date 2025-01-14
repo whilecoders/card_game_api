@@ -210,6 +210,7 @@ type Mutation {
   removeUserFromGame(deleteBy: Int!, gameSessionId: Int!, userId: Int!): Boolean!
   resetPassword(resetPasswordDto: ResetPasswordDto!): String!
   restrictUserAction(action: String!, userId: Float!): String!
+  sendOtp(mobile: String!): String!
   suspendUser(suspendUserDto: SuspendUserDto!): User!
   unrestrictUserAction(action: String!, userId: Float!): String!
   updateGameSession(id: Int!, updateGameSessionDto: UpdateGameSessionDto!): GameSession!
@@ -218,6 +219,7 @@ type Mutation {
   updateUserRecordStatus(gameSessionId: Int!, recordStatus: RecordSessionStatus!, userId: Int!): RecordSessionKqj!
   updateWallet(adminId: Float!, userId: Float!, walletData: WalletDto!): Transaction!
   userSignUp(signUpCredential: SignUpCredential!): User!
+  verifyOtp(mobile: String!, otp: String!): String!
 }
 
 type PaginatedAuditLogDto {
@@ -453,6 +455,7 @@ input UpdateUserDto {
   email: String
   first_time_password_reset: Boolean
   name: String
+  otp: String
   phone_number: String
   role: Role
   status: UserStatus
@@ -473,6 +476,7 @@ type User {
   first_time_password_reset: Boolean!
   id: Int!
   name: String
+  otp: String!
   password: String!
   permissions: Permission!
   phone_number: String!
