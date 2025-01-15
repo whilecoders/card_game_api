@@ -50,15 +50,19 @@ export class PermissionService {
     }
   }
 
-  async createPermission(input: CreatePermissionInput): Promise<Permission> {
+  async createPermission(
+    createPermissionInput: CreatePermissionInput,
+  ): Promise<Permission> {
     try {
+      console.log(createPermissionInput.role, createPermissionInput.userId);
       const permission = this.permissionRepository.create({
-        action: input.action,
-        role: input.role || null,
-        user: input.userId ? { id: input.userId } : null,
-        allowed: input.allowed,
+        action: createPermissionInput.action,
+        role: createPermissionInput.role,
+        user: createPermissionInput.userId
+          ? { id: createPermissionInput.userId }
+          : null,
+        allowed: createPermissionInput.allowed,
       });
-
       return await this.permissionRepository.save(permission);
     } catch (error) {
       throw new InternalServerErrorException('Error creating permission');

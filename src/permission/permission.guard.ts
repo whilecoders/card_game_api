@@ -7,20 +7,29 @@ import {
 } from '@nestjs/common';
 import { GqlExecutionContext } from '@nestjs/graphql';
 import { PermissionService } from './permission.service';
+import { Reflector } from '@nestjs/core';
+import { PERMISSIONS_KEY } from 'src/common/decorator/permission.decorator';
 
 @Injectable()
 export class PermissionGuard implements CanActivate {
-  constructor(private readonly permissionService: PermissionService) {}
+  constructor(
+    private readonly permissionService: PermissionService,
+    private readonly reflector: Reflector,
+  ) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const ctx = GqlExecutionContext.create(context).getContext();
     const user = ctx.user;
 
     if (!user) {
-      throw new UnauthorizedException('User not authenticated');
+      throw new UnauthorizedException('User not authenticatedd');
     }
 
-    const action = this.extractActionFromHeader(ctx.req);
+    const action = this.reflector.get<string>(
+      PERMISSIONS_KEY,
+      context.getHandler(),
+    );
+
     if (!action) {
       throw new ForbiddenException('Action is undefined');
     }
@@ -38,13 +47,5 @@ export class PermissionGuard implements CanActivate {
     }
 
     return true;
-  }
-
-  private extractActionFromHeader(request: Request): string {
-    const action = request.headers['x-action']; 
-    if (!action) {
-      throw new Error('Action header is missing'); 
-    }
-    return action;
   }
 }

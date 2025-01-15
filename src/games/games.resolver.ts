@@ -7,19 +7,15 @@ import { PaginatedGamesDto } from './dto/paginated-game.dto';
 import { DateFilterDto } from 'src/common/model/date-filter.dto';
 import { UseGuards } from '@nestjs/common';
 import { AuthGuard } from 'src/auth/auth.guard';
-import { RoleGuard } from 'src/auth/role.guard';
-import { Role } from 'src/common/constants';
-import { PermissionGuard } from 'src/permission/permission.guard';
+import { PermissionAction } from 'src/common/constants';
+import { Permissions } from 'src/common/decorator/permission.decorator';
 
 @UseGuards(AuthGuard)
 @Resolver(() => Games)
 export class GamesResolver {
   constructor(private readonly GamesService: GamesService) {}
 
-  @UseGuards(
-    new RoleGuard([Role.MASTER, Role.SYSTEM, Role.SUPERADMIN]),
-    PermissionGuard,
-  )
+  @Permissions(PermissionAction.CREATEGAME)
   @Mutation(() => Games)
   async createGames(
     @Args('createGamesDto') createGamesDto: CreateGamesDto,
@@ -27,10 +23,7 @@ export class GamesResolver {
     return await this.GamesService.createGame(createGamesDto);
   }
 
-  @UseGuards(
-    new RoleGuard([Role.MASTER, Role.SYSTEM, Role.SUPERADMIN]),
-    PermissionGuard,
-  )
+  @Permissions(PermissionAction.UPDATEGAME)
   @Mutation(() => Games)
   async updateGames(
     @Args('updateGamesDto') updateGamesDto: UpdateGamesDto,
@@ -38,10 +31,7 @@ export class GamesResolver {
     return await this.GamesService.updateGame(updateGamesDto);
   }
 
-  @UseGuards(
-    new RoleGuard([Role.MASTER, Role.SYSTEM, Role.SUPERADMIN]),
-    PermissionGuard,
-  )
+  @Permissions(PermissionAction.DELETEGAME)
   @Mutation(() => Boolean)
   async DeleteGames(
     @Args({ name: 'id', type: () => Int }) id: number,
@@ -50,9 +40,6 @@ export class GamesResolver {
     return true;
   }
 
-  @UseGuards(
-    PermissionGuard,
-  )
   @Query(() => PaginatedGamesDto, { name: 'getAllGameses' })
   async getAllGameses(
     @Args('skip', { type: () => Int }) skip: number,
@@ -76,7 +63,6 @@ export class GamesResolver {
     return await this.GamesService.getGamesByDate(filter);
   }
 
-  // @UseGuards(new RoleGuard(['USER', 'ADMIN']))
   @Query(() => [Games], { name: 'getGamesByDateOrToday' })
   async getGamesByDateOrToday(
     @Args('filter', { type: () => DateFilterDto, nullable: true })

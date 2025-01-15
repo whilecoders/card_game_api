@@ -5,11 +5,15 @@ import { Transaction } from './dbrepo/transaction.repository';
 import { DateFilterDto } from 'src/common/model/date-filter.dto';
 import { UseGuards } from '@nestjs/common';
 import { AuthGuard } from 'src/auth/auth.guard';
+import { Permissions } from 'src/common/decorator/permission.decorator';
+import { PermissionAction } from 'src/common/constants';
 
 @UseGuards(AuthGuard)
 @Resolver(() => Transaction)
 export class TransactionResolver {
   constructor(private transactionService: TransactionService) {}
+
+  @Permissions(PermissionAction.CREATETRANSACTION)
   @Mutation(() => Transaction)
   updateWallet(
     @Args('userId') userId: number,

@@ -123,7 +123,7 @@ export interface CreatePermissionInput {
     action: string;
     allowed: boolean;
     role?: Nullable<Role>;
-    userId?: Nullable<string>;
+    userId?: Nullable<number>;
 }
 
 export interface CreateRecordSessionKqjDto {
@@ -362,7 +362,7 @@ export interface PaginatedUserDto {
 
 export interface Permission {
     action: string;
-    allowed?: Nullable<boolean>;
+    allowed: boolean;
     createdAt: DateTime;
     createdBy: string;
     deletedAt: DateTime;

@@ -55,7 +55,7 @@ input CreatePermissionInput {
   action: String!
   allowed: Boolean!
   role: Role
-  userId: String
+  userId: Int
 }
 
 input CreateRecordSessionKqjDto {
@@ -258,7 +258,7 @@ input PaginationMetadataDto {
 
 type Permission {
   action: String!
-  allowed: Boolean
+  allowed: Boolean!
   createdAt: DateTime!
   createdBy: String!
   deletedAt: DateTime!

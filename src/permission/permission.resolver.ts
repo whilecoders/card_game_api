@@ -14,14 +14,9 @@ export class PermissionResolver {
   async createPermission(
     @Args('createPermissionInput') createPermissionInput: CreatePermissionInput,
   ): Promise<Permission> {
-    try {
-      return await this.permissionService.createPermission(
-        createPermissionInput,
-      );
-    } catch (error) {
-      throw new Error(error.message);
-    }
+    return await this.permissionService.createPermission(createPermissionInput);
   }
+
   @Mutation(() => String)
   async restrictUserAction(
     @Args('userId', { type: () => Number }) userId: number,

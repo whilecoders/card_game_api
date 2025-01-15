@@ -19,7 +19,7 @@ export class Permission extends BaseEntity {
   @ManyToOne(() => User, (user) => user.permissions, { nullable: true })
   user: User | null;
 
-  @Field(() => Boolean, { nullable: true })
+  @Field(() => Boolean, { nullable: false })
   @Column({ type: 'boolean', nullable: false })
   allowed: boolean;
 }

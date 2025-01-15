@@ -1,17 +1,20 @@
-import { Field, InputType } from '@nestjs/graphql';
+import { Field, InputType, Int } from '@nestjs/graphql';
+import { IsNotEmpty } from 'class-validator';
 import { Role } from 'src/common/constants/enums';
 
 @InputType()
 export class CreatePermissionInput {
-  @Field(() => String)
+  @IsNotEmpty()
+  @Field(() => String, { nullable: false })
   action: string;
 
   @Field(() => Role, { nullable: true })
   role?: Role;
 
-  @Field(() => String, { nullable: true })
+  @Field(() => Int, { nullable: true })
   userId?: number;
 
-  @Field(() => Boolean)
+  @IsNotEmpty()
+  @Field(() => Boolean, { nullable: false })
   allowed: boolean;
 }
