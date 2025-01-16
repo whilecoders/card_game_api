@@ -24,6 +24,7 @@ export class AuthGuard implements CanActivate {
     if (!accessToken) {
       throw new UnauthorizedException('Access token is missing');
     }
+    // console.log(accessToken);
 
     try {
       const payload = await this.jwtService.verifyAsync(accessToken, {

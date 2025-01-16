@@ -201,29 +201,29 @@ export class DashboardService {
 
   async getProfitAndLoss(): Promise<ProfitAndLoss> {
     try {
-      const creditTransactions = await this.transactionSessionRepository.find({
-        where: { type: TransactionType.CREDIT },
-      });
+      // const creditTransactions = await this.transactionSessionRepository.find({
+      //   where: { type: TransactionType.CREDIT },
+      // });
 
-      const debitTransactions = await this.transactionSessionRepository.find({
-        where: { type: TransactionType.DEBIT },
-      });
+      // const debitTransactions = await this.transactionSessionRepository.find({
+      //   where: { type: TransactionType.DEBIT },
+      // });
 
-      const profit = creditTransactions.reduce(
-        (sum, transaction) => sum + transaction.token,
-        0,
-      );
-      const loss = debitTransactions.reduce(
-        (sum, transaction) => sum + transaction.token,
-        0,
-      );
+      // const profit = creditTransactions.reduce(
+      //   (sum, transaction) => sum + transaction.token,
+      //   0,
+      // );
+      // const loss = debitTransactions.reduce(
+      //   (sum, transaction) => sum + transaction.token,
+      //   0,
+      // );
 
-      const net = profit - loss;
+      // const net = profit - loss;
 
       return {
-        profit,
-        loss,
-        net,
+        profit: 0,
+        loss: 0,
+        net: 0,
       };
     } catch (error) {
       console.error('Error calculating profit and loss:', error);

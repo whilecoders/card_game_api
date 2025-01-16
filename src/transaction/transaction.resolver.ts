@@ -1,4 +1,4 @@
-import { Args, Mutation, Query, Resolver } from '@nestjs/graphql';
+import { Args, Int, Mutation, Query, Resolver } from '@nestjs/graphql';
 import { WalletDto } from './dto/wallet.dto';
 import { TransactionService } from './transaction.service';
 import { Transaction } from './dbrepo/transaction.repository';
@@ -18,8 +18,8 @@ export class TransactionResolver {
   @Permissions(PermissionAction.CREATETRANSACTION)
   @Mutation(() => Transaction)
   updateWallet(
-    @Args('userId') userId: number,
-    @Args('adminId') adminId: number,
+    @Args('userId', { type: () => Int!}) userId: number,
+    @Args('adminId', { type: () => Int!}) adminId: number,
     @Args('walletData') walletData: WalletDto,
   ) {
     return this.transactionService.updateWallet(userId, adminId, walletData);
@@ -31,5 +31,13 @@ export class TransactionResolver {
     dateFilter?: DateFilterDto,
   ): Promise<Transaction[]> {
     return this.transactionService.getTransactionsByDate(dateFilter || {});
+  }
+
+  @Query(() => [Transaction])
+  async getTransactionsByUserId(
+    @Args('userId', { type: () => Int, nullable: false })
+    userId: number,
+  ): Promise<Transaction[]> {
+    return this.transactionService.getTrasactionByUserId(userId);
   }
 }

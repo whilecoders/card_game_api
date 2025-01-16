@@ -23,14 +23,14 @@ export class TransactionSessionService {
     private readonly transactionSessionRepository: Repository<TransactionSession>,
     @Inject('RECORD_SESSION_KQJ_REPOSITORY')
     private readonly recordSessionRepository: Repository<RecordSessionKqj>,
-  ) {}
+  ) { }
 
   async createTransactionSession(
     dto: CreateTransactionSessionDto,
   ): Promise<TransactionSession> {
     const recordSession = await this.recordSessionRepository.findOne({
       where: { id: dto.recordSessionId },
-      relations: ['user', 'game_session', 'transaction_session'],
+      relations: ['user', 'game_session_id', 'transaction_session'],
     });
     if (!recordSession) {
       throw new NotFoundException(
@@ -38,35 +38,29 @@ export class TransactionSessionService {
       );
     }
 
-    if (!recordSession.user) {
-      throw new BadRequestException(
-        'Associated user not found in record session.',
-      );
-    }
-
-    if (dto.type === TransactionType.CREDIT) {
-      recordSession.user.wallet += dto.token;
-    } else if (dto.type === TransactionType.DEBIT) {
-      if (recordSession.user.wallet < dto.token) {
-        throw new BadRequestException(
-          'Insufficient funds for this transaction.',
-        );
-      }
-      recordSession.user.wallet -= dto.token;
-    }
-
-    try {
-      await this.userRepository.save(recordSession.user);
-    } catch (error) {
-      console.error('Error updating user wallet:', error);
-      throw new InternalServerErrorException(
-        'Failed to update user wallet. Please try again.',
-      );
-    }
+    if (!recordSession.user) throw new BadRequestException('Associated user not found in record session.');
+    // if (dto.type === TransactionType.CREDIT) {
+    //   recordSession.user.wallet += dto.token;
+    // } else if (dto.type === TransactionType.DEBIT) {
+    //   if (recordSession.user.wallet < dto.token) {
+    //     throw new BadRequestException(
+    //       'Insufficient funds for this transaction.',
+    //     );
+    //   }
+    //   recordSession.user.wallet -= dto.token;
+    // }
+    // try {
+    //   await this.userRepository.save(recordSession.user);
+    // } catch (error) {
+    //   console.error('Error updating user wallet:', error);
+    //   throw new InternalServerErrorException(
+    //     'Failed to update user wallet. Please try again.',
+    //   );
+    // }
 
     const transactionSession = this.transactionSessionRepository.create({
       token: dto.token,
-      type: dto.type || TransactionType.CREDIT,
+      game_status: dto.game_status,
       record_session_kqj: recordSession,
       createdAt: new Date(),
     });
@@ -103,7 +97,7 @@ export class TransactionSessionService {
   }
 
   async getTransactionsByUserId(userId: number): Promise<TransactionSession[]> {
-    const user = await this.userRepository.findOne({ where: { id: userId } });
+    const user = await this.userRepository.findOne({ where: { id: userId, } });
     if (!user) {
       throw new NotFoundException(`User with ID ${userId} not found`);
     }

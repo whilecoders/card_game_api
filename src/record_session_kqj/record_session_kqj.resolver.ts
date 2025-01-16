@@ -27,7 +27,7 @@ export class RecordSessionKqjResolver {
   @Mutation(() => RecordSessionKqj)
   async createRecordSession(
     @Args('createRecordSessionKqjDto')
-    createRecordSessionKqjDto: CreateRecordSessionKqjDto,
+    createRecordSessionKqjDto: CreateRecordSessionKqjDto, 
   ): Promise<RecordSessionKqj> {
     return await this.recordSessionKqjService.createRecordSession(
       createRecordSessionKqjDto,
@@ -124,6 +124,15 @@ export class RecordSessionKqjResolver {
     return this.recordSessionKqjService.getAllRecordsBySessionId(
       sessionId,
       offset,
+    );
+  }
+
+  @Query(() => [RecordSessionKqj], { name: 'getRecordsBySessionId' })
+  async getRecordsBySessionId(
+    @Args('sessionId', { type: () => Int, nullable: false }) sessionId: number,
+  ) {
+    return this.recordSessionKqjService.getRecordsBySessionId(
+      sessionId,
     );
   }
 

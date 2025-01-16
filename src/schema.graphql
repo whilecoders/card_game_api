@@ -67,9 +67,9 @@ input CreateRecordSessionKqjDto {
 }
 
 input CreateTransactionSessionDto {
+  game_status: UserGameResultStatus!
   recordSessionId: Float!
   token: TokenValues!
-  type: TransactionType!
 }
 
 type DailyGame {
@@ -127,6 +127,12 @@ type GameSession {
   session_status: GameSessionStatus!
   updatedAt: DateTime!
   updatedBy: String!
+}
+
+type GameSessionKqjStats {
+  totalGamePlayed: Int!
+  totalLosses: Int!
+  totalWins: Int!
 }
 
 enum GameSessionStatus {
@@ -223,7 +229,7 @@ type Mutation {
   updateGames(updateGamesDto: UpdateGamesDto!): Games!
   updateUser(id: Int!, updateUserDto: UpdateUserDto!): User!
   updateUserRecordStatus(gameSessionId: Int!, recordStatus: RecordSessionStatus!, userId: Int!): RecordSessionKqj!
-  updateWallet(adminId: Float!, userId: Float!, walletData: WalletDto!): Transaction!
+  updateWallet(adminId: Int!, userId: Int!, walletData: WalletDto!): Transaction!
   userSignUp(signUpCredential: SignUpCredential!): User!
   verifyOtp(mobile: String!, otp: String!): String!
 }
@@ -300,15 +306,18 @@ type Query {
   getGamesByDate(filter: DateFilterDto): [Games!]!
   getGamesByDateOrToday(filter: DateFilterDto): [Games!]!
   getLiveGameSessions: GameSession
+  getPlayerStateByUserId(userId: Int!): GameSessionKqjStats!
   getProfitAndLoss: ProfitAndLoss!
   getRecordSessionBy(id: Int!): RecordSessionKqj!
   getRecordsBy(UserId: Int!): [RecordSessionKqj!]!
   getRecordsByDate(filter: DateFilterDto): [RecordSessionKqj!]!
-  getTotalSessionsDateOrToday(filter: DateFilterDto): Float!
-  getTotalTokensToday(filter: DateFilterDto): Float!
-  getTotalUsersByDateOrToday(filter: DateFilterDto): Float!
-  getTransactionSessionBy(id: Int!): TransactionSession!
+  getRecordsBySessionId(sessionId: Int!): [RecordSessionKqj!]!
+  getTotalSessionsToday: Float!
+  getTotalTokensToday: Float!
+  getTotalUsersToday: Float!
+  getTransactionSessionById(id: Int!): TransactionSession!
   getTransactionsByDate(filter: DateFilterDto): [TransactionSession!]!
+  getTransactionsByUserId(userId: Int!): [Transaction!]!
   getUpcomingSessions: [GameSession!]!
   getUserById(id: Int!): User!
   getUserByRole(role: String!): [User!]!
@@ -427,10 +436,10 @@ type TransactionSession {
   createdBy: String!
   deletedAt: DateTime!
   deletedBy: String!
+  game_status: UserGameResultStatus!
   id: Int!
   record_session_kqj: RecordSessionKqj!
-  token: TokenValues!
-  type: TransactionType!
+  token: Int!
   updatedAt: DateTime!
   updatedBy: String!
 }
@@ -510,6 +519,11 @@ input UserFiltersInput {
   role: Role
   status: UserStatus
   username: String
+}
+
+enum UserGameResultStatus {
+  LOSS
+  WIN
 }
 
 enum UserStatus {

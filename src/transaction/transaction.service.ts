@@ -18,26 +18,27 @@ export class TransactionService {
     private readonly userRepository: Repository<User>,
     @Inject('TRANSACTION_REPOSITORY')
     private transactionRepository: Repository<Transaction>,
-  ) {}
+  ) { }
 
   async updateWallet(userId: number, adminId: number, walletDto: WalletDto) {
+    
     const user = await this.userRepository.findOne({ where: { id: userId } });
     if (!user) throw new NotFoundException('User not found');
-
+    
     const admin = await this.userRepository.findOne({ where: { id: adminId } });
     if (!admin) throw new NotFoundException('Admin not found');
-
+    
     if (walletDto.type === TransactionType.CREDIT) {
-      user.wallet += walletDto.token;
+      user.wallet = parseInt(user.wallet.toString()) + walletDto.token;
     } else if (walletDto.type === TransactionType.DEBIT) {
       if (user.wallet < walletDto.token) {
         throw new BadRequestException('Insufficient funds');
       }
-      user.wallet -= walletDto.token;
+      user.wallet =  parseInt(user.wallet.toString()) - walletDto.token
     }
+    
 
     await this.userRepository.save(user);
-
     const transaction = this.transactionRepository.create({
       user: { id: user.id },
       admin: { id: admin.id },
@@ -48,7 +49,6 @@ export class TransactionService {
     });
 
     await this.transactionRepository.save(transaction);
-
     return transaction;
   }
 
@@ -65,15 +65,27 @@ export class TransactionService {
       }
     } else {
       const today = new Date();
-      start = new Date(today.setHours(0, 0, 0, 0)); 
+      start = new Date(today.setHours(0, 0, 0, 0));
       end = new Date(today.setHours(23, 59, 59, 999));
     }
 
     return this.transactionRepository.find({
       where: {
-        createdAt: Between(start, end), 
+        createdAt: Between(start, end),
       },
-      relations: ['user', 'admin'], 
+      relations: ['user', 'admin'],
+    });
+  }
+
+  async getTrasactionByUserId(userId: number): Promise<Transaction[]> {
+    let start: Date;
+    let end: Date;
+
+    return this.transactionRepository.find({
+      where: {
+        user: { id: userId },
+      },
+      relations: ['user', 'admin'],
     });
   }
 }
