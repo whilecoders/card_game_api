@@ -17,6 +17,11 @@ export enum TransactionType {
   DEBIT = 'DEBIT',
 }
 
+export enum UserGameResultStatus {
+  WIN = 'WIN',
+  LOSS = 'LOSS',
+}
+
 export enum Status {
   ACTIVE = 'ACTIVE',
   INACTIVE = 'INACTIVE',

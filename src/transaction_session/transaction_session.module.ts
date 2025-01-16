@@ -12,11 +12,11 @@ import { PermissionModule } from 'src/permission/permission.module';
     UserModule,
     PermissionModule,
   ],
-  providers: [
+  providers: [  
     TransactionSessionResolver,
     TransactionSessionService,
     ...TransactionSessionProvider,
   ],
-  exports: [...TransactionSessionProvider],
+  exports: [...TransactionSessionProvider, TransactionSessionService],
 })
 export class TransactionSessionModule {}

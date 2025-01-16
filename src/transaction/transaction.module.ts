@@ -7,6 +7,6 @@ import { UserModule } from 'src/user/user.module';
 @Module({
   imports:[UserModule],
   providers: [TransactionResolver, TransactionService, ...TransactionProviders],
-  exports: [...TransactionProviders]
+  exports: [...TransactionProviders, TransactionService]
 })
 export class TransactionModule { }

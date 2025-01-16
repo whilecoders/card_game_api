@@ -7,7 +7,7 @@ export class WalletDto {
   @Field(() => TokenValues)
   @IsNotEmpty({ message: 'Token is required' })
   @IsEnum(TokenValues, { message: 'Token must be a valid TokenValue' })
-  token: TokenValues;
+  token: number;
 
   @Field(() => TransactionType)
   @IsNotEmpty({ message: 'Transaction type is required' })

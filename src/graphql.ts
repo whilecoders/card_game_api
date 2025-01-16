@@ -92,6 +92,11 @@ export enum TransactionType {
     DEBIT = "DEBIT"
 }
 
+export enum UserGameResultStatus {
+    LOSS = "LOSS",
+    WIN = "WIN"
+}
+
 export enum UserStatus {
     ACTIVE = "ACTIVE",
     INACTIVE = "INACTIVE",
@@ -135,9 +140,9 @@ export interface CreateRecordSessionKqjDto {
 }
 
 export interface CreateTransactionSessionDto {
+    game_status: UserGameResultStatus;
     recordSessionId: number;
     token: TokenValues;
-    type: TransactionType;
 }
 
 export interface DateFilterDto {
@@ -269,6 +274,12 @@ export interface GameSession {
     updatedBy: string;
 }
 
+export interface GameSessionKqjStats {
+    totalGamePlayed: number;
+    totalLosses: number;
+    totalWins: number;
+}
+
 export interface Games {
     DailyGame?: Nullable<DailyGame[]>;
     admin: User;
@@ -394,15 +405,18 @@ export interface IQuery {
     getGamesByDate(filter?: Nullable<DateFilterDto>): Games[] | Promise<Games[]>;
     getGamesByDateOrToday(filter?: Nullable<DateFilterDto>): Games[] | Promise<Games[]>;
     getLiveGameSessions(): Nullable<GameSession> | Promise<Nullable<GameSession>>;
+    getPlayerStateByUserId(userId: number): GameSessionKqjStats | Promise<GameSessionKqjStats>;
     getProfitAndLoss(): ProfitAndLoss | Promise<ProfitAndLoss>;
     getRecordSessionBy(id: number): RecordSessionKqj | Promise<RecordSessionKqj>;
     getRecordsBy(UserId: number): RecordSessionKqj[] | Promise<RecordSessionKqj[]>;
     getRecordsByDate(filter?: Nullable<DateFilterDto>): RecordSessionKqj[] | Promise<RecordSessionKqj[]>;
+    getRecordsBySessionId(sessionId: number): RecordSessionKqj[] | Promise<RecordSessionKqj[]>;
     getTotalSessionsToday(): number | Promise<number>;
     getTotalTokensToday(): number | Promise<number>;
     getTotalUsersToday(): number | Promise<number>;
-    getTransactionSessionBy(id: number): TransactionSession | Promise<TransactionSession>;
+    getTransactionSessionById(id: number): TransactionSession | Promise<TransactionSession>;
     getTransactionsByDate(filter?: Nullable<DateFilterDto>): TransactionSession[] | Promise<TransactionSession[]>;
+    getTransactionsByUserId(userId: number): Transaction[] | Promise<Transaction[]>;
     getUpcomingSessions(): GameSession[] | Promise<GameSession[]>;
     getUserById(id: number): User | Promise<User>;
     getUserByRole(role: string): User[] | Promise<User[]>;
@@ -471,10 +485,10 @@ export interface TransactionSession {
     createdBy: string;
     deletedAt: DateTime;
     deletedBy: string;
+    game_status: UserGameResultStatus;
     id: number;
     record_session_kqj: RecordSessionKqj;
-    token: TokenValues;
-    type: TransactionType;
+    token: number;
     updatedAt: DateTime;
     updatedBy: string;
 }

@@ -29,7 +29,7 @@ export class TransactionSessionResolver {
     );
   }
 
-  @Query(() => TransactionSession, { name: 'getTransactionSessionBy' })
+  @Query(() => TransactionSession, { name: 'getTransactionSessionById' })
   async getTransactionSessionById(
     @Args('id', { type: () => Int }) id: number,
   ): Promise<TransactionSession> {

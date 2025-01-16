@@ -134,6 +134,15 @@ export class RecordSessionKqjResolver {
     );
   }
 
+  @Query(() => [RecordSessionKqj], { name: 'getRecordsBySessionId' })
+  async getRecordsBySessionId(
+    @Args('sessionId', { type: () => Int, nullable: false }) sessionId: number,
+  ) {
+    return this.recordSessionKqjService.getRecordsBySessionId(
+      sessionId,
+    );
+  }
+
   @Query(() => [RecordSessionKqj], { name: 'getRecordsByDate' })
   async getRecordsByDate(
     @Args('filter', { type: () => DateFilterDto, nullable: true })

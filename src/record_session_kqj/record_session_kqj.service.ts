@@ -10,7 +10,7 @@ import { RecordSessionKqj, RecordSessionKqjPagination } from './dbrepo/record_se
 import { CreateRecordSessionKqjDto } from './dto/create-record_session_kqj.input';
 import { User } from 'src/user/dbrepo/user.repository';
 import { GameSessionKqj } from 'src/game_session_kqj/dbrepo/game_session.repository';
-import { RecordStatus, TransactionType } from 'src/common/constants';
+import { RecordStatus, TransactionType, UserGameResultStatus } from 'src/common/constants';
 import { DateFilterDto } from 'src/common/model/date-filter.dto';
 import { TransactionSession } from 'src/transaction_session/dbrepo/transaction_session.repository';
 import { PaginationMetadataDto } from 'src/common/model';
@@ -112,9 +112,9 @@ export class RecordSessionKqjService {
         relations: ['user', 'game_session', 'transaction_session'],
       });
 
-      if (!records.length) {
-        throw new NotFoundException(`No records found for user ID ${userId}`);
-      }
+      // if (!records.length) {
+      //   throw new NotFoundException(`No records found for user ID ${userId}`);
+      // }
       return records;
     } catch (error) {
       console.error(error);
@@ -168,6 +168,25 @@ export class RecordSessionKqjService {
         relations: ['user', 'game_session_id', 'transaction_session'],
       });
       return { data, totalSize };
+    } catch (error) {
+      console.error(error);
+      throw new BadRequestException(
+        'Failed to retrieve records. Please try again later.',
+      );
+    }
+  }
+
+  async getRecordsBySessionId(
+    sessionId: number,
+  ): Promise<RecordSessionKqj[]> {
+    try {
+      const data = await this.recordSessionKqjRepository.find({
+        where: { game_session_id: { id: sessionId }, deletedAt: null, deletedBy: null },
+        relations: ['user', 'game_session_id', 'transaction_session'],
+      });
+      console.log(data);
+      
+      return data;
     } catch (error) {
       console.error(error);
       throw new BadRequestException(
@@ -348,7 +367,7 @@ export class RecordSessionKqjService {
       const transactionSession = this.transactionSessionRepository.create({
         record_session_kqj: record,
         token:prizeAmount,
-        type: isWinner ? TransactionType.CREDIT : TransactionType.DEBIT,
+        game_status: isWinner ? UserGameResultStatus.WIN : UserGameResultStatus.LOSS,
         createdAt: new Date(),
       });
 

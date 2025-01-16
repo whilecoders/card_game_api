@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { forwardRef, Module } from '@nestjs/common';
 import { RecordSessionKqjService } from './record_session_kqj.service';
 import { RecordSessionKqjResolver } from './record_session_kqj.resolver';
 import { RecordSessionKqjProvider } from './dbrepo/record_session_kqj.provider';
@@ -9,7 +9,7 @@ import { PermissionModule } from 'src/permission/permission.module';
 
 @Module({
   imports: [
-    GameSessionKqjModule,
+    forwardRef(() => GameSessionKqjModule),
     UserModule,
     TransactionSessionModule,
     PermissionModule,
@@ -19,6 +19,6 @@ import { PermissionModule } from 'src/permission/permission.module';
     RecordSessionKqjService,
     ...RecordSessionKqjProvider,
   ],
-  exports: [...RecordSessionKqjProvider],
+  exports: [...RecordSessionKqjProvider, RecordSessionKqjService],
 })
 export class RecordSessionKqjModule {}
