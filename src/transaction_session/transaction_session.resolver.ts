@@ -8,6 +8,8 @@ import { AuthGuard } from 'src/auth/auth.guard';
 import { RoleGuard } from 'src/auth/role.guard';
 import { Role } from 'src/graphql';
 import { PermissionGuard } from 'src/permission/permission.guard';
+import { PermissionAction } from 'src/common/constants';
+import { Permissions } from 'src/common/decorator/permission.decorator';
 
 @UseGuards(AuthGuard)
 @Resolver(() => TransactionSession)
@@ -15,10 +17,6 @@ export class TransactionSessionResolver {
   constructor(
     private readonly transactionSessionService: TransactionSessionService,
   ) {}
-  @UseGuards(
-    new RoleGuard([Role.ADMIN, Role.SYSTEM, Role.SUPERADMIN, Role.MASTER]),
-    PermissionGuard,
-  )
   @Mutation(() => TransactionSession)
   async createTransactionSession(
     @Args('createTransactionSessionDto')
@@ -41,6 +39,8 @@ export class TransactionSessionResolver {
     return await this.transactionSessionService.getAllTransactionSessions();
   }
 
+  @UseGuards(PermissionGuard)
+  @Permissions(PermissionAction.GETGAMERESULTBYID)
   @Query(() => [TransactionSession])
   async getGameResultByUserId(
     @Args('userId', { type: () => Int }) userId: number,

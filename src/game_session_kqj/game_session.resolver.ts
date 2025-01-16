@@ -14,10 +14,7 @@ import { PermissionGuard } from 'src/permission/permission.guard';
 @Resolver(() => GameSessionKqj)
 export class GameSessionKqjResolver {
   constructor(private readonly gameSessionKqjService: GameSessionKqjService) {}
-  @UseGuards(
-    new RoleGuard([Role.MASTER, Role.ADMIN, Role.SYSTEM, Role.SUPERADMIN]),
-    PermissionGuard,
-  )
+
   @Mutation(() => GameSessionKqj)
   async updateGameSession(
     @Args({ name: 'id', type: () => Int }) id: number,

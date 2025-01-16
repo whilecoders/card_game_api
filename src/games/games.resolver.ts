@@ -9,12 +9,14 @@ import { UseGuards } from '@nestjs/common';
 import { AuthGuard } from 'src/auth/auth.guard';
 import { PermissionAction } from 'src/common/constants';
 import { Permissions } from 'src/common/decorator/permission.decorator';
+import { PermissionGuard } from 'src/permission/permission.guard';
 
 @UseGuards(AuthGuard)
 @Resolver(() => Games)
 export class GamesResolver {
   constructor(private readonly GamesService: GamesService) {}
 
+  @UseGuards(PermissionGuard)
   @Permissions(PermissionAction.CREATEGAME)
   @Mutation(() => Games)
   async createGames(

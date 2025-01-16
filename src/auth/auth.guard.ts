@@ -30,14 +30,15 @@ export class AuthGuard implements CanActivate {
         secret: EnvKeyConstants.JWT_SECRET,
       });
 
-      if (!payload || !payload.id) {
+      if (!payload) {
         throw new UnauthorizedException('Invalid token payload');
       }
 
       const user = await this.userService.getUserById(payload.id);
-      if (!user) {
-        throw new UnauthorizedException('User not found');
-      }
+      
+      // if (!user) {
+      //   throw new UnauthorizedException('User not found');
+      // }
 
       ctx.user = user;
       return true;

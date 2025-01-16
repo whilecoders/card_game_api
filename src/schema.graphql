@@ -168,6 +168,12 @@ type Games {
   updatedBy: String!
 }
 
+type GuestToken {
+  access_token: String!
+  refresh_token: String!
+  role: Role!
+}
+
 type Message {
   createdAt: DateTime!
   createdBy: String!
@@ -277,6 +283,7 @@ type ProfitAndLoss {
 }
 
 type Query {
+  GuestSignIn: GuestToken!
   getAllGameSessions(skip: Int!, take: Int!): PaginatedAuditLogDto!
   getAllGameses(skip: Int!, take: Int!): PaginatedGamesDto!
   getAllRecordSessions: [RecordSessionKqj!]!
@@ -347,6 +354,7 @@ input ResetPasswordDto {
 
 enum Role {
   ADMIN
+  GUEST
   MASTER
   SUPERADMIN
   SYSTEM

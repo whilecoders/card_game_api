@@ -55,12 +55,19 @@ export class PermissionService {
   ): Promise<Permission> {
     try {
       console.log(createPermissionInput.role, createPermissionInput.userId);
+      const validUser = await this.userService.getUserById(
+        createPermissionInput.userId,
+      );
+
+      if (!validUser) {
+        throw new NotFoundException(
+          `User with ID ${createPermissionInput.userId} not found`,
+        );
+      }
       const permission = this.permissionRepository.create({
         action: createPermissionInput.action,
         role: createPermissionInput.role,
-        user: createPermissionInput.userId
-          ? { id: createPermissionInput.userId }
-          : null,
+        user: validUser,
         allowed: createPermissionInput.allowed,
       });
       return await this.permissionRepository.save(permission);

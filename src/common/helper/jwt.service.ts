@@ -14,10 +14,24 @@ export class JWTService {
     );
   }
 
+  async generateGuestAccessToken(role: Role): Promise<string> {
+    return this.jwtService.signAsync(
+      { role: role },
+      { secret: EnvKeyConstants.JWT_SECRET, expiresIn: '1h' },
+    );
+  }
+
   // Generate Refresh Token
   async generateRefreshToken(userId: number, role: Role): Promise<string> {
     return this.jwtService.signAsync(
       { sub: userId, role: role },
+      { secret: EnvKeyConstants.JWT_REFRESH_SECRET, expiresIn: '1d' },
+    );
+  }
+
+  async generateGuestRefreshToken(role: Role): Promise<string> {
+    return this.jwtService.signAsync(
+      { role: role },
       { secret: EnvKeyConstants.JWT_REFRESH_SECRET, expiresIn: '1d' },
     );
   }

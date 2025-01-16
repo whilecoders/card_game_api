@@ -72,6 +72,7 @@ export enum RecordSessionStatus {
 
 export enum Role {
     ADMIN = "ADMIN",
+    GUEST = "GUEST",
     MASTER = "MASTER",
     SUPERADMIN = "SUPERADMIN",
     SYSTEM = "SYSTEM",
@@ -291,6 +292,12 @@ export interface Games {
     updatedBy: string;
 }
 
+export interface GuestToken {
+    access_token: string;
+    refresh_token: string;
+    role: Role;
+}
+
 export interface Message {
     createdAt: DateTime;
     createdBy: string;
@@ -381,6 +388,7 @@ export interface ProfitAndLoss {
 }
 
 export interface IQuery {
+    GuestSignIn(): GuestToken | Promise<GuestToken>;
     getAllGameSessions(skip: number, take: number): PaginatedAuditLogDto | Promise<PaginatedAuditLogDto>;
     getAllGameses(skip: number, take: number): PaginatedGamesDto | Promise<PaginatedGamesDto>;
     getAllRecordSessions(): RecordSessionKqj[] | Promise<RecordSessionKqj[]>;

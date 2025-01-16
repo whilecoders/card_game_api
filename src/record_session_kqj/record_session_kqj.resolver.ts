@@ -5,7 +5,7 @@ import {
 } from './dbrepo/record_session_kqj.repository';
 import { CreateRecordSessionKqjDto } from './dto/create-record_session_kqj.input';
 import { RecordSessionKqjService } from './record_session_kqj.service';
-import { RecordStatus } from 'src/common/constants';
+import { PermissionAction, RecordStatus } from 'src/common/constants';
 import { DateFilterDto } from 'src/common/model/date-filter.dto';
 import { PaginationMetadataDto } from 'src/common/model';
 import { UseGuards } from '@nestjs/common';
@@ -13,6 +13,7 @@ import { AuthGuard } from 'src/auth/auth.guard';
 import { RoleGuard } from 'src/auth/role.guard';
 import { Role } from 'src/graphql';
 import { PermissionGuard } from 'src/permission/permission.guard';
+import { Permissions } from 'src/common/decorator/permission.decorator';
 
 @UseGuards(AuthGuard)
 @Resolver(() => RecordSessionKqj)
@@ -21,7 +22,8 @@ export class RecordSessionKqjResolver {
     private readonly recordSessionKqjService: RecordSessionKqjService,
   ) {}
 
-  @UseGuards(new RoleGuard([Role.USER, Role.SYSTEM]), PermissionGuard)
+  @UseGuards(PermissionGuard)
+  @Permissions(PermissionAction.CREATERECORD)
   @Mutation(() => RecordSessionKqj)
   async createRecordSession(
     @Args('createRecordSessionKqjDto')
@@ -54,10 +56,6 @@ export class RecordSessionKqjResolver {
     return true;
   }
 
-  @UseGuards(
-    new RoleGuard([Role.ADMIN, Role.SYSTEM, Role.SUPERADMIN, Role.MASTER]),
-    PermissionGuard,
-  )
   @Mutation(() => Boolean)
   async removeUserFromGame(
     @Args('deleteBy', { type: () => Int }) deleteBy: number,
@@ -72,10 +70,6 @@ export class RecordSessionKqjResolver {
     return true;
   }
 
-  @UseGuards(
-    new RoleGuard([Role.ADMIN, Role.SYSTEM, Role.SUPERADMIN, Role.MASTER]),
-    PermissionGuard,
-  )
   @Mutation(() => Boolean)
   async removeSessionFromGame(
     @Args('deleteBy', { type: () => Int }) deleteBy: number,

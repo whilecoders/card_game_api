@@ -1,10 +1,10 @@
 import { Field, ObjectType } from '@nestjs/graphql';
-import { User } from 'src/user/dbrepo/user.repository';
+import { Role } from 'src/common/constants';
 
-@ObjectType('UserToken')
-export class UserTokenType {
-  @Field(() => User)
-  user: User;
+@ObjectType('GuestToken')
+export class GuestTokenType {
+  @Field(() => Role)
+  role: Role;
 
   @Field(() => String)
   access_token: string;

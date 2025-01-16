@@ -18,6 +18,7 @@ import { TokenType } from './entities/token.entity';
 import { ResetPasswordDto } from './dto/reset_password.dto';
 import { Role } from 'src/common/constants';
 import axios from 'axios';
+import { GuestTokenType } from './entities/guest.entity';
 
 @Injectable()
 export class AuthService {
@@ -25,7 +26,7 @@ export class AuthService {
     @Inject('USER_REPOSITORY')
     private readonly userRepository: Repository<User>,
     private jwtService: JWTService,
-  ) { }
+  ) {}
   async AdminSignUp(signUpCredential: SignUpCredential) {
     const { username, email, password, role, city, phone_number } =
       signUpCredential;
@@ -94,11 +95,24 @@ export class AuthService {
     } catch {
       throw new InternalServerErrorException('Error creating user');
     }
+  }
 
+  async GuestSignIn() {
+    const access_token = await this.jwtService.generateGuestAccessToken(
+      Role.GUEST,
+    );
+    const refresh_token = await this.jwtService.generateGuestRefreshToken(
+      Role.GUEST,
+    );
+    const data: GuestTokenType = {
+      role: Role.GUEST,
+      access_token: access_token,
+      refresh_token: refresh_token,
+    };
+    return data;
   }
 
   async SignIn(signInCredential: SignInCredential) {
-
     const { username, password } = signInCredential;
 
     const user = await this.userRepository.findOne({ where: { username } });
@@ -180,7 +194,9 @@ export class AuthService {
       );
     }
     try {
-      const user = await this.userRepository.findOne({ where: { id, deletedAt: null, deletedBy: null } });
+      const user = await this.userRepository.findOne({
+        where: { id, deletedAt: null, deletedBy: null },
+      });
       if (!user) {
         throw new NotFoundException(`User with id ${id} not exist`);
       }
@@ -191,8 +207,7 @@ export class AuthService {
       if (!isCurrentPasswordValid) {
         throw new BadRequestException('Current password is incorrect');
       }
-      const hashedPassword =
-        PasswordHashService.hashPassword(newPassword);
+      const hashedPassword = PasswordHashService.hashPassword(newPassword);
       user.password = hashedPassword;
       user.first_time_password_reset = true;
 
@@ -205,32 +220,37 @@ export class AuthService {
 
   async sendOtp(mobile: string): Promise<string> {
     try {
-
       // step 1: check if user exist in database
-      const user = await this.userRepository.findOne({ where: { phone_number: mobile } });
+      const user = await this.userRepository.findOne({
+        where: { phone_number: mobile },
+      });
       if (!user) {
-        throw new NotFoundException(`User with mobile number :${mobile} not found`);
+        throw new NotFoundException(
+          `User with mobile number :${mobile} not found`,
+        );
       }
 
       // step 2: generate a 6 digit reandom otp
       const otp = Math.floor(100000 + Math.random() * 900000);
 
-
-      const TOKEN: string = "AAHuDAAANl6yPAdt6ax8JuYjzoHhWiA5FWeIVLp-MFYqTg";
-      const BASE_URL: string = 'https://gatewayapi.telegram.org/'
-      const PHONE = `+91${mobile}`
+      const TOKEN: string = 'AAHuDAAANl6yPAdt6ax8JuYjzoHhWiA5FWeIVLp-MFYqTg';
+      const BASE_URL: string = 'https://gatewayapi.telegram.org/';
+      const PHONE = `+91${mobile}`;
       const HEADERS = {
-        "Authorization": `Bearer ${TOKEN}`,
-        "Content-Type": "application/json"
-      }
+        Authorization: `Bearer ${TOKEN}`,
+        'Content-Type': 'application/json',
+      };
 
       // step 3: check if user can send otp
-      const issend = await axios.post(`${BASE_URL}checkSendAbility`, {
-        'phone_number': PHONE
-      }, {
-        headers: HEADERS
-      });
-
+      const issend = await axios.post(
+        `${BASE_URL}checkSendAbility`,
+        {
+          phone_number: PHONE,
+        },
+        {
+          headers: HEADERS,
+        },
+      );
 
       if (issend.data.ok != true) {
         throw new BadRequestException('Unable to send otp');
@@ -239,15 +259,17 @@ export class AuthService {
       await this.delay(5000);
 
       const json_body = {
-        'phone_number': PHONE,
-        'code': otp,
-        'ttl': 60
-      }
-
+        phone_number: PHONE,
+        code: otp,
+        ttl: 60,
+      };
 
       // step 4: send otp to user
-      const response = await axios.post(`${BASE_URL}sendVerificationMessage`,
-        json_body, { headers: HEADERS });
+      const response = await axios.post(
+        `${BASE_URL}sendVerificationMessage`,
+        json_body,
+        { headers: HEADERS },
+      );
 
       if (response.data.ok != true) {
         throw new BadRequestException('Unable to send otp');
@@ -256,8 +278,7 @@ export class AuthService {
       //  save the otp in table
       user.otp = otp.toString();
       await this.userRepository.save(user);
-      return "OTP sent successfully";
-
+      return 'OTP sent successfully';
     } catch (error) {
       throw new InternalServerErrorException('Unable to send otp');
     }
@@ -265,21 +286,24 @@ export class AuthService {
 
   async verifyOtp(mobile: string, otp: string): Promise<string> {
     try {
-      const user = await this.userRepository.findOne({ where: { phone_number: mobile } });
+      const user = await this.userRepository.findOne({
+        where: { phone_number: mobile },
+      });
       if (!user) {
-        throw new NotFoundException(`User with mobile number :${mobile} not found`);
+        throw new NotFoundException(
+          `User with mobile number :${mobile} not found`,
+        );
       }
       if (user.otp !== otp) {
         throw new BadRequestException('Invalid otp');
       }
-      return "OTP verified successfully";
+      return 'OTP verified successfully';
     } catch (error) {
       throw new InternalServerErrorException('Unable to verify otp');
     }
   }
 
   delay(ms: number): Promise<void> {
-    return new Promise(resolve => setTimeout(resolve, ms));
+    return new Promise((resolve) => setTimeout(resolve, ms));
   }
 }
-

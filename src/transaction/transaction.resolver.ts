@@ -7,12 +7,14 @@ import { UseGuards } from '@nestjs/common';
 import { AuthGuard } from 'src/auth/auth.guard';
 import { Permissions } from 'src/common/decorator/permission.decorator';
 import { PermissionAction } from 'src/common/constants';
+import { PermissionGuard } from 'src/permission/permission.guard';
 
 @UseGuards(AuthGuard)
 @Resolver(() => Transaction)
 export class TransactionResolver {
   constructor(private transactionService: TransactionService) {}
 
+  @UseGuards(PermissionGuard)
   @Permissions(PermissionAction.CREATETRANSACTION)
   @Mutation(() => Transaction)
   updateWallet(

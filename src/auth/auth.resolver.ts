@@ -7,10 +7,11 @@ import { UserTokenType } from './entities/signin.entity';
 import { SignInCredential } from './dto/signin.input';
 import { TokenType } from './entities/token.entity';
 import { ResetPasswordDto } from './dto/reset_password.dto';
+import { GuestTokenType } from './entities/guest.entity';
 
 @Resolver(() => User)
 export class AuthResolver {
-  constructor(private readonly authService: AuthService) { }
+  constructor(private readonly authService: AuthService) {}
 
   @Mutation(() => User)
   async adminSignUp(
@@ -24,6 +25,11 @@ export class AuthResolver {
     @Args('signUpCredential') signUpCredential: SignUpCredential,
   ) {
     return this.authService.UserSignUp(signUpCredential);
+  }
+
+  @Query(() => GuestTokenType)
+  async GuestSignIn() {
+    return this.authService.GuestSignIn();
   }
 
   @Query(() => UserTokenType)
@@ -59,9 +65,7 @@ export class AuthResolver {
   }
 
   @Mutation(() => String)
-  async sendOtp(
-    @Args('mobile') mobile: string,
-  ): Promise<string> {
+  async sendOtp(@Args('mobile') mobile: string): Promise<string> {
     return await this.authService.sendOtp(mobile);
   }
 }
