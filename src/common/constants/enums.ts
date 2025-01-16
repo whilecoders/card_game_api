@@ -95,3 +95,12 @@ export enum AuditEntityType {
   GameSession = 'GameSession',
   Transaction = 'Transaction',
 }
+
+export enum PermissionAction {
+  CREATEGAME = 'CREATEGAME',
+  UPDATEGAME = 'UPDATEGAME',
+  DELETEGAME = 'DELETEGAME',
+  CREATETRANSACTION = 'CREATETRANSACTION',
+  UPDATETRANSACTION = 'UPDATETRANSACTION',
+  DELETETRANSACTION = 'DELETETRANSACTION',
+}

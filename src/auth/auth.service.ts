@@ -17,6 +17,7 @@ import { UserTokenType } from './entities/signin.entity';
 import { TokenType } from './entities/token.entity';
 import { ResetPasswordDto } from './dto/reset_password.dto';
 import { Role } from 'src/common/constants';
+import axios from 'axios';
 
 @Injectable()
 export class AuthService {
@@ -200,6 +201,85 @@ export class AuthService {
     } catch (error) {
       throw new InternalServerErrorException('Failed to reset password');
     }
+  }
+
+  async sendOtp(mobile: string): Promise<string> {
+    try {
+
+      // step 1: check if user exist in database
+      const user = await this.userRepository.findOne({ where: { phone_number: mobile } });
+      if (!user) {
+        throw new NotFoundException(`User with mobile number :${mobile} not found`);
+      }
+
+      // step 2: generate a 6 digit reandom otp
+      const otp = Math.floor(100000 + Math.random() * 900000);
+
+
+      const TOKEN: string = "AAHuDAAANl6yPAdt6ax8JuYjzoHhWiA5FWeIVLp-MFYqTg";
+      const BASE_URL: string = 'https://gatewayapi.telegram.org/'
+      const PHONE = `+91${mobile}`
+      const HEADERS = {
+        "Authorization": `Bearer ${TOKEN}`,
+        "Content-Type": "application/json"
+      }
+
+      // step 3: check if user can send otp
+      const issend = await axios.post(`${BASE_URL}checkSendAbility`, {
+        'phone_number': PHONE
+      }, {
+        headers: HEADERS
+      });
+
+
+      if (issend.data.ok != true) {
+        throw new BadRequestException('Unable to send otp');
+      }
+
+      await this.delay(5000);
+
+      const json_body = {
+        'phone_number': PHONE,
+        'code': otp,
+        'ttl': 60
+      }
+
+
+      // step 4: send otp to user
+      const response = await axios.post(`${BASE_URL}sendVerificationMessage`,
+        json_body, { headers: HEADERS });
+
+      if (response.data.ok != true) {
+        throw new BadRequestException('Unable to send otp');
+      }
+
+      //  save the otp in table
+      user.otp = otp.toString();
+      await this.userRepository.save(user);
+      return "OTP sent successfully";
+
+    } catch (error) {
+      throw new InternalServerErrorException('Unable to send otp');
+    }
+  }
+
+  async verifyOtp(mobile: string, otp: string): Promise<string> {
+    try {
+      const user = await this.userRepository.findOne({ where: { phone_number: mobile } });
+      if (!user) {
+        throw new NotFoundException(`User with mobile number :${mobile} not found`);
+      }
+      if (user.otp !== otp) {
+        throw new BadRequestException('Invalid otp');
+      }
+      return "OTP verified successfully";
+    } catch (error) {
+      throw new InternalServerErrorException('Unable to verify otp');
+    }
+  }
+
+  delay(ms: number): Promise<void> {
+    return new Promise(resolve => setTimeout(resolve, ms));
   }
 }
 

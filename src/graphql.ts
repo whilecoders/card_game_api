@@ -128,7 +128,7 @@ export interface CreatePermissionInput {
     action: string;
     allowed: boolean;
     role?: Nullable<Role>;
-    userId?: Nullable<string>;
+    userId?: Nullable<number>;
 }
 
 export interface CreateRecordSessionKqjDto {
@@ -205,6 +205,7 @@ export interface UpdateUserDto {
     email?: Nullable<string>;
     first_time_password_reset?: Nullable<boolean>;
     name?: Nullable<string>;
+    otp?: Nullable<string>;
     phone_number?: Nullable<string>;
     role?: Nullable<Role>;
     status?: Nullable<UserStatus>;
@@ -330,6 +331,7 @@ export interface IMutation {
     removeUserFromGame(deleteBy: number, gameSessionId: number, userId: number): boolean | Promise<boolean>;
     resetPassword(resetPasswordDto: ResetPasswordDto): string | Promise<string>;
     restrictUserAction(action: string, userId: number): string | Promise<string>;
+    sendOtp(mobile: string): string | Promise<string>;
     suspendUser(suspendUserDto: SuspendUserDto): User | Promise<User>;
     unrestrictUserAction(action: string, userId: number): string | Promise<string>;
     updateGameSession(id: number, updateGameSessionDto: UpdateGameSessionDto): GameSession | Promise<GameSession>;
@@ -338,6 +340,7 @@ export interface IMutation {
     updateUserRecordStatus(gameSessionId: number, recordStatus: RecordSessionStatus, userId: number): RecordSessionKqj | Promise<RecordSessionKqj>;
     updateWallet(adminId: number, userId: number, walletData: WalletDto): Transaction | Promise<Transaction>;
     userSignUp(signUpCredential: SignUpCredential): User | Promise<User>;
+    verifyOtp(mobile: string, otp: string): string | Promise<string>;
 }
 
 export interface PaginatedAuditLogDto {
@@ -370,7 +373,7 @@ export interface PaginatedUserDto {
 
 export interface Permission {
     action: string;
-    allowed?: Nullable<boolean>;
+    allowed: boolean;
     createdAt: DateTime;
     createdBy: string;
     deletedAt: DateTime;
@@ -397,7 +400,7 @@ export interface IQuery {
     getAllUsers(skip: number, take: number): PaginatedUserDto | Promise<PaginatedUserDto>;
     getCurrentRunningSessions(): GameSession[] | Promise<GameSession[]>;
     getDailyWinnersAndLosers(): DailyWinnersAndLosers | Promise<DailyWinnersAndLosers>;
-    getFinishedSessionsToday(): number | Promise<number>;
+    getFinishedSessionsByDateOrToday(filter?: Nullable<DateFilterDto>): number | Promise<number>;
     getGameResultByUserId(userId: number): TransactionSession[] | Promise<TransactionSession[]>;
     getGameSessionById(id: number): GameSession | Promise<GameSession>;
     getGameSessionsByDateOrToday(filter?: Nullable<DateFilterDto>): GameSession[] | Promise<GameSession[]>;
@@ -506,6 +509,7 @@ export interface User {
     first_time_password_reset: boolean;
     id: number;
     name?: Nullable<string>;
+    otp: string;
     password: string;
     permissions: Permission;
     phone_number: string;

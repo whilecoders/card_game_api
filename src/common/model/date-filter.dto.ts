@@ -5,11 +5,9 @@ import { IsOptional, IsDateString } from 'class-validator';
 export class DateFilterDto {
   @Field(() => Date, { nullable: true })
   @IsOptional()
-  // @IsDateString()
   startDate?: Date;
 
   @Field(() => Date, { nullable: true })
   @IsOptional()
-  // @IsDateString()
   endDate?: Date;
 }

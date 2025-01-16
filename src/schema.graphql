@@ -55,7 +55,7 @@ input CreatePermissionInput {
   action: String!
   allowed: Boolean!
   role: Role
-  userId: String
+  userId: Int
 }
 
 input CreateRecordSessionKqjDto {
@@ -216,6 +216,7 @@ type Mutation {
   removeUserFromGame(deleteBy: Int!, gameSessionId: Int!, userId: Int!): Boolean!
   resetPassword(resetPasswordDto: ResetPasswordDto!): String!
   restrictUserAction(action: String!, userId: Float!): String!
+  sendOtp(mobile: String!): String!
   suspendUser(suspendUserDto: SuspendUserDto!): User!
   unrestrictUserAction(action: String!, userId: Float!): String!
   updateGameSession(id: Int!, updateGameSessionDto: UpdateGameSessionDto!): GameSession!
@@ -224,6 +225,7 @@ type Mutation {
   updateUserRecordStatus(gameSessionId: Int!, recordStatus: RecordSessionStatus!, userId: Int!): RecordSessionKqj!
   updateWallet(adminId: Int!, userId: Int!, walletData: WalletDto!): Transaction!
   userSignUp(signUpCredential: SignUpCredential!): User!
+  verifyOtp(mobile: String!, otp: String!): String!
 }
 
 type PaginatedAuditLogDto {
@@ -262,7 +264,7 @@ input PaginationMetadataDto {
 
 type Permission {
   action: String!
-  allowed: Boolean
+  allowed: Boolean!
   createdAt: DateTime!
   createdBy: String!
   deletedAt: DateTime!
@@ -289,7 +291,7 @@ type Query {
   getAllUsers(skip: Int!, take: Int!): PaginatedUserDto!
   getCurrentRunningSessions: [GameSession!]!
   getDailyWinnersAndLosers: DailyWinnersAndLosers!
-  getFinishedSessionsToday: Float!
+  getFinishedSessionsByDateOrToday(filter: DateFilterDto): Float!
   getGameResultByUserId(userId: Int!): [TransactionSession!]!
   getGameSessionById(id: Int!): GameSession!
   getGameSessionsByDateOrToday(filter: DateFilterDto): [GameSession!]!
@@ -462,6 +464,7 @@ input UpdateUserDto {
   email: String
   first_time_password_reset: Boolean
   name: String
+  otp: String
   phone_number: String
   role: Role
   status: UserStatus
@@ -482,6 +485,7 @@ type User {
   first_time_password_reset: Boolean!
   id: Int!
   name: String
+  otp: String!
   password: String!
   permissions: Permission!
   phone_number: String!
