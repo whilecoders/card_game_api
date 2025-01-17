@@ -422,9 +422,9 @@ export interface IQuery {
     getRecordsBy(UserId: number): RecordSessionKqj[] | Promise<RecordSessionKqj[]>;
     getRecordsByDate(filter?: Nullable<DateFilterDto>): RecordSessionKqj[] | Promise<RecordSessionKqj[]>;
     getRecordsBySessionId(sessionId: number): RecordSessionKqj[] | Promise<RecordSessionKqj[]>;
-    getTotalSessionsToday(): number | Promise<number>;
-    getTotalTokensToday(): number | Promise<number>;
-    getTotalUsersToday(): number | Promise<number>;
+    getTotalSessionsDateOrToday(filter?: Nullable<DateFilterDto>): number | Promise<number>;
+    getTotalTokensToday(filter?: Nullable<DateFilterDto>): number | Promise<number>;
+    getTotalUsersByDateOrToday(filter?: Nullable<DateFilterDto>): number | Promise<number>;
     getTransactionSessionById(id: number): TransactionSession | Promise<TransactionSession>;
     getTransactionsByDate(filter?: Nullable<DateFilterDto>): TransactionSession[] | Promise<TransactionSession[]>;
     getTransactionsByUserId(userId: number): Transaction[] | Promise<Transaction[]>;

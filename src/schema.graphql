@@ -312,9 +312,9 @@ type Query {
   getRecordsBy(UserId: Int!): [RecordSessionKqj!]!
   getRecordsByDate(filter: DateFilterDto): [RecordSessionKqj!]!
   getRecordsBySessionId(sessionId: Int!): [RecordSessionKqj!]!
-  getTotalSessionsToday: Float!
-  getTotalTokensToday: Float!
-  getTotalUsersToday: Float!
+  getTotalSessionsDateOrToday(filter: DateFilterDto): Float!
+  getTotalTokensToday(filter: DateFilterDto): Float!
+  getTotalUsersByDateOrToday(filter: DateFilterDto): Float!
   getTransactionSessionById(id: Int!): TransactionSession!
   getTransactionsByDate(filter: DateFilterDto): [TransactionSession!]!
   getTransactionsByUserId(userId: Int!): [Transaction!]!
