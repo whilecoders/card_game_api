@@ -493,7 +493,7 @@ type User {
   first_time_password_reset: Boolean!
   id: Int!
   name: String
-  otp: String!
+  otp: String
   password: String!
   permissions: Permission!
   phone_number: String!

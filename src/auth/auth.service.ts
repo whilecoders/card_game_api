@@ -92,7 +92,9 @@ export class AuthService {
 
       await this.userRepository.save(user);
       return user;
-    } catch {
+    } catch  (error) {
+      console.error(error);
+      
       throw new InternalServerErrorException('Error creating user');
     }
   }
@@ -114,6 +116,7 @@ export class AuthService {
 
   async SignIn(signInCredential: SignInCredential) {
     const { username, password } = signInCredential;
+    
 
     const user = await this.userRepository.findOne({ where: { username } });
     if (!user) throw new NotFoundException('User not found');
