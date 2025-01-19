@@ -15,14 +15,14 @@ import { Role } from 'src/graphql';
 import { PermissionGuard } from 'src/permission/permission.guard';
 import { Permissions } from 'src/common/decorator/permission.decorator';
 
-@UseGuards(AuthGuard)
+// @UseGuards(AuthGuard)
 @Resolver(() => RecordSessionKqj)
 export class RecordSessionKqjResolver {
   constructor(
     private readonly recordSessionKqjService: RecordSessionKqjService,
   ) {}
 
-  @UseGuards(PermissionGuard)
+  // @UseGuards(PermissionGuard)
   @Permissions(PermissionAction.CREATERECORD)
   @Mutation(() => RecordSessionKqj)
   async createRecordSession(

@@ -10,7 +10,7 @@ export class JWTService {
   async generateAccessToken(userId: number, role: Role): Promise<string> {
     return this.jwtService.signAsync(
       { sub: userId, role: role },
-      { secret: EnvKeyConstants.JWT_SECRET, expiresIn: '1h' },
+      { secret: EnvKeyConstants.JWT_SECRET, expiresIn: '1m' },
     );
   }
 

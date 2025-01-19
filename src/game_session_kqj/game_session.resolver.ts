@@ -1,17 +1,12 @@
-import { Resolver, Query, Mutation, Args, Int, ObjectType } from '@nestjs/graphql';
+import { Resolver, Query, Mutation, Args, Int } from '@nestjs/graphql';
 import { UpdateGameSessionDto } from './dto/update-game_session.input';
 import { GameSessionKqj } from './dbrepo/game_session.repository';
 import { GameSessionKqjService } from './game_session.service';
 import { PaginatedGameSessionKqjDto } from './dto/paginated-game-session-kqj';
 import { DateFilterDto } from 'src/common/model/date-filter.dto';
-import { UseGuards } from '@nestjs/common';
-import { AuthGuard } from 'src/auth/auth.guard';
-import { RoleGuard } from 'src/auth/role.guard';
-import { Role } from 'src/graphql';
-import { PermissionGuard } from 'src/permission/permission.guard';
 import { GameSessionKqjStats } from './dbrepo/game_session_state_repository';
 
-@UseGuards(AuthGuard)
+// @UseGuards(AuthGuard)
 @Resolver(() => GameSessionKqj)
 export class GameSessionKqjResolver {
   constructor(private readonly gameSessionKqjService: GameSessionKqjService) {}

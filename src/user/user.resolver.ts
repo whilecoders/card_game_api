@@ -12,7 +12,7 @@ import { AuthGuard } from 'src/auth/auth.guard';
 import { RoleGuard } from 'src/auth/role.guard';
 import { PermissionGuard } from 'src/permission/permission.guard';
 import { Permissions } from 'src/common/decorator/permission.decorator';
-@UseGuards(AuthGuard)
+// @UseGuards(AuthGuard)
 @Resolver(() => User)
 export class UserResolver {
   constructor(private readonly userService: UserService) {}
@@ -29,8 +29,8 @@ export class UserResolver {
     }
   }
 
-  @UseGuards(PermissionGuard)
-  @Permissions(PermissionAction.GETUSERBYID)
+  // @UseGuards(PermissionGuard)
+  // @Permissions(PermissionAction.GETUSERBYID)
   @Query(() => User)
   async getUserById(
     @Args('id', { type: () => Int }) id: number,

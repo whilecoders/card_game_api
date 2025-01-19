@@ -11,7 +11,7 @@ import { PermissionGuard } from 'src/permission/permission.guard';
 import { PermissionAction } from 'src/common/constants';
 import { Permissions } from 'src/common/decorator/permission.decorator';
 
-@UseGuards(AuthGuard)
+// @UseGuards(AuthGuard)
 @Resolver(() => TransactionSession)
 export class TransactionSessionResolver {
   constructor(
@@ -39,8 +39,8 @@ export class TransactionSessionResolver {
     return await this.transactionSessionService.getAllTransactionSessions();
   }
 
-  @UseGuards(PermissionGuard)
-  @Permissions(PermissionAction.GETGAMERESULTBYID)
+  // @UseGuards(PermissionGuard)
+  // @Permissions(PermissionAction.GETGAMERESULTBYID)
   @Query(() => [TransactionSession])
   async getGameResultByUserId(
     @Args('userId', { type: () => Int }) userId: number,
