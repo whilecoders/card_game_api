@@ -110,3 +110,15 @@ export enum PermissionAction {
   GETUSERBYID = 'GETUSERBYID',
   GETGAMERESULTBYID = 'GETGAMERESULTBYID',
 }
+
+export enum NotificationType {
+  MESSAGE = 'MESSAGE',
+  SYSTEM = 'SYSTEM',
+  COMMENT = 'COMMENT',
+  LIKE = 'LIKE',
+}
+
+export enum NotificationStatus {
+  READ = 'READ',
+  UNREAD = 'UNREAD',
+}

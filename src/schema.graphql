@@ -51,6 +51,13 @@ input CreateGamesDto {
   start_time: String!
 }
 
+input CreateNotificationInput {
+  message: String!
+  title: String!
+  type: NotificationType! = MESSAGE
+  userId: Float
+}
+
 input CreatePermissionInput {
   action: String!
   allowed: Boolean!
@@ -210,6 +217,7 @@ type Mutation {
   addUser(addUserDto: AddUserDto!): User!
   adminSignUp(signUpCredential: SignUpCredential!): User!
   createGames(createGamesDto: CreateGamesDto!): Games!
+  createNotification(createNotificationInput: CreateNotificationInput!): Notification!
 
   """Create a new permission"""
   createPermission(createPermissionInput: CreatePermissionInput!): Permission!
@@ -227,11 +235,38 @@ type Mutation {
   unrestrictUserAction(action: String!, userId: Float!): String!
   updateGameSession(id: Int!, updateGameSessionDto: UpdateGameSessionDto!): GameSession!
   updateGames(updateGamesDto: UpdateGamesDto!): Games!
+  updateNotification(updateNotificationInput: UpdateNotificationInput!): Notification!
   updateUser(id: Int!, updateUserDto: UpdateUserDto!): User!
   updateUserRecordStatus(gameSessionId: Int!, recordStatus: RecordSessionStatus!, userId: Int!): RecordSessionKqj!
   updateWallet(adminId: Int!, userId: Int!, walletData: WalletDto!): Transaction!
   userSignUp(signUpCredential: SignUpCredential!): User!
   verifyOtp(mobile: String!, otp: String!): String!
+}
+
+type Notification {
+  createdAt: DateTime!
+  createdBy: String!
+  deletedAt: DateTime!
+  deletedBy: String!
+  id: Int!
+  message: String!
+  status: NotificationStatus!
+  title: String!
+  type: NotificationType!
+  updatedAt: DateTime!
+  updatedBy: String!
+}
+
+enum NotificationStatus {
+  READ
+  UNREAD
+}
+
+enum NotificationType {
+  COMMENT
+  LIKE
+  MESSAGE
+  SYSTEM
 }
 
 type PaginatedAuditLogDto {
@@ -298,6 +333,7 @@ type Query {
   getAllUsers(skip: Int!, take: Int!): PaginatedUserDto!
   getCurrentRunningSessions: [GameSession!]!
   getDailyWinnersAndLosers: DailyWinnersAndLosers!
+  getDeletedNotifications(userId: Float!): [Notification!]!
   getFinishedSessionsByDateOrToday(filter: DateFilterDto): Float!
   getGameResultByUserId(userId: Int!): [TransactionSession!]!
   getGameSessionById(id: Int!): GameSession!
@@ -321,6 +357,7 @@ type Query {
   getUpcomingSessions: [GameSession!]!
   getUserById(id: Int!): User!
   getUserByRole(role: String!): [User!]!
+  getUserNotifications(userId: Float!): [Notification!]!
   getUsersByCreatedAt(date: DateTime!): [User!]!
   searchRecords(offset: PaginationMetadataDto!, searchTerm: String!, sessionId: Int!): RecordSessionKqjPagination!
   searchUser(filters: UserFiltersInput!, skip: Int!, take: Int!): PaginatedUserDto!
@@ -464,6 +501,16 @@ input UpdateGamesDto {
   game_type: GameType
   start_date: DateTime!
   start_time: String!
+}
+
+input UpdateNotificationInput {
+  deletedAt: DateTime
+  deletedBy: String
+  id: Int!
+  message: String
+  status: NotificationStatus
+  title: String
+  type: NotificationType
 }
 
 input UpdateUserDto {
