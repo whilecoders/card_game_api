@@ -64,6 +64,18 @@ export enum MessageType {
     VIDEO = "VIDEO"
 }
 
+export enum NotificationStatus {
+    READ = "READ",
+    UNREAD = "UNREAD"
+}
+
+export enum NotificationType {
+    COMMENT = "COMMENT",
+    LIKE = "LIKE",
+    MESSAGE = "MESSAGE",
+    SYSTEM = "SYSTEM"
+}
+
 export enum RecordSessionStatus {
     ACTIVE = "ACTIVE",
     COMPLETED = "COMPLETED",
@@ -123,6 +135,13 @@ export interface CreateGamesDto {
     game_type: GameType;
     start_date: DateTime;
     start_time: string;
+}
+
+export interface CreateNotificationInput {
+    message: string;
+    title: string;
+    type: NotificationType;
+    userId?: Nullable<number>;
 }
 
 export interface CreatePermissionInput {
@@ -198,6 +217,16 @@ export interface UpdateGamesDto {
     game_type?: Nullable<GameType>;
     start_date: DateTime;
     start_time: string;
+}
+
+export interface UpdateNotificationInput {
+    deletedAt?: Nullable<DateTime>;
+    deletedBy?: Nullable<string>;
+    id: number;
+    message?: Nullable<string>;
+    status?: Nullable<NotificationStatus>;
+    title?: Nullable<string>;
+    type?: Nullable<NotificationType>;
 }
 
 export interface UpdateUserDto {
@@ -328,6 +357,7 @@ export interface IMutation {
     addUser(addUserDto: AddUserDto): User | Promise<User>;
     adminSignUp(signUpCredential: SignUpCredential): User | Promise<User>;
     createGames(createGamesDto: CreateGamesDto): Games | Promise<Games>;
+    createNotification(createNotificationInput: CreateNotificationInput): Notification | Promise<Notification>;
     createPermission(createPermissionInput: CreatePermissionInput): Permission | Promise<Permission>;
     createRecordSession(createRecordSessionKqjDto: CreateRecordSessionKqjDto): RecordSessionKqj | Promise<RecordSessionKqj>;
     createTransactionSession(createTransactionSessionDto: CreateTransactionSessionDto): TransactionSession | Promise<TransactionSession>;
@@ -343,11 +373,26 @@ export interface IMutation {
     unrestrictUserAction(action: string, userId: number): string | Promise<string>;
     updateGameSession(id: number, updateGameSessionDto: UpdateGameSessionDto): GameSession | Promise<GameSession>;
     updateGames(updateGamesDto: UpdateGamesDto): Games | Promise<Games>;
+    updateNotification(updateNotificationInput: UpdateNotificationInput): Notification | Promise<Notification>;
     updateUser(id: number, updateUserDto: UpdateUserDto): User | Promise<User>;
     updateUserRecordStatus(gameSessionId: number, recordStatus: RecordSessionStatus, userId: number): RecordSessionKqj | Promise<RecordSessionKqj>;
     updateWallet(adminId: number, userId: number, walletData: WalletDto): Transaction | Promise<Transaction>;
     userSignUp(signUpCredential: SignUpCredential): User | Promise<User>;
     verifyOtp(mobile: string, otp: string): string | Promise<string>;
+}
+
+export interface Notification {
+    createdAt: DateTime;
+    createdBy: string;
+    deletedAt: DateTime;
+    deletedBy: string;
+    id: number;
+    message: string;
+    status: NotificationStatus;
+    title: string;
+    type: NotificationType;
+    updatedAt: DateTime;
+    updatedBy: string;
 }
 
 export interface PaginatedAuditLogDto {
@@ -408,6 +453,7 @@ export interface IQuery {
     getAllUsers(skip: number, take: number): PaginatedUserDto | Promise<PaginatedUserDto>;
     getCurrentRunningSessions(): GameSession[] | Promise<GameSession[]>;
     getDailyWinnersAndLosers(): DailyWinnersAndLosers | Promise<DailyWinnersAndLosers>;
+    getDeletedNotifications(userId: number): Notification[] | Promise<Notification[]>;
     getFinishedSessionsByDateOrToday(filter?: Nullable<DateFilterDto>): number | Promise<number>;
     getGameResultByUserId(userId: number): TransactionSession[] | Promise<TransactionSession[]>;
     getGameSessionById(id: number): GameSession | Promise<GameSession>;
@@ -431,6 +477,7 @@ export interface IQuery {
     getUpcomingSessions(): GameSession[] | Promise<GameSession[]>;
     getUserById(id: number): User | Promise<User>;
     getUserByRole(role: string): User[] | Promise<User[]>;
+    getUserNotifications(userId: number): Notification[] | Promise<Notification[]>;
     getUsersByCreatedAt(date: DateTime): User[] | Promise<User[]>;
     searchRecords(offset: PaginationMetadataDto, searchTerm: string, sessionId: number): RecordSessionKqjPagination | Promise<RecordSessionKqjPagination>;
     searchUser(filters: UserFiltersInput, skip: number, take: number): PaginatedUserDto | Promise<PaginatedUserDto>;

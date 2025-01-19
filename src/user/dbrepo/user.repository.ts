@@ -4,6 +4,7 @@ import { Role, UserStatus } from 'src/common/constants/enums';
 import { BaseEntity } from 'src/common/repository/base.repository';
 import { Games } from 'src/games/dbrepo/games.repository';
 import { Message } from 'src/message/dbrepo/message.repository';
+import { Notification } from 'src/notification/dbrepo/notification.repository';
 import { Permission } from 'src/permission/dbrepo/permission.repository';
 import { RecordSessionKqj } from 'src/record_session_kqj/dbrepo/record_session_kqj.repository';
 import { Room } from 'src/room/dbrepo/room.repository';
@@ -77,7 +78,7 @@ export class User extends BaseEntity {
 
   @Field(() => Number)
   @Column({ type: 'decimal', precision: 10, scale: 2, default: 0 })
-  wallet_limit: number
+  wallet_limit: number;
 
   @Field(() => UserStatus)
   @Column({
@@ -123,4 +124,8 @@ export class User extends BaseEntity {
   @OneToMany(() => Permission, (permission) => permission.user)
   @JoinColumn({ name: 'user' })
   permissions: Permission[];
+
+  @OneToMany(() => Notification, (notification) => notification.user)
+  @JoinColumn({ name: 'user' })
+  notifications: Notification;
 }

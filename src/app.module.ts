@@ -17,19 +17,14 @@ import { RecordSessionKqjModule } from './record_session_kqj/record_session_kqj.
 import { GamesModule } from './games/games.module';
 import { GameSessionKqjModule } from './game_session_kqj/game_session.module';
 import { TransactionSessionModule } from './transaction_session/transaction_session.module';
-
 import { DailyGameModule } from './daily_game/daily_game.module';
 import { TaskSchedulerModule } from './task_scheduler/task_scheduler.module';
 import { ScheduleModule } from '@nestjs/schedule';
 import { DashboardModule } from './dashboard/dashboard.module';
 import { GamesocketModule } from './gamesocket/gamesocket.module';
-import { TaskScheduler } from './task_scheduler/task_scheduler.service';
-import { GamesocketGateway } from './gamesocket/gamesocket.gateway';
 import { AuditLogModule } from './audit-log/audit-log.module';
 import { PermissionModule } from './permission/permission.module';
-import { APP_GUARD, APP_INTERCEPTOR } from '@nestjs/core';
-import { PermissionGuard } from './permission/permission.guard';
-import { AuditLogInterceptor } from './audit-log/audit-log.interceptor';
+import { NotificationModule } from './notification/notification.module';
 
 @Module({
   imports: [
@@ -68,6 +63,7 @@ import { AuditLogInterceptor } from './audit-log/audit-log.interceptor';
     GamesocketModule,
     AuditLogModule,
     PermissionModule,
+    NotificationModule,
   ],
   controllers: [AppController],
   providers: [
