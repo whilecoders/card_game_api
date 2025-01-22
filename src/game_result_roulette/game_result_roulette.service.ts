@@ -11,6 +11,8 @@ import { GameResultRoulette } from './dbrepo/game_result_roulette.repository';
 import { DateFilterDto } from 'src/common/model/date-filter.dto';
 import { GameResultStatus } from 'src/common/constants';
 import { GameResultStats } from './dto/game_result_stats.dto';
+import { CreateGameResultDto } from './dto/create_game_result_roulette.dto';
+import { RecordSessionRoulette } from 'src/record_session_roulette/dbrepo/record-session-roulette.repository';
 
 @Injectable()
 export class GameResultRouletteService {
@@ -19,7 +21,49 @@ export class GameResultRouletteService {
     private readonly userRepository: Repository<User>,
     @Inject('GAME_RESULT_ROULETTE_REPOSITORY')
     private readonly gameResultRouletteRepository: Repository<GameResultRoulette>,
+    @Inject('RECORD_SESSION_ROULETTE_REPOSITORY')
+    private readonly recordSessionRouletteRepository: Repository<RecordSessionRoulette>,
   ) {}
+
+  async createGameResult(
+    dto: CreateGameResultDto,
+  ): Promise<GameResultRoulette> {
+    const recordSessionRoulette =
+      await this.recordSessionRouletteRepository.findOne({
+        where: { id: dto.recordSessionId },
+        relations: {
+          user: true,
+          game_session_roulette: true,
+          game_result_roulette: true,
+        },
+      });
+    if (!recordSessionRoulette) {
+      throw new NotFoundException(
+        `RecordSession with ID ${dto.recordSessionId} not found`,
+      );
+    }
+
+    if (!recordSessionRoulette.user)
+      throw new BadRequestException(
+        'Associated user not found in record session.',
+      );
+
+    const gameResult = this.gameResultRouletteRepository.create({
+      token: dto.token,
+      game_status: dto.game_status,
+      record_session_roulette: recordSessionRoulette,
+      createdAt: new Date(),
+    });
+
+    try {
+      return await this.gameResultRouletteRepository.save(gameResult);
+    } catch (error) {
+      console.error('Error saving transaction session:', error);
+      throw new InternalServerErrorException(
+        'Failed to create transaction session.',
+      );
+    }
+  }
 
   async getGameResultById(id: number): Promise<GameResultRoulette> {
     const gameResult = await this.gameResultRouletteRepository.findOne({

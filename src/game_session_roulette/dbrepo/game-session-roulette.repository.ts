@@ -26,7 +26,7 @@ export class GameSessionRoulette extends BaseEntity {
 
   @Field(() => GameRouletteNumbers, { nullable: true })
   @Column({ type: 'enum', enum: GameRouletteNumbers, nullable: true })
-  game_result_card: GameRouletteNumbers;
+  game_result_number: GameRouletteNumbers;
 
   @Field(() => Date, { nullable: true })
   @Column({ type: 'timestamp', precision: 3, nullable: true })
