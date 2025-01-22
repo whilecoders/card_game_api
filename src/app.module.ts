@@ -25,6 +25,11 @@ import { GamesocketModule } from './gamesocket/gamesocket.module';
 import { AuditLogModule } from './audit-log/audit-log.module';
 import { PermissionModule } from './permission/permission.module';
 import { NotificationModule } from './notification/notification.module';
+import { GameRouletteModule } from './game_roulette/game_roulette.module';
+import { DailyGameRouletteModule } from './daily_game_roulette/daily_game_roulette.module';
+import { GameSessionRouletteModule } from './game_session_roulette/game_session_roulette.module';
+import { RecordSessionRouletteModule } from './record_session_roulette/record_session_roulette.module';
+import { GameResultRouletteModule } from './game_result_roulette/game_result_roulette.module';
 
 @Module({
   imports: [
@@ -64,6 +69,11 @@ import { NotificationModule } from './notification/notification.module';
     AuditLogModule,
     PermissionModule,
     NotificationModule,
+    GameRouletteModule,
+    DailyGameRouletteModule,
+    GameSessionRouletteModule,
+    RecordSessionRouletteModule,
+    GameResultRouletteModule,
   ],
   controllers: [AppController],
   providers: [

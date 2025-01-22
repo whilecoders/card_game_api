@@ -1,8 +1,8 @@
 import { Field, Int, ObjectType } from '@nestjs/graphql';
-import { Games } from '../dbrepo/games.repository';
+import { Games } from 'src/games/dbrepo/games.repository';
 
 @ObjectType()
-export class PaginatedGamesDto {
+export class PaginatedGameRouletteDto {
   @Field(() => [Games])
   data: Games[];
 

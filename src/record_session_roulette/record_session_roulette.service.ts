@@ -6,51 +6,51 @@ import {
   InternalServerErrorException,
 } from '@nestjs/common';
 import { Between, ILike, Repository } from 'typeorm';
-import { RecordSessionKqj } from './dbrepo/record_session_kqj.repository';
-import { CreateRecordSessionKqjDto } from './dto/create-record_session_kqj.input';
 import { User } from 'src/user/dbrepo/user.repository';
-import { GameSessionKqj } from 'src/game_session_kqj/dbrepo/game_session.repository';
-import { RecordSessionStatus } from 'src/common/constants';
+import { GameRouletteNumbers, RecordSessionStatus } from 'src/common/constants';
 import { DateFilterDto } from 'src/common/model/date-filter.dto';
-import { TransactionSession } from 'src/transaction_session/dbrepo/transaction_session.repository';
 import { PaginationMetadataDto } from 'src/common/model';
-import { RecordSessionKqjPagination } from './dto/paginated-record-session.dto';
+import { RecordSessionRoulette } from './dbrepo/record-session-roulette.repository';
+import { GameSessionRoulette } from 'src/game_session_roulette/dbrepo/game-session-roulette.repository';
+import { CreateRecordSessionRouletteDto } from './dto/create_record_session_roulette.dto';
+import { RecordSessionRoulettePagination } from './dto/paginated_record_session_roulette.dto';
 
 @Injectable()
-export class RecordSessionKqjService {
+export class RecordSessionRouletteService {
   constructor(
-    @Inject('RECORD_SESSION_KQJ_REPOSITORY')
-    private readonly recordSessionKqjRepository: Repository<RecordSessionKqj>,
+    @Inject('RECORD_SESSION_ROULETTE_REPOSITORY')
+    private readonly recordSessionRouletteRepository: Repository<RecordSessionRoulette>,
     @Inject('USER_REPOSITORY')
     private readonly userRepository: Repository<User>,
-    @Inject('GAME_SESSION_KQJ_REPOSITORY')
-    private readonly gameSessionKqjRepository: Repository<GameSessionKqj>,
+    @Inject('GAMES_SESSION_ROULETTE_REPOSITORY')
+    private readonly gameSessionRouletteRepository: Repository<GameSessionRoulette>,
   ) {}
 
   async createRecordSession(
-    dto: CreateRecordSessionKqjDto,
-  ): Promise<RecordSessionKqj> {
+    dto: CreateRecordSessionRouletteDto,
+  ): Promise<RecordSessionRoulette> {
     const user = await this.userRepository.findOne({
       where: { id: dto.userId },
     });
     if (!user) {
       throw new NotFoundException(`User with ID ${dto.userId} not found`);
     }
-    const gameSession = await this.gameSessionKqjRepository.findOne({
-      where: { id: dto.gameSessionId },
-    });
+    const gameSessionRoulette =
+      await this.gameSessionRouletteRepository.findOne({
+        where: { id: dto.gameSessionRouletteId },
+      });
 
-    if (!gameSession) {
+    if (!gameSessionRoulette) {
       throw new NotFoundException(
-        `GameSession with ID ${dto.gameSessionId} not found`,
+        `GameSessionRoulette with ID ${dto.gameSessionRouletteId} not found`,
       );
     }
 
-    const recordSession = this.recordSessionKqjRepository.create({
-      user,
+    const recordSession = this.recordSessionRouletteRepository.create({
+      user: { id: dto.userId },
       token: dto.token,
-      game_session_id: gameSession,
-      choosen_card: dto.choosen_card,
+      game_session_roulette: gameSessionRoulette,
+      choosen_number: dto.choosen_number,
       record_status: dto.record_status,
       createdAt: new Date(),
     });
@@ -65,19 +65,20 @@ export class RecordSessionKqjService {
     }
 
     try {
-      const savedSession = await this.recordSessionKqjRepository.save(recordSession);
+      const savedSession =await this.recordSessionRouletteRepository.save(recordSession);
       await this.userRepository.save(user);
-      const findCreatedSession = await this.recordSessionKqjRepository.findOne({
-        where: { id: savedSession.id },
-      });
+      const findCreatedSession =
+        await this.recordSessionRouletteRepository.findOne({
+          where: { id: savedSession.id },
+        });
       return findCreatedSession;
     } catch (error) {
       throw new BadRequestException('Failed to create record session');
     }
   }
 
-  async getRecordSessionById(id: number): Promise<RecordSessionKqj> {
-    const recordSession = await this.recordSessionKqjRepository.findOne({
+  async getRecordSessionById(id: number): Promise<RecordSessionRoulette> {
+    const recordSession = await this.recordSessionRouletteRepository.findOne({
       where: { id, deletedAt: null, deletedBy: null },
       relations: ['user', 'game_session', 'transaction_session'],
     });
@@ -87,17 +88,17 @@ export class RecordSessionKqjService {
     return recordSession;
   }
 
-  async getAllRecordSessions(): Promise<RecordSessionKqj[]> {
+  async getAllRecordSessions(): Promise<RecordSessionRoulette[]> {
     try {
-      return await this.recordSessionKqjRepository.find({
+      return await this.recordSessionRouletteRepository.find({
         where: {
           deletedAt: null,
           deletedBy: null,
         },
         relations: {
           user: true,
-          game_session_id: true,
-          transaction_session: true,
+          game_session_roulette: true,
+          game_result_roulette: true,
         },
       });
     } catch (error) {
@@ -106,9 +107,9 @@ export class RecordSessionKqjService {
     }
   }
 
-  async getRecordsByUserId(userId: number): Promise<RecordSessionKqj[]> {
+  async getRecordsByUserId(userId: number): Promise<RecordSessionRoulette[]> {
     try {
-      const records = await this.recordSessionKqjRepository.find({
+      const records = await this.recordSessionRouletteRepository.find({
         where: { user: { id: userId }, deletedAt: null, deletedBy: null },
         relations: ['user', 'game_session', 'transaction_session'],
       });
@@ -129,7 +130,7 @@ export class RecordSessionKqjService {
     sessionId: number,
     searchTerm: string,
     offset: PaginationMetadataDto,
-  ): Promise<RecordSessionKqjPagination> {
+  ): Promise<RecordSessionRoulettePagination> {
     try {
       let whereCondition = {
         game_session_id: { id: sessionId },
@@ -140,9 +141,13 @@ export class RecordSessionKqjService {
         whereCondition['user'] = { id: Number(searchTerm) };
       else whereCondition['user'] = { username: ILike(`%${searchTerm}%`) };
       const [data, totalSize] =
-        await this.recordSessionKqjRepository.findAndCount({
+        await this.recordSessionRouletteRepository.findAndCount({
           where: whereCondition,
-          relations: ['user', 'game_session_id', 'transaction_session'],
+          relations: {
+            user: true,
+            game_session_roulette: true,
+            game_result_roulette: true,
+          },
           skip: offset.skip,
           take: offset.take,
         });
@@ -159,14 +164,14 @@ export class RecordSessionKqjService {
   async getAllRecordsBySessionId(
     sessionId: number,
     offset?: PaginationMetadataDto,
-  ): Promise<RecordSessionKqjPagination> {
+  ): Promise<RecordSessionRoulettePagination> {
     try {
       console.log(offset);
 
       const [data, totalSize] =
-        await this.recordSessionKqjRepository.findAndCount({
+        await this.recordSessionRouletteRepository.findAndCount({
           where: {
-            game_session_id: { id: sessionId },
+            game_session_roulette: { id: sessionId },
             deletedAt: null,
             deletedBy: null,
           },
@@ -187,10 +192,13 @@ export class RecordSessionKqjService {
     userId: number,
     gameSessionId: number,
     status: RecordSessionStatus,
-  ): Promise<RecordSessionKqj> {
+  ): Promise<RecordSessionRoulette> {
     try {
-      const recordSession = await this.recordSessionKqjRepository.findOne({
-        where: { user: { id: userId }, game_session_id: { id: gameSessionId } },
+      const recordSession = await this.recordSessionRouletteRepository.findOne({
+        where: {
+          user: { id: userId },
+          game_session_roulette: { id: gameSessionId },
+        },
       });
 
       if (!recordSession) {
@@ -207,7 +215,7 @@ export class RecordSessionKqjService {
 
       recordSession.record_status = status;
 
-      return await this.recordSessionKqjRepository.save(recordSession);
+      return await this.recordSessionRouletteRepository.save(recordSession);
     } catch (error) {
       if (
         error instanceof NotFoundException ||
@@ -221,8 +229,8 @@ export class RecordSessionKqjService {
 
   async markSessionAsCompleted(gameSessionId: number): Promise<void> {
     try {
-      const recordSessions = await this.recordSessionKqjRepository.find({
-        where: { game_session_id: { id: gameSessionId } },
+      const recordSessions = await this.recordSessionRouletteRepository.find({
+        where: { game_session_roulette: { id: gameSessionId } },
       });
       if (!recordSessions.length) {
         throw new NotFoundException(
@@ -232,7 +240,7 @@ export class RecordSessionKqjService {
       for (const record of recordSessions) {
         record.record_status = RecordSessionStatus.COMPLETED;
       }
-      await this.recordSessionKqjRepository.save(recordSessions);
+      await this.recordSessionRouletteRepository.save(recordSessions);
     } catch (error) {
       if (error instanceof NotFoundException) {
         throw error;
@@ -249,8 +257,11 @@ export class RecordSessionKqjService {
     deleteBy: number,
   ) {
     try {
-      const recordSession = await this.recordSessionKqjRepository.find({
-        where: { user: { id: userId }, game_session_id: { id: gameSessionId } },
+      const recordSession = await this.recordSessionRouletteRepository.find({
+        where: {
+          user: { id: userId },
+          game_session_roulette: { id: gameSessionId },
+        },
       });
       if (!recordSession || recordSession.length === 0) {
         throw new NotFoundException(
@@ -261,7 +272,7 @@ export class RecordSessionKqjService {
         session.deletedAt = new Date();
         session.deletedBy = deleteBy.toString();
       }
-      return await this.recordSessionKqjRepository.save(recordSession);
+      return await this.recordSessionRouletteRepository.save(recordSession);
     } catch (error) {
       console.error(error);
       if (
@@ -276,7 +287,7 @@ export class RecordSessionKqjService {
 
   async removeSessionFromGame(id: number, deleteBy: number) {
     try {
-      const recordSession = await this.recordSessionKqjRepository.find({
+      const recordSession = await this.recordSessionRouletteRepository.find({
         where: { id: id },
       });
       if (!recordSession || recordSession.length === 0) {
@@ -286,7 +297,7 @@ export class RecordSessionKqjService {
         session.deletedAt = new Date();
         session.deletedBy = deleteBy.toString();
       }
-      return await this.recordSessionKqjRepository.save(recordSession);
+      return await this.recordSessionRouletteRepository.save(recordSession);
     } catch (error) {
       console.error(error);
       if (
@@ -298,7 +309,9 @@ export class RecordSessionKqjService {
     }
   }
 
-  async getRecordsByDate(filter?: DateFilterDto): Promise<RecordSessionKqj[]> {
+  async getRecordsByDate(
+    filter?: DateFilterDto,
+  ): Promise<RecordSessionRoulette[]> {
     let start: Date;
     let end: Date;
 
@@ -317,7 +330,7 @@ export class RecordSessionKqjService {
       end = new Date(today.setHours(23, 59, 59, 999));
     }
 
-    return this.recordSessionKqjRepository.find({
+    return this.recordSessionRouletteRepository.find({
       where: {
         createdAt: Between(start, end),
         deletedAt: null,

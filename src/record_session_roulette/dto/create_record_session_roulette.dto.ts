@@ -1,16 +1,16 @@
 import { InputType, Field, Int } from '@nestjs/graphql';
 import { IsNotEmpty } from 'class-validator';
 import {
-  GameKqjCards,
   TokenValues,
   RecordSessionStatus,
+  GameRouletteNumbers,
 } from 'src/common/constants';
 
 @InputType()
-export class CreateRecordSessionKqjDto {
+export class CreateRecordSessionRouletteDto {
   @IsNotEmpty()
-  @Field(() => GameKqjCards)
-  choosen_card: GameKqjCards;
+  @Field(() => GameRouletteNumbers)
+  choosen_number: GameRouletteNumbers;
 
   @IsNotEmpty()
   @Field(() => Int)
@@ -26,5 +26,5 @@ export class CreateRecordSessionKqjDto {
 
   @IsNotEmpty()
   @Field(() => Int)
-  gameSessionId: number;
+  gameSessionRouletteId: number;
 }

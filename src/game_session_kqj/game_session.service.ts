@@ -6,12 +6,12 @@ import {
   InternalServerErrorException,
 } from '@nestjs/common';
 import { Between, Repository } from 'typeorm';
-import { UpdateGameSessionDto } from './dto/update-game_session.input';
+import { UpdateGameSessionDto } from './dto/update-game_session.dto';
 import { GameSessionKqj } from './dbrepo/game_session.repository';
-import { GameSessionStatus, UserGameResultStatus } from 'src/common/constants';
-import { PaginatedGameSessionKqjDto } from './dto/paginated-game-session-kqj';
+import { GameSessionStatus, GameResultStatus } from 'src/common/constants';
+import { PaginatedGameSessionKqjDto } from './dto/paginated-game-session-kqj.dto';
 import { DateFilterDto } from 'src/common/model/date-filter.dto';
-import { GameSessionKqjStats } from './dbrepo/game_session_state_repository';
+import { GameSessionKqjStats } from './dto/game_session_stats.dto';
 import { RecordSessionKqj } from 'src/record_session_kqj/dbrepo/record_session_kqj.repository';
 import { User } from 'src/user/dbrepo/user.repository';
 import { TransactionSession } from 'src/transaction_session/dbrepo/transaction_session.repository';
@@ -21,14 +21,11 @@ export class GameSessionKqjService {
   constructor(
     @Inject('GAME_SESSION_KQJ_REPOSITORY')
     private readonly gameSessionKqjRepository: Repository<GameSessionKqj>,
-    @Inject('RECORD_SESSION_KQJ_REPOSITORY')
-    private readonly recordSessionKqj: Repository<RecordSessionKqj>,
     @Inject('USER_REPOSITORY')
     private readonly user: Repository<User>,
     @Inject('TRANSACTION_SESSION_REPOSITORY')
     private readonly transactionSession: Repository<TransactionSession>,
-
-  ) { }
+  ) {}
 
   async updateGameSession(
     id: number,
@@ -78,18 +75,10 @@ export class GameSessionKqjService {
   }
 
   async getLiveGameSessions(): Promise<GameSessionKqj> {
-
-    const today = new Date();
-    const to = new Date(today.setHours(0, 0, 0, 0));
-    const from = new Date(today.setHours(23, 59, 59, 999));
-
-    // console.log({ session_status: GameSessionStatus.LIVE, to, from });
-
     const finded = await this.gameSessionKqjRepository.find({
       where: { session_status: GameSessionStatus.LIVE },
       relations: ['game', 'record_session_kqj'],
     });
-    // console.log(finded);
     return finded[finded.length - 1];
   }
 
@@ -134,29 +123,30 @@ export class GameSessionKqjService {
   }
 
   async getPlayerStats(userId: number): Promise<GameSessionKqjStats> {
-
     const user = await this.user.findOne({ where: { id: userId } });
     if (!user) {
-      new NotFoundException("No user found");
+      new NotFoundException('No user found');
     }
 
     const totalUserBets = await this.transactionSession.find({
       where: {
-        record_session_kqj: { user: { id: userId } }
+        record_session_kqj: { user: { id: userId } },
       },
-      relations: ['record_session_kqj', 'record_session_kqj.game_session_id']
+      relations: ['record_session_kqj', 'record_session_kqj.game_session_id'],
     });
 
     // Group bets by `game_session_id`
-    const groupedGameResult = totalUserBets.reduce<Map<string, TransactionSession>>((accum, value) => {
+    const groupedGameResult = totalUserBets.reduce<
+      Map<string, TransactionSession>
+    >((accum, value) => {
       const uniqueKey = value.record_session_kqj.game_session_id.id.toString();
       if (accum.has(uniqueKey)) {
         const existing = accum.get(uniqueKey)!;
-        if (value.game_status === UserGameResultStatus.WIN) {
-          existing.game_status = UserGameResultStatus.WIN;
+        if (value.game_status === GameResultStatus.WIN) {
+          existing.game_status = GameResultStatus.WIN;
         }
-        if (existing.game_status === UserGameResultStatus.LOSS) {
-          existing.game_status = UserGameResultStatus.LOSS
+        if (existing.game_status === GameResultStatus.LOSS) {
+          existing.game_status = GameResultStatus.LOSS;
         }
       } else {
         accum.set(uniqueKey, { ...value });
@@ -165,20 +155,22 @@ export class GameSessionKqjService {
     }, new Map<string, TransactionSession>());
 
     const gameResult = Array.from(groupedGameResult.values());
-    const losseGames = gameResult.filter((result) => result.game_status === UserGameResultStatus.LOSS);
-    const winGames = gameResult.filter((result) => result.game_status === UserGameResultStatus.WIN);
+    const losseGames = gameResult.filter(
+      (result) => result.game_status === GameResultStatus.LOSS,
+    );
+    const winGames = gameResult.filter(
+      (result) => result.game_status === GameResultStatus.WIN,
+    );
 
-    console.log("gruped resutl: ", groupedGameResult);
-    console.log("gameResult: ", losseGames);
-    console.log("Loss Games: ", losseGames);
-    console.log("Win Games: ", winGames);
+    console.log('gruped resutl: ', groupedGameResult);
+    console.log('gameResult: ', losseGames);
+    console.log('Loss Games: ', losseGames);
+    console.log('Win Games: ', winGames);
 
     return {
       totalWins: winGames.length,
       totalGamePlayed: gameResult.length,
-      totalLosses: losseGames.length
-    }
+      totalLosses: losseGames.length,
+    };
   }
-
-  async generateResult() { }
 }

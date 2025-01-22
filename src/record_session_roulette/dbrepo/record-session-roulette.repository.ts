@@ -1,29 +1,29 @@
 import { Field, ObjectType, registerEnumType } from '@nestjs/graphql';
 import {
-  GameKqjCards,
+  GameRouletteNumbers,
   RecordSessionStatus,
   TokenValues,
 } from 'src/common/constants';
 import { BaseEntity } from 'src/common/repository/base.repository';
-import { GameSessionKqj } from 'src/game_session_kqj/dbrepo/game_session.repository';
-import { TransactionSession } from 'src/transaction_session/dbrepo/transaction_session.repository';
+import { GameResultRoulette } from 'src/game_result_roulette/dbrepo/game_result_roulette.repository';
+import { GameSessionRoulette } from 'src/game_session_roulette/dbrepo/game-session-roulette.repository';
 import { User } from 'src/user/dbrepo/user.repository';
 import { Column, Entity, JoinColumn, ManyToOne, OneToOne } from 'typeorm';
 
-registerEnumType(TokenValues, { name: 'TokenValues' });
-registerEnumType(RecordSessionStatus, { name: 'RecordSessionStatus' });
-@ObjectType('RecordSessionKqj')
-@Entity({ name: 'record_session_kqj' })
-export class RecordSessionKqj extends BaseEntity {
-  @Field(() => GameKqjCards, { nullable: false })
-  @Column({ type: 'enum', enum: GameKqjCards, nullable: false })
-  choosen_card: GameKqjCards;
+
+@ObjectType('RecordSessionRoulette')
+@Entity({ name: 'record_session_roulette' })
+export class RecordSessionRoulette extends BaseEntity {
+  @Field(() => GameRouletteNumbers, { nullable: false })
+  @Column({ type: 'enum', enum: GameRouletteNumbers, nullable: false })
+  choosen_number: GameRouletteNumbers;
 
   @Field(() => User, { nullable: false })
   @ManyToOne(() => User, (user) => user.record_session_kqj, {
     nullable: false,
     onDelete: 'CASCADE',
   })
+  @JoinColumn({ name: 'user' })
   user: User;
 
   @Field(() => TokenValues, { nullable: false })
@@ -42,27 +42,27 @@ export class RecordSessionKqj extends BaseEntity {
   })
   record_status: RecordSessionStatus;
 
-  @Field(() => GameSessionKqj, { nullable: false })
+  @Field(() => GameSessionRoulette, { nullable: false })
   @ManyToOne(
-    () => GameSessionKqj,
-    (gameSessionKqj) => gameSessionKqj.record_session_kqj,
+    () => GameSessionRoulette,
+    (gameSessionRoulette) => gameSessionRoulette.record_session_roulette,
     {
       nullable: false,
       onDelete: 'CASCADE',
     },
   )
-  @JoinColumn({ name: 'game_session_id' })
-  game_session_id: GameSessionKqj;
+  @JoinColumn({ name: 'game_session_roulette' })
+  game_session_roulette: GameSessionRoulette;
 
-  @Field(() => TransactionSession, { nullable: true })
+  @Field(() => GameResultRoulette, { nullable: true })
   @OneToOne(
-    () => TransactionSession,
-    (transactionSession) => transactionSession.record_session_kqj,
+    () => GameResultRoulette,
+    (transactionSession) => transactionSession.record_session_roulette,
     {
       nullable: true,
       onDelete: 'CASCADE',
     },
   )
-  @JoinColumn({ name: 'transaction_session' })
-  transaction_session: TransactionSession;
+  @JoinColumn({ name: 'game_result_roulette' })
+  game_result_roulette: GameResultRoulette;
 }

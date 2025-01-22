@@ -1,15 +1,12 @@
-import { Resolver, Query, Mutation, Args, Int, ObjectType } from '@nestjs/graphql';
-import { UpdateGameSessionDto } from './dto/update-game_session.input';
+import { Resolver, Query, Mutation, Args, Int } from '@nestjs/graphql';
+import { UpdateGameSessionDto } from './dto/update-game_session.dto';
 import { GameSessionKqj } from './dbrepo/game_session.repository';
 import { GameSessionKqjService } from './game_session.service';
-import { PaginatedGameSessionKqjDto } from './dto/paginated-game-session-kqj';
+import { PaginatedGameSessionKqjDto } from './dto/paginated-game-session-kqj.dto';
 import { DateFilterDto } from 'src/common/model/date-filter.dto';
 import { UseGuards } from '@nestjs/common';
 import { AuthGuard } from 'src/auth/auth.guard';
-import { RoleGuard } from 'src/auth/role.guard';
-import { Role } from 'src/graphql';
-import { PermissionGuard } from 'src/permission/permission.guard';
-import { GameSessionKqjStats } from './dbrepo/game_session_state_repository';
+import { GameSessionKqjStats } from './dto/game_session_stats.dto';
 
 @UseGuards(AuthGuard)
 @Resolver(() => GameSessionKqj)
@@ -54,7 +51,7 @@ export class GameSessionKqjResolver {
   ): Promise<GameSessionKqj[]> {
     return this.gameSessionKqjService.getGameSessionsByDateOrToday(filter);
   }
-  
+
   @Query(() => GameSessionKqjStats, { name: 'getPlayerStateByUserId' })
   async getPlayerStateByUserId(
     @Args('userId', { type: () => Int }) userId: number,

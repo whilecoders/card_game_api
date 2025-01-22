@@ -39,6 +39,18 @@ type AuditLog {
   user_id: User
 }
 
+input CreateGameRouletteDto {
+  admin_id: Int!
+  end_date: DateTime!
+  end_time: String!
+  game_duration: Int!
+  game_in_day: Int!
+  game_status: GameStatus!
+  game_type: GameType!
+  start_date: DateTime!
+  start_time: String!
+}
+
 input CreateGamesDto {
   admin_id: Int!
   end_date: DateTime!
@@ -90,6 +102,17 @@ type DailyGame {
   updatedBy: String!
 }
 
+type DailyGameRoulette {
+  createdAt: DateTime!
+  createdBy: String!
+  deletedAt: DateTime!
+  deletedBy: String!
+  game_roulette: GameRoulette!
+  id: Int!
+  updatedAt: DateTime!
+  updatedBy: String!
+}
+
 type DailyWinnersAndLosers {
   losers: Float!
   winners: Float!
@@ -120,6 +143,53 @@ enum GameKqjCards {
   QUEEN_OF_SPADES
 }
 
+type GameResultRoulette {
+  createdAt: DateTime!
+  createdBy: String!
+  deletedAt: DateTime!
+  deletedBy: String!
+  game_status: UserGameResultStatus!
+  id: Int!
+  record_session_roulette: RecordSessionRoulette!
+  token: Int!
+  updatedAt: DateTime!
+  updatedBy: String!
+}
+
+type GameRoulette {
+  admin: User!
+  createdAt: DateTime!
+  createdBy: String!
+  daily_game_roulette: [DailyGameRoulette!]
+  deletedAt: DateTime!
+  deletedBy: String!
+  end_date: DateTime!
+  end_time: String!
+  game_duration: Float!
+  game_in_day: Float!
+  game_session_roulette: [GameSessionRoulette!]
+  game_status: GameStatus!
+  game_type: GameType!
+  id: Int!
+  start_date: DateTime!
+  start_time: String!
+  updatedAt: DateTime!
+  updatedBy: String!
+}
+
+enum GameRouletteNumbers {
+  EIGTH
+  FIVE
+  FOUR
+  NINE
+  ONE
+  SEVEN
+  SIX
+  TEN
+  THREE
+  TWO
+}
+
 type GameSession {
   createdAt: DateTime!
   createdBy: String!
@@ -142,6 +212,22 @@ type GameSessionKqjStats {
   totalWins: Int!
 }
 
+type GameSessionRoulette {
+  createdAt: DateTime!
+  createdBy: String!
+  deletedAt: DateTime!
+  deletedBy: String!
+  game_result_card: GameRouletteNumbers
+  game_roulette: GameRoulette!
+  id: Int!
+  record_session_roulette: RecordSessionRoulette
+  session_end_time: DateTime
+  session_start_time: DateTime
+  session_status: GameSessionStatus!
+  updatedAt: DateTime!
+  updatedBy: String!
+}
+
 enum GameSessionStatus {
   END
   INACTIVE
@@ -158,6 +244,7 @@ enum GameStatus {
 
 enum GameType {
   KQJ
+  ROULETTE
 }
 
 type Games {
@@ -216,6 +303,7 @@ type Mutation {
   DeleteGames(id: Int!): Boolean!
   addUser(addUserDto: AddUserDto!): User!
   adminSignUp(signUpCredential: SignUpCredential!): User!
+  createGameRoulette(createGameRouletteDto: CreateGameRouletteDto!): GameRoulette!
   createGames(createGamesDto: CreateGamesDto!): Games!
   createNotification(createNotificationInput: CreateNotificationInput!): Notification!
 
@@ -223,6 +311,7 @@ type Mutation {
   createPermission(createPermissionInput: CreatePermissionInput!): Permission!
   createRecordSession(createRecordSessionKqjDto: CreateRecordSessionKqjDto!): RecordSessionKqj!
   createTransactionSession(createTransactionSessionDto: CreateTransactionSessionDto!): TransactionSession!
+  deleteGameRoulette(id: Int!): Boolean!
   deleteUser(adminId: Float!, userId: Float!): Boolean!
   markSessionAsCompleted(gameSessionId: Int!): Boolean!
   refreshAccessToken(refreshToken: String!, token: String!): Token!
@@ -233,7 +322,8 @@ type Mutation {
   sendOtp(mobile: String!): String!
   suspendUser(suspendUserDto: SuspendUserDto!): User!
   unrestrictUserAction(action: String!, userId: Float!): String!
-  updateGameSession(id: Int!, updateGameSessionDto: UpdateGameSessionDto!): GameSession!
+  updateGameRoulette(updateGameRouletteDto: UpdateGameRouletteDto!): GameRoulette!
+  updateGameSession(id: Int!, updateGameSessionRouletteDto: UpdateGameSessionRouletteDto!): GameSessionRoulette!
   updateGames(updateGamesDto: UpdateGamesDto!): Games!
   updateNotification(updateNotificationInput: UpdateNotificationInput!): Notification!
   updateUser(id: Int!, updateUserDto: UpdateUserDto!): User!
@@ -276,9 +366,23 @@ type PaginatedAuditLogDto {
   take: Int!
 }
 
+type PaginatedGameRouletteDto {
+  count: Int!
+  data: [Games!]!
+  skip: Int!
+  take: Int!
+}
+
 type PaginatedGameSessionKqjDto {
   count: Int!
   data: [GameSession!]!
+  skip: Int!
+  take: Int!
+}
+
+type PaginatedGameSessionRouletteDto {
+  count: Int!
+  data: [GameSessionRoulette!]!
   skip: Int!
   take: Int!
 }
@@ -325,7 +429,8 @@ type ProfitAndLoss {
 
 type Query {
   GuestSignIn: GuestToken!
-  getAllGameSessions(skip: Int!, take: Int!): PaginatedAuditLogDto!
+  getAllGameSessions(skip: Int!, take: Int!): PaginatedGameSessionRouletteDto!
+  getAllGamesRoulette(skip: Int!, take: Int!): PaginatedGameRouletteDto!
   getAllGameses(skip: Int!, take: Int!): PaginatedGamesDto!
   getAllRecordSessions: [RecordSessionKqj!]!
   getAllRecordsBySessionId(offset: PaginationMetadataDto!, sessionId: Int!): RecordSessionKqjPagination!
@@ -336,18 +441,21 @@ type Query {
   getDeletedNotifications(userId: Float!): [Notification!]!
   getFinishedSessionsByDateOrToday(filter: DateFilterDto): Float!
   getGameResultByUserId(userId: Int!): [TransactionSession!]!
+  getGameRouletteByDateOrToday(filter: DateFilterDto): [GameRoulette!]!
   getGameSessionById(id: Int!): GameSession!
+  getGameSessionRouletteById(id: Int!): GameSessionRoulette!
   getGameSessionsByDateOrToday(filter: DateFilterDto): [GameSession!]!
-  getGamesBy(id: Int!): Games!
+  getGameSessionsRouletteByDateOrToday(filter: DateFilterDto): [GameSessionRoulette!]!
+  getGamesBy(id: Int!): GameRoulette!
   getGamesByDate(filter: DateFilterDto): [Games!]!
   getGamesByDateOrToday(filter: DateFilterDto): [Games!]!
+  getLiveGameSessionRoulette: GameSessionRoulette
   getLiveGameSessions: GameSession
   getPlayerStateByUserId(userId: Int!): GameSessionKqjStats!
   getProfitAndLoss: ProfitAndLoss!
   getRecordSessionBy(id: Int!): RecordSessionKqj!
   getRecordsBy(UserId: Int!): [RecordSessionKqj!]!
   getRecordsByDate(filter: DateFilterDto): [RecordSessionKqj!]!
-  getRecordsBySessionId(sessionId: Int!): [RecordSessionKqj!]!
   getTotalSessionsDateOrToday(filter: DateFilterDto): Float!
   getTotalTokensToday(filter: DateFilterDto): Float!
   getTotalUsersByDateOrToday(filter: DateFilterDto): Float!
@@ -383,6 +491,22 @@ type RecordSessionKqj {
 type RecordSessionKqjPagination {
   data: [RecordSessionKqj!]!
   totalSize: Int!
+}
+
+type RecordSessionRoulette {
+  choosen_number: GameRouletteNumbers!
+  createdAt: DateTime!
+  createdBy: String!
+  deletedAt: DateTime!
+  deletedBy: String!
+  game_result_roulette: GameResultRoulette
+  game_session_roulette: GameSessionRoulette!
+  id: Int!
+  record_status: RecordSessionStatus!
+  token: TokenValues!
+  updatedAt: DateTime!
+  updatedBy: String!
+  user: User!
 }
 
 enum RecordSessionStatus {
@@ -486,8 +610,21 @@ enum TransactionType {
   DEBIT
 }
 
-input UpdateGameSessionDto {
-  game_result_card: GameKqjCards!
+input UpdateGameRouletteDto {
+  admin_id: Int!
+  end_date: DateTime!
+  end_time: String!
+  game_duration: Int
+  game_id: Int!
+  game_in_day: Int
+  game_status: GameStatus
+  game_type: GameType
+  start_date: DateTime!
+  start_time: String!
+}
+
+input UpdateGameSessionRouletteDto {
+  game_result_roulette_number: GameRouletteNumbers!
 }
 
 input UpdateGamesDto {
@@ -538,6 +675,7 @@ type User {
   deletedBy: String!
   email: String!
   first_time_password_reset: Boolean!
+  game_roulete: GameRoulette!
   id: Int!
   name: String
   otp: String!
@@ -546,6 +684,7 @@ type User {
   phone_number: String!
   profile: String
   record_session_kqj: RecordSessionKqj!
+  record_session_roulette: RecordSessionRoulette!
   role: Role!
   roomMember: Room!
   status: UserStatus!

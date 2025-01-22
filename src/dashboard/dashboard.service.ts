@@ -4,13 +4,11 @@ import {
   Injectable,
   InternalServerErrorException,
 } from '@nestjs/common';
-import { GameSessionStatus, TransactionType } from 'src/common/constants';
+import { GameSessionStatus } from 'src/common/constants';
 import { GameSessionKqj } from 'src/game_session_kqj/dbrepo/game_session.repository';
 import { RecordSessionKqj } from 'src/record_session_kqj/dbrepo/record_session_kqj.repository';
-import { User } from 'src/user/dbrepo/user.repository';
 import { Between, Repository } from 'typeorm';
 import { DailyWinnersAndLosers } from './dto/Daily-Winner-Looser.input';
-import { TransactionSession } from 'src/transaction_session/dbrepo/transaction_session.repository';
 import { ProfitAndLoss } from './dto/profite-loss.input';
 import { DateFilterDto } from 'src/common/model/date-filter.dto';
 
@@ -21,10 +19,6 @@ export class DashboardService {
     private readonly gameSessionKqjRepository: Repository<GameSessionKqj>,
     @Inject('RECORD_SESSION_KQJ_REPOSITORY')
     private readonly recordSessionKqjRepository: Repository<RecordSessionKqj>,
-    @Inject('USER_REPOSITORY')
-    private readonly userRepository: Repository<User>,
-    @Inject('TRANSACTION_SESSION_REPOSITORY')
-    private readonly transactionSessionRepository: Repository<TransactionSession>,
   ) {}
 
   async getTotalSessionsDateOrToday(filter?: DateFilterDto): Promise<number> {
@@ -177,17 +171,20 @@ export class DashboardService {
 
       // Iterate through each session and its records
       for (const session of sessions) {
-        if (!session.record_session_kqj?.length || !session.game_result_card) {
-          continue;
+        if (!session.game_result_card) {
+          continue; // Skip if the game result card is not available
         }
 
-        session.record_session_kqj.forEach((record) => {
-          if (record.choosen_card === session.game_result_card) {
-            winners++;
-          } else {
-            losers++;
-          }
-        });
+        // Ensure `record_session_kqj` is an array
+        if (Array.isArray(session.record_session_kqj)) {
+          session.record_session_kqj.forEach((record) => {
+            if (record.choosen_card === session.game_result_card) {
+              winners++;
+            } else {
+              losers++;
+            }
+          });
+        }
       }
 
       return { winners, losers };

@@ -1,6 +1,10 @@
 import { InputType, Field } from '@nestjs/graphql';
 import { IsNotEmpty, IsEnum, IsNumber } from 'class-validator';
-import { TokenValues, TransactionType, UserGameResultStatus } from 'src/common/constants';
+import {
+  TokenValues,
+  TransactionType,
+  GameResultStatus,
+} from 'src/common/constants';
 
 @InputType()
 export class CreateTransactionSessionDto {
@@ -9,10 +13,10 @@ export class CreateTransactionSessionDto {
   @IsEnum(TokenValues, { message: 'Invalid token value' })
   token: TokenValues;
 
-  @Field(() => UserGameResultStatus, { nullable: false })
+  @Field(() => GameResultStatus, { nullable: false })
   @IsNotEmpty({ message: 'game result type cannot be empty' })
-  @IsEnum(UserGameResultStatus, { message: 'Invalid transaction type' })
-  game_status: UserGameResultStatus;
+  @IsEnum(GameResultStatus, { message: 'Invalid transaction type' })
+  game_status: GameResultStatus;
 
   @Field(() => Number, { nullable: false })
   @IsNotEmpty({ message: 'Record session ID cannot be empty' })

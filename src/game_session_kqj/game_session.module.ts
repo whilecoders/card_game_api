@@ -10,7 +10,6 @@ import { TransactionSessionModule } from 'src/transaction_session/transaction_se
 @Module({
   imports: [
     PermissionModule, 
-    forwardRef(() => RecordSessionKqjModule),
     forwardRef(() => UserModule),
     forwardRef(() => TransactionSessionModule),
   ],

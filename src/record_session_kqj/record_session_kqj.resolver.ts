@@ -1,19 +1,15 @@
 import { Resolver, Query, Mutation, Args, Int } from '@nestjs/graphql';
-import {
-  RecordSessionKqj,
-  RecordSessionKqjPagination,
-} from './dbrepo/record_session_kqj.repository';
+import { RecordSessionKqj } from './dbrepo/record_session_kqj.repository';
 import { CreateRecordSessionKqjDto } from './dto/create-record_session_kqj.input';
 import { RecordSessionKqjService } from './record_session_kqj.service';
-import { PermissionAction, RecordStatus } from 'src/common/constants';
+import { PermissionAction, RecordSessionStatus } from 'src/common/constants';
 import { DateFilterDto } from 'src/common/model/date-filter.dto';
 import { PaginationMetadataDto } from 'src/common/model';
 import { UseGuards } from '@nestjs/common';
 import { AuthGuard } from 'src/auth/auth.guard';
-import { RoleGuard } from 'src/auth/role.guard';
-import { Role } from 'src/graphql';
 import { PermissionGuard } from 'src/permission/permission.guard';
 import { Permissions } from 'src/common/decorator/permission.decorator';
+import { RecordSessionKqjPagination } from './dto/paginated-record-session.dto';
 
 @UseGuards(AuthGuard)
 @Resolver(() => RecordSessionKqj)
@@ -27,7 +23,7 @@ export class RecordSessionKqjResolver {
   @Mutation(() => RecordSessionKqj)
   async createRecordSession(
     @Args('createRecordSessionKqjDto')
-    createRecordSessionKqjDto: CreateRecordSessionKqjDto, 
+    createRecordSessionKqjDto: CreateRecordSessionKqjDto,
   ): Promise<RecordSessionKqj> {
     return await this.recordSessionKqjService.createRecordSession(
       createRecordSessionKqjDto,
@@ -38,8 +34,8 @@ export class RecordSessionKqjResolver {
   async updateUserRecordStatus(
     @Args('userId', { type: () => Int }) userId: number,
     @Args('gameSessionId', { type: () => Int }) gameSessionId: number,
-    @Args('recordStatus', { type: () => RecordStatus })
-    recordStatus: RecordStatus,
+    @Args('recordStatus', { type: () => RecordSessionStatus })
+    recordStatus: RecordSessionStatus,
   ): Promise<RecordSessionKqj> {
     return this.recordSessionKqjService.updateRecordStatus(
       userId,
@@ -127,14 +123,6 @@ export class RecordSessionKqjResolver {
     );
   }
 
-  @Query(() => [RecordSessionKqj], { name: 'getRecordsBySessionId' })
-  async getRecordsBySessionId(
-    @Args('sessionId', { type: () => Int, nullable: false }) sessionId: number,
-  ) {
-    return this.recordSessionKqjService.getRecordsBySessionId(
-      sessionId,
-    );
-  }
 
   @Query(() => [RecordSessionKqj], { name: 'getRecordsByDate' })
   async getRecordsByDate(

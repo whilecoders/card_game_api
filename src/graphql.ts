@@ -37,6 +37,19 @@ export enum GameKqjCards {
     QUEEN_OF_SPADES = "QUEEN_OF_SPADES"
 }
 
+export enum GameRouletteNumbers {
+    EIGTH = "EIGTH",
+    FIVE = "FIVE",
+    FOUR = "FOUR",
+    NINE = "NINE",
+    ONE = "ONE",
+    SEVEN = "SEVEN",
+    SIX = "SIX",
+    TEN = "TEN",
+    THREE = "THREE",
+    TWO = "TWO"
+}
+
 export enum GameSessionStatus {
     END = "END",
     INACTIVE = "INACTIVE",
@@ -52,7 +65,8 @@ export enum GameStatus {
 }
 
 export enum GameType {
-    KQJ = "KQJ"
+    KQJ = "KQJ",
+    ROULETTE = "ROULETTE"
 }
 
 export enum MessageType {
@@ -123,6 +137,18 @@ export interface AddUserDto {
     phone_number: string;
     role: Role;
     username: string;
+}
+
+export interface CreateGameRouletteDto {
+    admin_id: number;
+    end_date: DateTime;
+    end_time: string;
+    game_duration: number;
+    game_in_day: number;
+    game_status: GameStatus;
+    game_type: GameType;
+    start_date: DateTime;
+    start_time: string;
 }
 
 export interface CreateGamesDto {
@@ -202,8 +228,21 @@ export interface SuspendUserDto {
     userId: number;
 }
 
-export interface UpdateGameSessionDto {
-    game_result_card: GameKqjCards;
+export interface UpdateGameRouletteDto {
+    admin_id: number;
+    end_date: DateTime;
+    end_time: string;
+    game_duration?: Nullable<number>;
+    game_id: number;
+    game_in_day?: Nullable<number>;
+    game_status?: Nullable<GameStatus>;
+    game_type?: Nullable<GameType>;
+    start_date: DateTime;
+    start_time: string;
+}
+
+export interface UpdateGameSessionRouletteDto {
+    game_result_roulette_number: GameRouletteNumbers;
 }
 
 export interface UpdateGamesDto {
@@ -284,9 +323,54 @@ export interface DailyGame {
     updatedBy: string;
 }
 
+export interface DailyGameRoulette {
+    createdAt: DateTime;
+    createdBy: string;
+    deletedAt: DateTime;
+    deletedBy: string;
+    game_roulette: GameRoulette;
+    id: number;
+    updatedAt: DateTime;
+    updatedBy: string;
+}
+
 export interface DailyWinnersAndLosers {
     losers: number;
     winners: number;
+}
+
+export interface GameResultRoulette {
+    createdAt: DateTime;
+    createdBy: string;
+    deletedAt: DateTime;
+    deletedBy: string;
+    game_status: UserGameResultStatus;
+    id: number;
+    record_session_roulette: RecordSessionRoulette;
+    token: number;
+    updatedAt: DateTime;
+    updatedBy: string;
+}
+
+export interface GameRoulette {
+    admin: User;
+    createdAt: DateTime;
+    createdBy: string;
+    daily_game_roulette?: Nullable<DailyGameRoulette[]>;
+    deletedAt: DateTime;
+    deletedBy: string;
+    end_date: DateTime;
+    end_time: string;
+    game_duration: number;
+    game_in_day: number;
+    game_session_roulette?: Nullable<GameSessionRoulette[]>;
+    game_status: GameStatus;
+    game_type: GameType;
+    id: number;
+    start_date: DateTime;
+    start_time: string;
+    updatedAt: DateTime;
+    updatedBy: string;
 }
 
 export interface GameSession {
@@ -309,6 +393,22 @@ export interface GameSessionKqjStats {
     totalGamePlayed: number;
     totalLosses: number;
     totalWins: number;
+}
+
+export interface GameSessionRoulette {
+    createdAt: DateTime;
+    createdBy: string;
+    deletedAt: DateTime;
+    deletedBy: string;
+    game_result_card?: Nullable<GameRouletteNumbers>;
+    game_roulette: GameRoulette;
+    id: number;
+    record_session_roulette?: Nullable<RecordSessionRoulette>;
+    session_end_time?: Nullable<DateTime>;
+    session_start_time?: Nullable<DateTime>;
+    session_status: GameSessionStatus;
+    updatedAt: DateTime;
+    updatedBy: string;
 }
 
 export interface Games {
@@ -356,11 +456,13 @@ export interface IMutation {
     DeleteGames(id: number): boolean | Promise<boolean>;
     addUser(addUserDto: AddUserDto): User | Promise<User>;
     adminSignUp(signUpCredential: SignUpCredential): User | Promise<User>;
+    createGameRoulette(createGameRouletteDto: CreateGameRouletteDto): GameRoulette | Promise<GameRoulette>;
     createGames(createGamesDto: CreateGamesDto): Games | Promise<Games>;
     createNotification(createNotificationInput: CreateNotificationInput): Notification | Promise<Notification>;
     createPermission(createPermissionInput: CreatePermissionInput): Permission | Promise<Permission>;
     createRecordSession(createRecordSessionKqjDto: CreateRecordSessionKqjDto): RecordSessionKqj | Promise<RecordSessionKqj>;
     createTransactionSession(createTransactionSessionDto: CreateTransactionSessionDto): TransactionSession | Promise<TransactionSession>;
+    deleteGameRoulette(id: number): boolean | Promise<boolean>;
     deleteUser(adminId: number, userId: number): boolean | Promise<boolean>;
     markSessionAsCompleted(gameSessionId: number): boolean | Promise<boolean>;
     refreshAccessToken(refreshToken: string, token: string): Token | Promise<Token>;
@@ -371,7 +473,8 @@ export interface IMutation {
     sendOtp(mobile: string): string | Promise<string>;
     suspendUser(suspendUserDto: SuspendUserDto): User | Promise<User>;
     unrestrictUserAction(action: string, userId: number): string | Promise<string>;
-    updateGameSession(id: number, updateGameSessionDto: UpdateGameSessionDto): GameSession | Promise<GameSession>;
+    updateGameRoulette(updateGameRouletteDto: UpdateGameRouletteDto): GameRoulette | Promise<GameRoulette>;
+    updateGameSession(id: number, updateGameSessionRouletteDto: UpdateGameSessionRouletteDto): GameSessionRoulette | Promise<GameSessionRoulette>;
     updateGames(updateGamesDto: UpdateGamesDto): Games | Promise<Games>;
     updateNotification(updateNotificationInput: UpdateNotificationInput): Notification | Promise<Notification>;
     updateUser(id: number, updateUserDto: UpdateUserDto): User | Promise<User>;
@@ -402,9 +505,23 @@ export interface PaginatedAuditLogDto {
     take: number;
 }
 
+export interface PaginatedGameRouletteDto {
+    count: number;
+    data: Games[];
+    skip: number;
+    take: number;
+}
+
 export interface PaginatedGameSessionKqjDto {
     count: number;
     data: GameSession[];
+    skip: number;
+    take: number;
+}
+
+export interface PaginatedGameSessionRouletteDto {
+    count: number;
+    data: GameSessionRoulette[];
     skip: number;
     take: number;
 }
@@ -445,7 +562,8 @@ export interface ProfitAndLoss {
 
 export interface IQuery {
     GuestSignIn(): GuestToken | Promise<GuestToken>;
-    getAllGameSessions(skip: number, take: number): PaginatedAuditLogDto | Promise<PaginatedAuditLogDto>;
+    getAllGameSessions(skip: number, take: number): PaginatedGameSessionRouletteDto | Promise<PaginatedGameSessionRouletteDto>;
+    getAllGamesRoulette(skip: number, take: number): PaginatedGameRouletteDto | Promise<PaginatedGameRouletteDto>;
     getAllGameses(skip: number, take: number): PaginatedGamesDto | Promise<PaginatedGamesDto>;
     getAllRecordSessions(): RecordSessionKqj[] | Promise<RecordSessionKqj[]>;
     getAllRecordsBySessionId(offset: PaginationMetadataDto, sessionId: number): RecordSessionKqjPagination | Promise<RecordSessionKqjPagination>;
@@ -456,18 +574,21 @@ export interface IQuery {
     getDeletedNotifications(userId: number): Notification[] | Promise<Notification[]>;
     getFinishedSessionsByDateOrToday(filter?: Nullable<DateFilterDto>): number | Promise<number>;
     getGameResultByUserId(userId: number): TransactionSession[] | Promise<TransactionSession[]>;
+    getGameRouletteByDateOrToday(filter?: Nullable<DateFilterDto>): GameRoulette[] | Promise<GameRoulette[]>;
     getGameSessionById(id: number): GameSession | Promise<GameSession>;
+    getGameSessionRouletteById(id: number): GameSessionRoulette | Promise<GameSessionRoulette>;
     getGameSessionsByDateOrToday(filter?: Nullable<DateFilterDto>): GameSession[] | Promise<GameSession[]>;
-    getGamesBy(id: number): Games | Promise<Games>;
+    getGameSessionsRouletteByDateOrToday(filter?: Nullable<DateFilterDto>): GameSessionRoulette[] | Promise<GameSessionRoulette[]>;
+    getGamesBy(id: number): GameRoulette | Promise<GameRoulette>;
     getGamesByDate(filter?: Nullable<DateFilterDto>): Games[] | Promise<Games[]>;
     getGamesByDateOrToday(filter?: Nullable<DateFilterDto>): Games[] | Promise<Games[]>;
+    getLiveGameSessionRoulette(): Nullable<GameSessionRoulette> | Promise<Nullable<GameSessionRoulette>>;
     getLiveGameSessions(): Nullable<GameSession> | Promise<Nullable<GameSession>>;
     getPlayerStateByUserId(userId: number): GameSessionKqjStats | Promise<GameSessionKqjStats>;
     getProfitAndLoss(): ProfitAndLoss | Promise<ProfitAndLoss>;
     getRecordSessionBy(id: number): RecordSessionKqj | Promise<RecordSessionKqj>;
     getRecordsBy(UserId: number): RecordSessionKqj[] | Promise<RecordSessionKqj[]>;
     getRecordsByDate(filter?: Nullable<DateFilterDto>): RecordSessionKqj[] | Promise<RecordSessionKqj[]>;
-    getRecordsBySessionId(sessionId: number): RecordSessionKqj[] | Promise<RecordSessionKqj[]>;
     getTotalSessionsDateOrToday(filter?: Nullable<DateFilterDto>): number | Promise<number>;
     getTotalTokensToday(filter?: Nullable<DateFilterDto>): number | Promise<number>;
     getTotalUsersByDateOrToday(filter?: Nullable<DateFilterDto>): number | Promise<number>;
@@ -503,6 +624,22 @@ export interface RecordSessionKqj {
 export interface RecordSessionKqjPagination {
     data: RecordSessionKqj[];
     totalSize: number;
+}
+
+export interface RecordSessionRoulette {
+    choosen_number: GameRouletteNumbers;
+    createdAt: DateTime;
+    createdBy: string;
+    deletedAt: DateTime;
+    deletedBy: string;
+    game_result_roulette?: Nullable<GameResultRoulette>;
+    game_session_roulette: GameSessionRoulette;
+    id: number;
+    record_status: RecordSessionStatus;
+    token: TokenValues;
+    updatedAt: DateTime;
+    updatedBy: string;
+    user: User;
 }
 
 export interface Room {
@@ -562,6 +699,7 @@ export interface User {
     deletedBy: string;
     email: string;
     first_time_password_reset: boolean;
+    game_roulete: GameRoulette;
     id: number;
     name?: Nullable<string>;
     otp: string;
@@ -570,6 +708,7 @@ export interface User {
     phone_number: string;
     profile?: Nullable<string>;
     record_session_kqj: RecordSessionKqj;
+    record_session_roulette: RecordSessionRoulette;
     role: Role;
     roomMember: Room;
     status: UserStatus;

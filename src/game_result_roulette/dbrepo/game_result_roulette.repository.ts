@@ -1,18 +1,14 @@
 import { Field, Int, ObjectType, registerEnumType } from '@nestjs/graphql';
-import {
-  TokenValues,
-  TransactionType,
-  GameResultStatus,
-} from 'src/common/constants';
+import { GameResultStatus } from 'src/common/constants';
 import { BaseEntity } from 'src/common/repository/base.repository';
-import { RecordSessionKqj } from 'src/record_session_kqj/dbrepo/record_session_kqj.repository';
+import { RecordSessionRoulette } from 'src/record_session_roulette/dbrepo/record-session-roulette.repository';
 import { Column, Entity, JoinColumn, OneToOne } from 'typeorm';
 
 registerEnumType(GameResultStatus, { name: 'UserGameResultStatus' });
 
-@ObjectType('TransactionSession')
-@Entity({ name: 'transaction_session' })
-export class TransactionSession extends BaseEntity {
+@ObjectType('GameResultRoulette')
+@Entity({ name: 'game_result_roulette' })
+export class GameResultRoulette extends BaseEntity {
   @Field(() => Int)
   @Column({ type: 'int', nullable: false })
   token: number;
@@ -25,15 +21,15 @@ export class TransactionSession extends BaseEntity {
   })
   game_status: GameResultStatus;
 
-  @Field(() => RecordSessionKqj)
+  @Field(() => RecordSessionRoulette)
   @OneToOne(
-    () => RecordSessionKqj,
-    (recordSessionKqj) => recordSessionKqj.transaction_session,
+    () => RecordSessionRoulette,
+    (recordSessionRoulette) => recordSessionRoulette.game_result_roulette,
     {
       nullable: false,
       onDelete: 'CASCADE',
     },
   )
-  @JoinColumn({ name: 'record_session_kqj' })
-  record_session_kqj: RecordSessionKqj;
+  @JoinColumn({ name: 'record_session_roulette' })
+  record_session_roulette: RecordSessionRoulette;
 }

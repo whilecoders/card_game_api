@@ -18,7 +18,7 @@ export enum TransactionType {
   DEBIT = 'DEBIT',
 }
 
-export enum UserGameResultStatus {
+export enum GameResultStatus {
   WIN = 'WIN',
   LOSS = 'LOSS',
 }
@@ -42,7 +42,7 @@ export enum GameSessionStatus {
   INACTIVE = 'INACTIVE',
 }
 
-export enum RecordStatus {
+export enum RecordSessionStatus {
   ACTIVE = 'ACTIVE',
   SUSPENDED = 'SUSPENDED',
   COMPLETED = 'COMPLETED',
@@ -70,6 +70,19 @@ export enum GameKqjCards {
   KING_OF_CLUBS = 'KING_OF_CLUBS',
 }
 
+export enum GameRouletteNumbers {
+  TWO = 2,
+  ONE = 1,
+  SIX = 6,
+  SEVEN = 7,
+  EIGTH = 8,
+  NINE = 9,
+  TEN = 10,
+  THREE = 3,
+  FOUR = 4,
+  FIVE = 5,
+}
+
 export enum TokenValues {
   TOKEN_11 = 11,
   TOKEN_55 = 55,
@@ -81,6 +94,7 @@ export enum TokenValues {
 
 export enum GameType {
   KQJ = 'KQJ',
+  ROULETTE = 'ROULETTE',
 }
 
 export enum AuditActionType {

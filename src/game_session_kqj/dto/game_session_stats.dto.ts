@@ -9,16 +9,13 @@ registerEnumType(GameKqjCards, { name: 'GameKqjCards' });
 registerEnumType(GameSessionStatus, { name: 'GameSessionStatus' });
 
 @ObjectType('GameSessionKqjStats')
-// @Entity({
-//   name: 'game_session_kqj',
-// })
 export class GameSessionKqjStats {
-    @Field(() => Int)
-    totalGamePlayed: number;
+  @Field(() => Int)
+  totalGamePlayed: number;
 
-    @Field(() => Int)
-    totalWins: number;
+  @Field(() => Int)
+  totalWins: number;
 
-    @Field(() => Int)
-    totalLosses: number;
+  @Field(() => Int)
+  totalLosses: number;
 }
