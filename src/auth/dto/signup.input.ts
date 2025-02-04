@@ -2,6 +2,7 @@ import { InputType, Field, Int } from '@nestjs/graphql';
 import {
   IsEmail,
   IsNotEmpty,
+  IsOptional,
   IsString,
   Matches,
   MaxLength,
@@ -48,7 +49,7 @@ export class SignUpCredential {
   @IsNotEmpty({ message: 'phone number cannot be empty' })
   phone_number: string;
 
-  @Field(() => Role)
-  @IsNotEmpty()
+  @Field(() => Role, { nullable: true })
+  @IsOptional()
   role: Role;
 }

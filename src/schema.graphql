@@ -554,7 +554,7 @@ input SignUpCredential {
   email: String!
   password: String!
   phone_number: String!
-  role: Role!
+  role: Role
   username: String!
 }
 
@@ -678,7 +678,7 @@ type User {
   game_roulete: GameRoulette!
   id: Int!
   name: String
-  otp: String!
+  otp: String
   password: String!
   permissions: Permission!
   phone_number: String!

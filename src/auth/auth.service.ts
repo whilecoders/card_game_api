@@ -66,7 +66,6 @@ export class AuthService {
   async UserSignUp(signUpCredential: SignUpCredential) {
     const { username, email, password, city, phone_number } = signUpCredential;
     const hashedPassword: string = PasswordHashService.hashPassword(password);
-
     try {
       const existingUser = await this.userRepository.findOne({
         where: [{ username }, { email }],
@@ -92,8 +91,11 @@ export class AuthService {
 
       await this.userRepository.save(user);
       return user;
-    } catch {
-      throw new InternalServerErrorException('Error creating user');
+    } catch (error) {
+      console.error('Error creating user:', error); 
+      throw new InternalServerErrorException(
+        error.message || 'Error creating user',
+      );
     }
   }
 

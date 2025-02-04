@@ -219,7 +219,7 @@ export interface SignUpCredential {
     email: string;
     password: string;
     phone_number: string;
-    role: Role;
+    role?: Nullable<Role>;
     username: string;
 }
 
@@ -702,7 +702,7 @@ export interface User {
     game_roulete: GameRoulette;
     id: number;
     name?: Nullable<string>;
-    otp: string;
+    otp?: Nullable<string>;
     password: string;
     permissions: Permission;
     phone_number: string;

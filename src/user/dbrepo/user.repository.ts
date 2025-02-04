@@ -57,8 +57,8 @@ export class User extends BaseEntity {
   @Column({ type: 'varchar', length: 40, nullable: false })
   phone_number: string;
 
-  @Field(() => String)
-  @Column({ type: 'varchar', length: 40, nullable: false })
+  @Field(() => String,{nullable:true})
+  @Column({ type: 'varchar', length: 40, nullable: true })
   otp: string;
 
   @Field(() => Role)
