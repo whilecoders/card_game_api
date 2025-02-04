@@ -30,7 +30,7 @@ export class GameSessionRouletteService {
         });
       if (!gameSessionRoulette)
         throw new NotFoundException(`GameSession with ID ${id} not found`);
-      gameSessionRoulette.game_result_card =
+      gameSessionRoulette.game_result_number =
         updateGameSessionRouletteDto.game_result_roulette_number;
 
       return await this.gameSessionRouletteRepository.save(gameSessionRoulette);

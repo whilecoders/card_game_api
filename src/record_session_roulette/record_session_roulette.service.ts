@@ -7,7 +7,7 @@ import {
 } from '@nestjs/common';
 import { Between, ILike, Repository } from 'typeorm';
 import { User } from 'src/user/dbrepo/user.repository';
-import { GameRouletteNumbers, RecordSessionStatus } from 'src/common/constants';
+import { RecordSessionStatus } from 'src/common/constants';
 import { DateFilterDto } from 'src/common/model/date-filter.dto';
 import { PaginationMetadataDto } from 'src/common/model';
 import { RecordSessionRoulette } from './dbrepo/record-session-roulette.repository';
@@ -26,7 +26,7 @@ export class RecordSessionRouletteService {
     private readonly gameSessionRouletteRepository: Repository<GameSessionRoulette>,
   ) {}
 
-  async createRecordSession(
+  async createRecordSessionRoulette(
     dto: CreateRecordSessionRouletteDto,
   ): Promise<RecordSessionRoulette> {
     const user = await this.userRepository.findOne({
@@ -65,7 +65,8 @@ export class RecordSessionRouletteService {
     }
 
     try {
-      const savedSession =await this.recordSessionRouletteRepository.save(recordSession);
+      const savedSession =
+        await this.recordSessionRouletteRepository.save(recordSession);
       await this.userRepository.save(user);
       const findCreatedSession =
         await this.recordSessionRouletteRepository.findOne({
@@ -77,18 +78,21 @@ export class RecordSessionRouletteService {
     }
   }
 
-  async getRecordSessionById(id: number): Promise<RecordSessionRoulette> {
-    const recordSession = await this.recordSessionRouletteRepository.findOne({
-      where: { id, deletedAt: null, deletedBy: null },
-      relations: ['user', 'game_session', 'transaction_session'],
-    });
-    if (!recordSession) {
+  async getRecordSessionRouletteById(
+    id: number,
+  ): Promise<RecordSessionRoulette> {
+    const recordSessionRoulette =
+      await this.recordSessionRouletteRepository.findOne({
+        where: { id, deletedAt: null, deletedBy: null },
+        relations: ['user', 'game_session', 'transaction_session'],
+      });
+    if (!recordSessionRoulette) {
       throw new NotFoundException(`RecordSession with ID ${id} not found`);
     }
-    return recordSession;
+    return recordSessionRoulette;
   }
 
-  async getAllRecordSessions(): Promise<RecordSessionRoulette[]> {
+  async getAllRecordSessionsRoulette(): Promise<RecordSessionRoulette[]> {
     try {
       return await this.recordSessionRouletteRepository.find({
         where: {
@@ -107,16 +111,22 @@ export class RecordSessionRouletteService {
     }
   }
 
-  async getRecordsByUserId(userId: number): Promise<RecordSessionRoulette[]> {
+  async getRecordSessionRouletteByUserId(
+    userId: number,
+  ): Promise<RecordSessionRoulette[]> {
     try {
       const records = await this.recordSessionRouletteRepository.find({
         where: { user: { id: userId }, deletedAt: null, deletedBy: null },
-        relations: ['user', 'game_session', 'transaction_session'],
+        relations: {
+          user: true,
+          game_session_roulette: true,
+          game_result_roulette: true,
+        },
       });
 
-      // if (!records.length) {
-      //   throw new NotFoundException(`No records found for user ID ${userId}`);
-      // }
+      if (!records) {
+        throw new NotFoundException(`No records found for user ID ${userId}`);
+      }
       return records;
     } catch (error) {
       console.error(error);
@@ -126,14 +136,14 @@ export class RecordSessionRouletteService {
     }
   }
 
-  async searchRecords(
+  async searchRecordSessionRoulette(
     sessionId: number,
     searchTerm: string,
     offset: PaginationMetadataDto,
   ): Promise<RecordSessionRoulettePagination> {
     try {
       let whereCondition = {
-        game_session_id: { id: sessionId },
+        game_session_roulette: { id: sessionId },
         deletedAt: null,
         deletedBy: null,
       };
@@ -161,7 +171,7 @@ export class RecordSessionRouletteService {
     }
   }
 
-  async getAllRecordsBySessionId(
+  async getAllRecordSessionRouletteBySessionId(
     sessionId: number,
     offset?: PaginationMetadataDto,
   ): Promise<RecordSessionRoulettePagination> {
@@ -177,7 +187,11 @@ export class RecordSessionRouletteService {
           },
           skip: offset.skip,
           take: offset.take,
-          relations: ['user', 'game_session_id', 'transaction_session'],
+          relations: {
+            user: true,
+            game_session_roulette: true,
+            game_result_roulette: true,
+          },
         });
       return { data, totalSize };
     } catch (error) {
@@ -188,34 +202,39 @@ export class RecordSessionRouletteService {
     }
   }
 
-  async updateRecordStatus(
+  async updateRecordSessionRouletteStatus(
     userId: number,
-    gameSessionId: number,
+    SessionId: number,
     status: RecordSessionStatus,
   ): Promise<RecordSessionRoulette> {
     try {
-      const recordSession = await this.recordSessionRouletteRepository.findOne({
-        where: {
-          user: { id: userId },
-          game_session_roulette: { id: gameSessionId },
-        },
-      });
+      const recordSessionRoulette =
+        await this.recordSessionRouletteRepository.findOne({
+          where: {
+            user: { id: userId },
+            game_session_roulette: { id: SessionId },
+          },
+        });
 
-      if (!recordSession) {
+      if (!recordSessionRoulette) {
         throw new NotFoundException(
-          `RecordSession for userId ${userId} and gameSessionId ${gameSessionId} not found`,
+          `RecordSession for userId ${userId} and gameSessionId ${SessionId} not found`,
         );
       }
 
-      if (recordSession.record_status === RecordSessionStatus.COMPLETED) {
+      if (
+        recordSessionRoulette.record_status === RecordSessionStatus.COMPLETED
+      ) {
         throw new BadRequestException(
           'Cannot update a session that is already completed',
         );
       }
 
-      recordSession.record_status = status;
+      recordSessionRoulette.record_status = status;
 
-      return await this.recordSessionRouletteRepository.save(recordSession);
+      return await this.recordSessionRouletteRepository.save(
+        recordSessionRoulette,
+      );
     } catch (error) {
       if (
         error instanceof NotFoundException ||
@@ -227,20 +246,21 @@ export class RecordSessionRouletteService {
     }
   }
 
-  async markSessionAsCompleted(gameSessionId: number): Promise<void> {
+  async markRecordSessionRouletteAsCompleted(SessionId: number): Promise<void> {
     try {
-      const recordSessions = await this.recordSessionRouletteRepository.find({
-        where: { game_session_roulette: { id: gameSessionId } },
-      });
-      if (!recordSessions.length) {
+      const recordSessionRolette =
+        await this.recordSessionRouletteRepository.find({
+          where: { game_session_roulette: { id: SessionId } },
+        });
+      if (!recordSessionRolette.length) {
         throw new NotFoundException(
-          `No records found for gameSessionId ${gameSessionId}`,
+          `No records found for gameSessionId ${SessionId}`,
         );
       }
-      for (const record of recordSessions) {
+      for (const record of recordSessionRolette) {
         record.record_status = RecordSessionStatus.COMPLETED;
       }
-      await this.recordSessionRouletteRepository.save(recordSessions);
+      await this.recordSessionRouletteRepository.save(recordSessionRolette);
     } catch (error) {
       if (error instanceof NotFoundException) {
         throw error;
@@ -251,28 +271,27 @@ export class RecordSessionRouletteService {
     }
   }
 
-  async removeFromGame(
-    userId: number,
-    gameSessionId: number,
-    deleteBy: number,
-  ) {
+  async removeFromGame(userId: number, SessionId: number, deleteBy: string) {
     try {
-      const recordSession = await this.recordSessionRouletteRepository.find({
-        where: {
-          user: { id: userId },
-          game_session_roulette: { id: gameSessionId },
-        },
-      });
-      if (!recordSession || recordSession.length === 0) {
+      const recordSessionRoulette =
+        await this.recordSessionRouletteRepository.find({
+          where: {
+            user: { id: userId },
+            game_session_roulette: { id: SessionId },
+          },
+        });
+      if (!recordSessionRoulette || recordSessionRoulette.length === 0) {
         throw new NotFoundException(
-          `RecordSession for userId ${userId} and gameSessionId ${gameSessionId} not found`,
+          `RecordSession for userId ${userId} and gameSessionId ${SessionId} not found`,
         );
       }
-      for (const session of recordSession) {
+      for (const session of recordSessionRoulette) {
         session.deletedAt = new Date();
-        session.deletedBy = deleteBy.toString();
+        session.deletedBy = deleteBy;
       }
-      return await this.recordSessionRouletteRepository.save(recordSession);
+      return await this.recordSessionRouletteRepository.save(
+        recordSessionRoulette,
+      );
     } catch (error) {
       console.error(error);
       if (
@@ -285,19 +304,22 @@ export class RecordSessionRouletteService {
     }
   }
 
-  async removeSessionFromGame(id: number, deleteBy: number) {
+  async removeRecordSessionRouletteFromGame(id: number, deleteBy: string) {
     try {
-      const recordSession = await this.recordSessionRouletteRepository.find({
-        where: { id: id },
-      });
-      if (!recordSession || recordSession.length === 0) {
+      const recordSessionRoulette =
+        await this.recordSessionRouletteRepository.find({
+          where: { id: id },
+        });
+      if (!recordSessionRoulette || recordSessionRoulette.length === 0) {
         throw new NotFoundException(`RecordSession for userId ${id} not found`);
       }
-      for (const session of recordSession) {
+      for (const session of recordSessionRoulette) {
         session.deletedAt = new Date();
-        session.deletedBy = deleteBy.toString();
+        session.deletedBy = deleteBy;
       }
-      return await this.recordSessionRouletteRepository.save(recordSession);
+      return await this.recordSessionRouletteRepository.save(
+        recordSessionRoulette,
+      );
     } catch (error) {
       console.error(error);
       if (
