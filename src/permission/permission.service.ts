@@ -9,6 +9,9 @@ import { Permission } from './dbrepo/permission.repository';
 import { User } from 'src/user/dbrepo/user.repository';
 import { CreatePermissionInput } from './dto/create-permission.dto';
 import { UserService } from 'src/user/user.service';
+import { permissionFilterInput } from './dto/permission_filter.input';
+import { PaginatedPermission } from './entity/paginated_permission.entity';
+import { UpdatePermissionDto } from './dto/update-permission.input';
 
 @Injectable()
 export class PermissionService {
@@ -54,16 +57,15 @@ export class PermissionService {
     createPermissionInput: CreatePermissionInput,
   ): Promise<Permission> {
     try {
-      console.log(createPermissionInput.role, createPermissionInput.userId);
       const validUser = await this.userService.getUserById(
         createPermissionInput.userId,
       );
 
-      if (!validUser) {
-        throw new NotFoundException(
-          `User with ID ${createPermissionInput.userId} not found`,
-        );
-      }
+      // if (!validUser) {
+      //   throw new NotFoundException(
+      //     `User with ID ${createPermissionInput.userId} not found`,
+      //   );
+      // }
       const permission = this.permissionRepository.create({
         action: createPermissionInput.action,
         role: createPermissionInput.role,
@@ -74,6 +76,19 @@ export class PermissionService {
     } catch (error) {
       throw new InternalServerErrorException('Error creating permission');
     }
+  }
+
+  async updatePermission(updateDto: UpdatePermissionDto): Promise<Permission> {
+    const permission = await this.permissionRepository.findOne({
+      where: { id: updateDto.id },
+    });
+
+    if (!permission) {
+      throw new NotFoundException('Permission not found');
+    }
+
+    Object.assign(permission, updateDto);
+    return this.permissionRepository.save(permission);
   }
 
   async restrictUserAction(userId: number, action: string): Promise<string> {
@@ -142,6 +157,42 @@ export class PermissionService {
     } catch (error) {
       throw new InternalServerErrorException(
         'Error removing user action restriction',
+      );
+    }
+  }
+
+  async getPermission(
+    filters: permissionFilterInput,
+    skip: number,
+    take: number,
+  ): Promise<PaginatedPermission> {
+    try {
+      const queryBuilder =
+        this.permissionRepository.createQueryBuilder('permission');
+
+      Object.entries(filters).forEach(([key, value]) => {
+        if (value !== undefined && value !== null) {
+          queryBuilder.andWhere(`permission.${key} = :${key}`, {
+            [key]: value,
+          });
+        }
+      });
+      queryBuilder.skip(skip).take(take);
+      const [data, count] = await queryBuilder.getManyAndCount();
+      if (!data.length) {
+        throw new NotFoundException(
+          'No users found with the provided criteria.',
+        );
+      }
+      return {
+        count,
+        take,
+        skip,
+        data,
+      };
+    } catch (error) {
+      throw new InternalServerErrorException(
+        'Failed to fetch users with the provided criteria.',
       );
     }
   }
