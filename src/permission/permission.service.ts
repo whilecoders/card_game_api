@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   Inject,
   Injectable,
   InternalServerErrorException,
@@ -9,6 +10,7 @@ import { Permission } from './dbrepo/permission.repository';
 import { User } from 'src/user/dbrepo/user.repository';
 import { CreatePermissionInput } from './dto/create-permission.dto';
 import { UserService } from 'src/user/user.service';
+import { Role } from 'src/common/constants';
 
 @Injectable()
 export class PermissionService {
@@ -97,37 +99,30 @@ export class PermissionService {
         await this.permissionRepository.save(existingRestriction);
         return `User has been restricted from performing this action: ${action}`;
       } else {
-        const actionWithRole = await this.permissionRepository.findOne({
-          where: { action },
+        // Create Permission with restricted action
+        const permission = this.permissionRepository.create({
+          user: validUser,
+          action: action,
+          allowed: false,
         });
-
-        if (actionWithRole) {
-          if (actionWithRole.role) {
-            const newRestriction = this.permissionRepository.create({
-              user: { id: userId },
-              action,
-              allowed: false,
-            });
-
-            await this.permissionRepository.save(newRestriction);
-            return `User has been restricted from performing this action: ${action}`;
-          } else {
-            return `No valid role found for the action: ${action}`;
-          }
-        }
+        await this.permissionRepository.save(permission);
+        return 'Created Permission with restricted access';
       }
     } catch (error) {
-      throw new InternalServerErrorException('Error restricting user action');
+      throw new InternalServerErrorException(
+        error?.response?.message ?? 'Error restricting user action',
+      );
     }
   }
 
   async unrestrictUserAction(userId: number, action: string): Promise<string> {
     try {
-      const validUser = this.userService.getUserById(userId);
+      const validUser = await this.userService.getUserById(userId);
 
       if (!validUser) {
         throw new NotFoundException(`User with ID ${userId} not found`);
       }
+
       const restriction = await this.permissionRepository.findOne({
         where: { user: { id: userId }, action },
       });
@@ -138,10 +133,107 @@ export class PermissionService {
         return `User has been unrestricted and can now perform this action: ${action}`;
       }
 
-      return `No restriction found for user on this action: ${action}`;
+      const permission = this.permissionRepository.create({
+        user: validUser,
+        action: action,
+        allowed: true,
+      });
+
+      await this.permissionRepository.save(permission);
+      return 'Created Permission with unrestricted access';
     } catch (error) {
       throw new InternalServerErrorException(
-        'Error removing user action restriction',
+        error?.response?.message ?? 'Error removing user action restriction',
+      );
+    }
+  }
+
+  async restrictRoleAction(role: Role, action: string): Promise<string> {
+    try {
+      const existingRestriction = await this.permissionRepository.findOne({
+        where: { role: role, action },
+      });
+
+      if (existingRestriction) {
+        if (existingRestriction.allowed === false) {
+          return `Role is already restricted from performing this action: ${action}`;
+        }
+
+        existingRestriction.allowed = false;
+        await this.permissionRepository.save(existingRestriction);
+        return `Role has been restricted from performing this action: ${action}`;
+      } else {
+        // Create Permission with restricted action
+        const permission = this.permissionRepository.create({
+          role: role,
+          action: action,
+          allowed: false,
+        });
+        await this.permissionRepository.save(permission);
+        return 'Created Permission with restricted access';
+      }
+    } catch (error) {
+      throw new InternalServerErrorException(
+        error?.response?.message ?? 'Error restricting user action',
+      );
+    }
+  }
+
+  async unrestrictRoleAction(role: Role, action: string): Promise<string> {
+    try {
+      const restriction = await this.permissionRepository.findOne({
+        where: { role: role, action },
+      });
+
+      if (restriction) {
+        restriction.allowed = true;
+        await this.permissionRepository.save(restriction);
+        return `Role has been unrestricted and can now perform this action: ${action}`;
+      }
+
+      const permission = this.permissionRepository.create({
+        role: role,
+        action: action,
+        allowed: true,
+      });
+
+      await this.permissionRepository.save(permission);
+      return 'Created Permission with unrestricted access';
+    } catch (error) {
+      throw new InternalServerErrorException(
+        error?.response?.message ?? 'Error removing user action restriction',
+      );
+    }
+  }
+
+  async getPermissions(userId: number, role: Role) {
+    try {
+      if (userId) {
+        const validUser = await this.userService.getUserById(userId);
+
+        if (!validUser) {
+          throw new NotFoundException(`User with ID ${userId} not found`);
+        }
+
+        const userPermission = await this.permissionRepository.find({
+          where: { user: { id: userId } },
+        });
+
+        return userPermission;
+      } else if (role) {
+        const rolePermission = await this.permissionRepository.find({
+          where: { role: role },
+        });
+
+        return rolePermission;
+      } else {
+        throw new BadRequestException(
+          'Provide userid or role to get the permission of the smae',
+        );
+      }
+    } catch (error) {
+      throw new InternalServerErrorException(
+        error?.response?.message ?? 'Error removing user action restriction',
       );
     }
   }
