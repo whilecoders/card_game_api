@@ -30,9 +30,13 @@ import { PermissionModule } from './permission/permission.module';
 import { APP_GUARD, APP_INTERCEPTOR } from '@nestjs/core';
 import { PermissionGuard } from './permission/permission.guard';
 import { AuditLogInterceptor } from './audit-log/audit-log.interceptor';
+import { ServeStaticModule } from '@nestjs/serve-static';
 
 @Module({
   imports: [
+    ServeStaticModule.forRoot({
+      rootPath: join(__dirname, '..', 'public'), // Path to the static folder
+    }),
     GraphQLModule.forRoot<ApolloDriverConfig>({
       driver: ApolloDriver,
       playground: false,

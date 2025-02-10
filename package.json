@@ -31,6 +31,7 @@
     "@nestjs/platform-express": "^10.0.0",
     "@nestjs/platform-socket.io": "^10.4.15",
     "@nestjs/schedule": "^4.1.1",
+    "@nestjs/serve-static": "^5.0.2",
     "@nestjs/typeorm": "^10.0.2",
     "@nestjs/websockets": "^10.4.15",
     "apollo-server-core": "^3.13.0",

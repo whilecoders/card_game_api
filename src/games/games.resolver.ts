@@ -16,8 +16,8 @@ import { PermissionGuard } from 'src/permission/permission.guard';
 export class GamesResolver {
   constructor(private readonly GamesService: GamesService) {}
 
-  @UseGuards(PermissionGuard)
-  @Permissions(PermissionAction.CREATEGAME)
+  // @UseGuards(PermissionGuard)
+  // @Permissions(PermissionAction.CREATEGAME)
   @Mutation(() => Games)
   async createGames(
     @Args('createGamesDto') createGamesDto: CreateGamesDto,

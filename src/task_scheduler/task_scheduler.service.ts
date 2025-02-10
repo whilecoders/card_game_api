@@ -47,7 +47,7 @@ export class TaskScheduler {
     private gamesocketGateway: GamesocketGateway,
   ) { }
 
-  @Cron('49 20 * * *', { name: 'createDailyGame' })
+  @Cron('42 3 * * *', { name: 'createDailyGame' })
   async creaeDailyGame(): Promise<void> {
 
     // .............testing code ...........
