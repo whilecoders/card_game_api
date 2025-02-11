@@ -39,8 +39,8 @@ export class TransactionSessionResolver {
     return await this.transactionSessionService.getAllTransactionSessions();
   }
 
-  @UseGuards(PermissionGuard)
-  @Permissions(PermissionAction.GETGAMERESULTBYID)
+  // @UseGuards(PermissionGuard)
+  // @Permissions(PermissionAction.GETGAMERESULTBYID)
   @Query(() => [TransactionSession])
   async getGameResultByUserId(
     @Args('userId', { type: () => Int }) userId: number,

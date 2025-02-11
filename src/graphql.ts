@@ -289,7 +289,9 @@ export interface UserFiltersInput {
     name?: Nullable<string>;
     phone_number?: Nullable<string>;
     role?: Nullable<Role>;
+    skip: number;
     status?: Nullable<UserStatus>;
+    take: number;
     username?: Nullable<string>;
 }
 
@@ -400,7 +402,7 @@ export interface GameSessionRoulette {
     createdBy: string;
     deletedAt: DateTime;
     deletedBy: string;
-    game_result_card?: Nullable<GameRouletteNumbers>;
+    game_result_number?: Nullable<GameRouletteNumbers>;
     game_roulette: GameRoulette;
     id: number;
     record_session_roulette?: Nullable<RecordSessionRoulette>;
@@ -469,9 +471,11 @@ export interface IMutation {
     removeSessionFromGame(deleteBy: number, gameSessionId: number): boolean | Promise<boolean>;
     removeUserFromGame(deleteBy: number, gameSessionId: number, userId: number): boolean | Promise<boolean>;
     resetPassword(resetPasswordDto: ResetPasswordDto): string | Promise<string>;
+    restrictRoleAction(action: string, role: Role): string | Promise<string>;
     restrictUserAction(action: string, userId: number): string | Promise<string>;
     sendOtp(mobile: string): string | Promise<string>;
     suspendUser(suspendUserDto: SuspendUserDto): User | Promise<User>;
+    unrestrictRoleAction(action: string, role: Role): string | Promise<string>;
     unrestrictUserAction(action: string, userId: number): string | Promise<string>;
     updateGameRoulette(updateGameRouletteDto: UpdateGameRouletteDto): GameRoulette | Promise<GameRoulette>;
     updateGameSession(id: number, updateGameSessionRouletteDto: UpdateGameSessionRouletteDto): GameSessionRoulette | Promise<GameSessionRoulette>;
@@ -584,6 +588,7 @@ export interface IQuery {
     getGamesByDateOrToday(filter?: Nullable<DateFilterDto>): Games[] | Promise<Games[]>;
     getLiveGameSessionRoulette(): Nullable<GameSessionRoulette> | Promise<Nullable<GameSessionRoulette>>;
     getLiveGameSessions(): Nullable<GameSession> | Promise<Nullable<GameSession>>;
+    getPermissions(role?: Nullable<Role>, userId?: Nullable<number>): Permission[] | Promise<Permission[]>;
     getPlayerStateByUserId(userId: number): GameSessionKqjStats | Promise<GameSessionKqjStats>;
     getProfitAndLoss(): ProfitAndLoss | Promise<ProfitAndLoss>;
     getRecordSessionBy(id: number): RecordSessionKqj | Promise<RecordSessionKqj>;
@@ -601,7 +606,7 @@ export interface IQuery {
     getUserNotifications(userId: number): Notification[] | Promise<Notification[]>;
     getUsersByCreatedAt(date: DateTime): User[] | Promise<User[]>;
     searchRecords(offset: PaginationMetadataDto, searchTerm: string, sessionId: number): RecordSessionKqjPagination | Promise<RecordSessionKqjPagination>;
-    searchUser(filters: UserFiltersInput, skip: number, take: number): PaginatedUserDto | Promise<PaginatedUserDto>;
+    searchUser(UserFiltersInput: UserFiltersInput): PaginatedUserDto | Promise<PaginatedUserDto>;
     signIn(signInCredential: SignInCredential): UserToken | Promise<UserToken>;
 }
 

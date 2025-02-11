@@ -14,12 +14,12 @@ import { PermissionGuard } from 'src/permission/permission.guard';
 export class TransactionResolver {
   constructor(private transactionService: TransactionService) {}
 
-  @UseGuards(PermissionGuard)
-  @Permissions(PermissionAction.CREATETRANSACTION)
+  // @UseGuards(PermissionGuard)
+  // @Permissions(PermissionAction.CREATETRANSACTION)
   @Mutation(() => Transaction)
   updateWallet(
-    @Args('userId', { type: () => Int!}) userId: number,
-    @Args('adminId', { type: () => Int!}) adminId: number,
+    @Args('userId', { type: () => Int! }) userId: number,
+    @Args('adminId', { type: () => Int! }) adminId: number,
     @Args('walletData') walletData: WalletDto,
   ) {
     return this.transactionService.updateWallet(userId, adminId, walletData);

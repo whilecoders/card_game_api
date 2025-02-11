@@ -29,8 +29,8 @@ export class UserResolver {
     }
   }
 
-  @UseGuards(PermissionGuard)
-  @Permissions(PermissionAction.GETUSERBYID)
+  // @UseGuards(PermissionGuard)
+  // @Permissions(PermissionAction.GETUSERBYID)
   @Query(() => User)
   async getUserById(
     @Args('id', { type: () => Int }) id: number,
@@ -103,13 +103,14 @@ export class UserResolver {
 
   @Query(() => PaginatedUserDto, { name: 'searchUser' })
   async searchUser(
-    @Args('filters', { type: () => UserFiltersInput })
-    filters: UserFiltersInput,
-    @Args('skip', { type: () => Int }) skip: number,
-    @Args('take', { type: () => Int }) take: number,
+    @Args('UserFiltersInput') userFiltersInput: UserFiltersInput,
   ): Promise<PaginatedUserDto> {
     try {
-      return await this.userService.searchUser(filters, skip, take);
+      return await this.userService.searchUser(
+        userFiltersInput,
+        userFiltersInput.skip,
+        userFiltersInput.take,
+      );
     } catch (error) {
       throw new NotFoundException(error.message);
     }

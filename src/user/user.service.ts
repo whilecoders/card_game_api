@@ -19,11 +19,14 @@ export class UserService {
   constructor(
     @Inject('USER_REPOSITORY')
     private readonly userRepository: Repository<User>,
-  ) { }
+  ) {}
 
   async getAllUsers(skip: number, take: number): Promise<PaginatedUserDto> {
     try {
-      const [data,count] = await this.userRepository.findAndCount({ skip, take });
+      const [data, count] = await this.userRepository.findAndCount({
+        skip,
+        take,
+      });
 
       return {
         count,
@@ -104,8 +107,9 @@ export class UserService {
 
   async updateUser(id: number, updateUserDto: UpdateUserDto): Promise<User> {
     try {
-
-      const user = await this.userRepository.findOne({ where: { id, deletedAt: null, deletedBy: null } });
+      const user = await this.userRepository.findOne({
+        where: { id, deletedAt: null, deletedBy: null },
+      });
       if (!user) {
         throw new NotFoundException(`User with ID ${id} not found`);
       }
@@ -170,18 +174,58 @@ export class UserService {
     try {
       const queryBuilder = this.userRepository.createQueryBuilder('user');
 
-      Object.entries(filters).forEach(([key, value]) => {
-        if (value !== undefined && value !== null) {
-          queryBuilder.andWhere(`user.${key} = :${key}`, { [key]: value });
-        }
-      });
+      // Apply LIKE for string fields
+      if (filters.id != null) {
+        queryBuilder.andWhere('user.id = :id', { id: filters.id });
+      }
+      if (filters.name) {
+        queryBuilder.andWhere('user.name LIKE :name', {
+          name: `%${filters.name}%`,
+        });
+      }
+      if (filters.username) {
+        queryBuilder.andWhere('user.username LIKE :username', {
+          username: `%${filters.username}%`,
+        });
+      }
+      if (filters.email) {
+        queryBuilder.andWhere('user.email LIKE :email', {
+          email: `%${filters.email}%`,
+        });
+      }
+      if (filters.role) {
+        queryBuilder.andWhere('user.role = :role', { role: filters.role });
+      }
+      if (filters.status) {
+        queryBuilder.andWhere('user.status = :status', {
+          status: filters.status,
+        });
+      }
+      if (filters.city) {
+        queryBuilder.andWhere('user.city LIKE :city', {
+          city: `%${filters.city}%`,
+        });
+      }
+      if (filters.phone_number) {
+        queryBuilder.andWhere('user.phone_number LIKE :phone_number', {
+          phone_number: `%${filters.phone_number}%`,
+        });
+      }
+
+      // Apply pagination
       queryBuilder.skip(skip).take(take);
+
+      // Execute the query and get the results
       const [data, count] = await queryBuilder.getManyAndCount();
+
+      // Handle no results case
       if (!data.length) {
         throw new NotFoundException(
           'No users found with the provided criteria.',
         );
       }
+
+      // Return paginated data
       return {
         count,
         take,

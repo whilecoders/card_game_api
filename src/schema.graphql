@@ -217,7 +217,7 @@ type GameSessionRoulette {
   createdBy: String!
   deletedAt: DateTime!
   deletedBy: String!
-  game_result_card: GameRouletteNumbers
+  game_result_number: GameRouletteNumbers
   game_roulette: GameRoulette!
   id: Int!
   record_session_roulette: RecordSessionRoulette
@@ -318,9 +318,11 @@ type Mutation {
   removeSessionFromGame(deleteBy: Int!, gameSessionId: Int!): Boolean!
   removeUserFromGame(deleteBy: Int!, gameSessionId: Int!, userId: Int!): Boolean!
   resetPassword(resetPasswordDto: ResetPasswordDto!): String!
+  restrictRoleAction(action: String!, role: Role!): String!
   restrictUserAction(action: String!, userId: Float!): String!
   sendOtp(mobile: String!): String!
   suspendUser(suspendUserDto: SuspendUserDto!): User!
+  unrestrictRoleAction(action: String!, role: Role!): String!
   unrestrictUserAction(action: String!, userId: Float!): String!
   updateGameRoulette(updateGameRouletteDto: UpdateGameRouletteDto!): GameRoulette!
   updateGameSession(id: Int!, updateGameSessionRouletteDto: UpdateGameSessionRouletteDto!): GameSessionRoulette!
@@ -451,6 +453,7 @@ type Query {
   getGamesByDateOrToday(filter: DateFilterDto): [Games!]!
   getLiveGameSessionRoulette: GameSessionRoulette
   getLiveGameSessions: GameSession
+  getPermissions(role: Role, userId: Float): [Permission!]!
   getPlayerStateByUserId(userId: Int!): GameSessionKqjStats!
   getProfitAndLoss: ProfitAndLoss!
   getRecordSessionBy(id: Int!): RecordSessionKqj!
@@ -468,7 +471,7 @@ type Query {
   getUserNotifications(userId: Float!): [Notification!]!
   getUsersByCreatedAt(date: DateTime!): [User!]!
   searchRecords(offset: PaginationMetadataDto!, searchTerm: String!, sessionId: Int!): RecordSessionKqjPagination!
-  searchUser(filters: UserFiltersInput!, skip: Int!, take: Int!): PaginatedUserDto!
+  searchUser(UserFiltersInput: UserFiltersInput!): PaginatedUserDto!
   signIn(signInCredential: SignInCredential!): UserToken!
 }
 
@@ -703,7 +706,9 @@ input UserFiltersInput {
   name: String
   phone_number: String
   role: Role
+  skip: Int!
   status: UserStatus
+  take: Int!
   username: String
 }
 

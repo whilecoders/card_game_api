@@ -18,8 +18,8 @@ export class RecordSessionKqjResolver {
     private readonly recordSessionKqjService: RecordSessionKqjService,
   ) {}
 
-  @UseGuards(PermissionGuard)
-  @Permissions(PermissionAction.CREATERECORD)
+  // @UseGuards(PermissionGuard)
+  // @Permissions(PermissionAction.CREATERECORD)
   @Mutation(() => RecordSessionKqj)
   async createRecordSession(
     @Args('createRecordSessionKqjDto')
@@ -122,7 +122,6 @@ export class RecordSessionKqjResolver {
       offset,
     );
   }
-
 
   @Query(() => [RecordSessionKqj], { name: 'getRecordsByDate' })
   async getRecordsByDate(

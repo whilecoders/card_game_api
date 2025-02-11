@@ -15,9 +15,9 @@ import { PaginatedGameRouletteDto } from './dto/paginated-game-roulette.dto';
 @Resolver(() => GameRoulette)
 export class GameRouletteResolver {
   constructor(private readonly gameRouletteService: GameRouletteService) {}
-  
-  @Permissions(PermissionAction.CREATEGAME)
-  @UseGuards(PermissionGuard)
+
+  // @Permissions(PermissionAction.CREATEGAME)
+  // @UseGuards(PermissionGuard)
   @Mutation(() => GameRoulette)
   async createGameRoulette(
     @Args('createGameRouletteDto') createGameRouletteDto: CreateGameRouletteDto,
