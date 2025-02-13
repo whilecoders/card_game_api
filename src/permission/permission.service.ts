@@ -217,6 +217,7 @@ export class PermissionService {
 
         const userPermission = await this.permissionRepository.find({
           where: { user: { id: userId } },
+          relations: ['user'],
         });
 
         return userPermission;
