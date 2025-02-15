@@ -330,6 +330,7 @@ type Mutation {
   updateNotification(updateNotificationInput: UpdateNotificationInput!): Notification!
   updateUser(id: Int!, updateUserDto: UpdateUserDto!): User!
   updateUserRecordStatus(gameSessionId: Int!, recordStatus: RecordSessionStatus!, userId: Int!): RecordSessionKqj!
+  updateUserWallet(id: Int!, updateUserDto: UpdateUserDto!): User!
   updateWallet(adminId: Int!, userId: Int!, walletData: WalletDto!): Transaction!
   userSignUp(signUpCredential: SignUpCredential!): User!
   verifyOtp(mobile: String!, otp: String!): String!
@@ -664,6 +665,7 @@ input UpdateUserDto {
   role: Role
   status: UserStatus
   username: String
+  wallet: Float
   wallet_limit: Float
 }
 

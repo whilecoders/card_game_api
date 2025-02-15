@@ -66,4 +66,9 @@ export class UpdateUserDto {
   @IsNumber()
   @IsOptional()
   wallet_limit?: Number;
+
+  @Field(() => Number, { nullable: true })
+  @IsNumber()
+  @IsOptional()
+  wallet?: Number;
 }

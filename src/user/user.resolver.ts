@@ -115,4 +115,16 @@ export class UserResolver {
       throw new NotFoundException(error.message);
     }
   }
+
+  @Mutation(() => User)
+  async updateUserWallet(
+    @Args('id', { type: () => Int }) id: number,
+    @Args('updateUserDto') updateUserDto: UpdateUserDto,
+  ): Promise<User> {
+    try {
+      return await this.userService.updateUserWallet(id, updateUserDto);
+    } catch (error) {
+      throw new NotFoundException(error.message);
+    }
+  }
 }

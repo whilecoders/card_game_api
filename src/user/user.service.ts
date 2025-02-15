@@ -121,6 +121,25 @@ export class UserService {
     }
   }
 
+  async updateUserWallet(
+    id: number,
+    updateUserDto: UpdateUserDto,
+  ): Promise<User> {
+    try {
+      const user = await this.userRepository.findOne({
+        where: { id, deletedAt: null, deletedBy: null },
+      });
+      if (!user) {
+        throw new NotFoundException(`User with ID ${id} not found`);
+      }
+
+      Object.assign(user, updateUserDto);
+      return await this.userRepository.save(user);
+    } catch (error) {
+      throw new InternalServerErrorException('Failed to update user');
+    }
+  }
+
   async suspendUser(suspendUserDto: SuspendUserDto): Promise<User> {
     const { userId, suspend } = suspendUserDto;
     try {

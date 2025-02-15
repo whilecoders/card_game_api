@@ -279,6 +279,7 @@ export interface UpdateUserDto {
     role?: Nullable<Role>;
     status?: Nullable<UserStatus>;
     username?: Nullable<string>;
+    wallet?: Nullable<number>;
     wallet_limit?: Nullable<number>;
 }
 
@@ -483,6 +484,7 @@ export interface IMutation {
     updateNotification(updateNotificationInput: UpdateNotificationInput): Notification | Promise<Notification>;
     updateUser(id: number, updateUserDto: UpdateUserDto): User | Promise<User>;
     updateUserRecordStatus(gameSessionId: number, recordStatus: RecordSessionStatus, userId: number): RecordSessionKqj | Promise<RecordSessionKqj>;
+    updateUserWallet(id: number, updateUserDto: UpdateUserDto): User | Promise<User>;
     updateWallet(adminId: number, userId: number, walletData: WalletDto): Transaction | Promise<Transaction>;
     userSignUp(signUpCredential: SignUpCredential): User | Promise<User>;
     verifyOtp(mobile: string, otp: string): string | Promise<string>;
