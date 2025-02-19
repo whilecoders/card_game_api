@@ -68,6 +68,13 @@ export enum GameKqjCards {
   JACK_OF_CLUBS = 'JACK_OF_CLUBS',
   QUEEN_OF_CLUBS = 'QUEEN_OF_CLUBS',
   KING_OF_CLUBS = 'KING_OF_CLUBS',
+  KING = 'KING',
+  QUEEN = 'QUEEN',
+  JACK = 'JACK',
+  SPADES = 'SPADES',
+  HEARTS = 'HEARTS',
+  DIAMONDS = 'DIAMONDS',
+  CLUBS = 'CLUBS',
 }
 
 export enum GameRouletteNumbers {

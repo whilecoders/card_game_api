@@ -19,6 +19,7 @@ import {
   GameSessionStatus,
   TransactionType,
   GameResultStatus,
+  TokenValues,
 } from '../common/constants';
 import { DailyGame } from 'src/daily_game/dbrepo/daily_game.repository';
 import { Cron, SchedulerRegistry } from '@nestjs/schedule';
@@ -52,7 +53,7 @@ export class TaskScheduler {
     private gamesocketGateway: GamesocketGateway,
   ) {}
 
-  @Cron('33 00 * * *', { name: 'createDailyGame' })
+  @Cron('23 05 * * *', { name: 'createDailyGame' })
   async creaeDailyGame(): Promise<void> {
     // .............testing code ...........
     // const session = await this.gameSessionKqjRepository.findOne({ where: { id: 407 } });
@@ -320,7 +321,7 @@ export class TaskScheduler {
       });
       let resultOfSesion: GameKqjCards = latestSessionData.game_result_card
         ? latestSessionData.game_result_card
-        : this.generateResult();
+        : await this.generateResult(session_id);
       latestSessionData.game_result_card = resultOfSesion;
       await this.gameSessionKqjRepository.save(latestSessionData);
 
@@ -374,9 +375,77 @@ export class TaskScheduler {
     }
   }
 
-  generateResult(): GameKqjCards {
-    const values = Object.values(GameKqjCards) as GameKqjCards[];
-    const randomIndex = Math.floor(Math.random() * values.length);
-    return values[randomIndex];
+  async generateResult(gameSessionId: number): Promise<GameKqjCards> {
+    // Step 1: Fetch all bets for this game session
+    const bets = await this.recordSessionKqj.find({
+      where: { game_session_id: { id: gameSessionId } },
+      select: ['choosen_card', 'token'],
+    });
+
+    if (!bets.length) {
+      throw new Error('No bets found for this game session.');
+    }
+
+    // Step 2: Sum up the total bet amount for each specific card
+    const specificCardBets: Record<GameKqjCards, number> = Object.fromEntries(
+      Object.values(GameKqjCards).map((card) => [card, 0]),
+    ) as Record<GameKqjCards, number>;
+
+    let totalBetAmount = 0;
+
+    for (const bet of bets) {
+      const betAmount = this.getTokenValue(bet.token); // Convert token to numeric value
+      totalBetAmount += betAmount;
+
+      if (this.isSpecificCard(bet.choosen_card)) {
+        specificCardBets[bet.choosen_card] += betAmount;
+      }
+    }
+
+    if (totalBetAmount === 0) {
+      throw new Error('Total bet amount is zero.');
+    }
+
+    // Step 3: Try to select a card based on the defined ratios in a **single loop**
+    const sortedCards = Object.entries(specificCardBets).sort(
+      (a, b) => b[1] - a[1],
+    );
+
+    for (const [card, amount] of sortedCards) {
+      const savePercentage = (1 - amount / totalBetAmount) * 100;
+      if (savePercentage >= 70) return card as GameKqjCards; // 70:30 rule
+      if (savePercentage >= 60) return card as GameKqjCards; // 60:40 rule
+      if (savePercentage >= 50) return card as GameKqjCards; // 50:50 rule
+    }
+
+    // Step 4: If no ratio matches, pick the **least bet amount card** to minimize payout
+    return sortedCards[sortedCards.length - 1][0] as GameKqjCards;
+  }
+
+  // Helper function: Convert TokenValues to actual numeric bet amount
+  private getTokenValue(token: TokenValues): number {
+    // Define token-to-amount mapping based on your system
+    const tokenMap: Record<TokenValues, number> = {
+      [TokenValues.TOKEN_11]: 11,
+      [TokenValues.TOKEN_110]: 110,
+      [TokenValues.TOKEN_1100]: 1100,
+      [TokenValues.TOKEN_55]: 55,
+      [TokenValues.TOKEN_550]: 550,
+      [TokenValues.TOKEN_5500]: 5500,
+    };
+    return tokenMap[token] || 0;
+  }
+
+  // Helper function: Check if a card is a "specific card"
+  private isSpecificCard(card: GameKqjCards): boolean {
+    return ![
+      'JACK',
+      'QUEEN',
+      'KING',
+      'SPADES',
+      'HEARTS',
+      'DIAMONDS',
+      'CLUBS',
+    ].includes(card);
   }
 }
