@@ -53,7 +53,7 @@ export class TaskScheduler {
     private gamesocketGateway: GamesocketGateway,
   ) {}
 
-  @Cron('23 05 * * *', { name: 'createDailyGame' })
+  @Cron('9 23 * * *', { name: 'createDailyGame' })
   async creaeDailyGame(): Promise<void> {
     // .............testing code ...........
     // const session = await this.gameSessionKqjRepository.findOne({ where: { id: 407 } });
@@ -376,12 +376,13 @@ export class TaskScheduler {
   }
 
   async generateResult(gameSessionId: number): Promise<GameKqjCards> {
+    console.log('one');
     // Step 1: Fetch all bets for this game session
     const bets = await this.recordSessionKqj.find({
       where: { game_session_id: { id: gameSessionId } },
       select: ['choosen_card', 'token'],
     });
-
+    console.log('two');
     if (!bets.length) {
       throw new Error('No bets found for this game session.');
     }
@@ -402,6 +403,9 @@ export class TaskScheduler {
       }
     }
 
+    console.log('specificCardBets ->', specificCardBets);
+    console.log('totalBetAmount ->', totalBetAmount);
+
     if (totalBetAmount === 0) {
       throw new Error('Total bet amount is zero.');
     }
@@ -411,15 +415,31 @@ export class TaskScheduler {
       (a, b) => b[1] - a[1],
     );
 
-    for (const [card, amount] of sortedCards) {
-      const savePercentage = (1 - amount / totalBetAmount) * 100;
-      if (savePercentage >= 70) return card as GameKqjCards; // 70:30 rule
-      if (savePercentage >= 60) return card as GameKqjCards; // 60:40 rule
-      if (savePercentage >= 50) return card as GameKqjCards; // 50:50 rule
+    console.log('sortedCard', sortedCards);
+
+    // Step 4: Find a card that meets the ratio criteria
+    // Step 3: Check for strict ratio match (30%, 40%, 50%)
+    const ratioChecks = [30, 40, 50]; // The strict ratios to check
+
+    for (const ratio of ratioChecks) {
+      for (const [card, amount] of Object.entries(specificCardBets)) {
+        const betPercentage = (amount / totalBetAmount) * 100;
+        console.log(`${card}=>${betPercentage}`);
+        if (Math.abs(betPercentage - ratio) < 0.01) {
+          // Strict check allowing minimal floating-point error
+          console.log(`Selected card at ${ratio}% rule:`, card);
+          return card as GameKqjCards;
+        }
+      }
     }
 
-    // Step 4: If no ratio matches, pick the **least bet amount card** to minimize payout
-    return sortedCards[sortedCards.length - 1][0] as GameKqjCards;
+    // Step 4: If no exact match, pick the **least bet amount card** to minimize payout
+    const leastBetCard = Object.entries(specificCardBets).sort(
+      (a, b) => a[1] - b[1],
+    )[0][0] as GameKqjCards;
+
+    console.log('Least bet card chosen:', leastBetCard);
+    return leastBetCard;
   }
 
   // Helper function: Convert TokenValues to actual numeric bet amount
@@ -428,6 +448,7 @@ export class TaskScheduler {
     const tokenMap: Record<TokenValues, number> = {
       [TokenValues.TOKEN_11]: 11,
       [TokenValues.TOKEN_110]: 110,
+      [TokenValues.TOKEN_100]: 100,
       [TokenValues.TOKEN_1100]: 1100,
       [TokenValues.TOKEN_55]: 55,
       [TokenValues.TOKEN_550]: 550,

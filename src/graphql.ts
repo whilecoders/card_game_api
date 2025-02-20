@@ -115,6 +115,7 @@ export enum Role {
 export enum TokenValues {
     TOKEN_11 = "TOKEN_11",
     TOKEN_55 = "TOKEN_55",
+    TOKEN_100 = "TOKEN_100",
     TOKEN_110 = "TOKEN_110",
     TOKEN_550 = "TOKEN_550",
     TOKEN_1100 = "TOKEN_1100",
