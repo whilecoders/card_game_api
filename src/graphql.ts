@@ -139,6 +139,13 @@ export interface AddUserDto {
     username: string;
 }
 
+export interface AuditLogFiltersInput {
+    action?: Nullable<string>;
+    entity?: Nullable<string>;
+    skip: number;
+    take: number;
+}
+
 export interface CreateGameRouletteDto {
     admin_id: number;
     end_date: DateTime;
@@ -568,6 +575,7 @@ export interface ProfitAndLoss {
 
 export interface IQuery {
     GuestSignIn(): GuestToken | Promise<GuestToken>;
+    getAllAuditLog(AuditLogFiltersInput: AuditLogFiltersInput): PaginatedAuditLogDto | Promise<PaginatedAuditLogDto>;
     getAllGameSessions(skip: number, take: number): PaginatedGameSessionRouletteDto | Promise<PaginatedGameSessionRouletteDto>;
     getAllGamesRoulette(skip: number, take: number): PaginatedGameRouletteDto | Promise<PaginatedGameRouletteDto>;
     getAllGameses(skip: number, take: number): PaginatedGamesDto | Promise<PaginatedGamesDto>;

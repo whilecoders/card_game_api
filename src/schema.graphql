@@ -39,6 +39,13 @@ type AuditLog {
   user_id: User
 }
 
+input AuditLogFiltersInput {
+  action: String
+  entity: String
+  skip: Int!
+  take: Int!
+}
+
 input CreateGameRouletteDto {
   admin_id: Int!
   end_date: DateTime!
@@ -432,6 +439,7 @@ type ProfitAndLoss {
 
 type Query {
   GuestSignIn: GuestToken!
+  getAllAuditLog(AuditLogFiltersInput: AuditLogFiltersInput!): PaginatedAuditLogDto!
   getAllGameSessions(skip: Int!, take: Int!): PaginatedGameSessionRouletteDto!
   getAllGamesRoulette(skip: Int!, take: Int!): PaginatedGameRouletteDto!
   getAllGameses(skip: Int!, take: Int!): PaginatedGamesDto!

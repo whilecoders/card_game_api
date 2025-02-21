@@ -1,16 +1,16 @@
 import { Args, Int, Query, Resolver } from '@nestjs/graphql';
 import { AuditLogService } from './audit-log.service';
 import { PaginatedAuditLogDto } from './dto/paginated_audit_log.dto';
+import { AuditLogFiltersInput } from './dto/audit-log-filter.dto';
 
 @Resolver()
 export class AuditLogResolver {
   constructor(private readonly auditLogService: AuditLogService) {}
 
-  @Query(() => PaginatedAuditLogDto, { name: 'getAllGameSessions' })
+  @Query(() => PaginatedAuditLogDto)
   async getAllAuditLog(
-    @Args('skip', { type: () => Int }) skip: number,
-    @Args('take', { type: () => Int }) take: number,
+    @Args('AuditLogFiltersInput') auditLogFiltersInput: AuditLogFiltersInput,
   ): Promise<PaginatedAuditLogDto> {
-    return this.auditLogService.getAllGameSessions(skip, take);
+    return this.auditLogService.getAllGameSessions(auditLogFiltersInput);
   }
 }
