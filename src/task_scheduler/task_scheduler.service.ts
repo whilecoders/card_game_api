@@ -469,9 +469,19 @@ export class TaskScheduler {
     }
 
     // Step 4: If no exact match, pick the **least bet amount card** to minimize payout
-    const leastBetCard = Object.entries(specificCardBets)
+    const filteredBets = Object.entries(specificCardBets)
       .filter(([_, amount]) => amount > 0) // Exclude zero amount cards
-      .sort((a, b) => a[1] - b[1])[0]?.[0] as GameKqjCards;
+      .sort((a, b) => a[1] - b[1]);
+
+    let leastBetCard: GameKqjCards | undefined =
+      filteredBets[0]?.[0] as GameKqjCards;
+
+    if (!leastBetCard) {
+      // If no least amount is found, pick a random card from specific ones
+      const specificCards = Object.keys(specificCardBets) as GameKqjCards[];
+      leastBetCard =
+        specificCards[Math.floor(Math.random() * specificCards.length)];
+    }
 
     console.log('Least bet card chosen:', leastBetCard);
     return leastBetCard;
