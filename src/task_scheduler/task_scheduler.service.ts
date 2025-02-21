@@ -53,7 +53,7 @@ export class TaskScheduler {
     private gamesocketGateway: GamesocketGateway,
   ) {}
 
-  @Cron('9 23 * * *', { name: 'createDailyGame' })
+  @Cron('48 22 * * *', { name: 'createDailyGame' })
   async creaeDailyGame(): Promise<void> {
     // .............testing code ...........
     // const session = await this.gameSessionKqjRepository.findOne({ where: { id: 407 } });
@@ -418,10 +418,6 @@ export class TaskScheduler {
       select: ['choosen_card', 'token'],
     });
 
-    if (!bets.length) {
-      throw new Error('No bets found for this game session.');
-    }
-
     // Step 2: Sum up the total bet amount for each specific card
     const specificCardBets: Record<GameKqjCards, number> = Object.fromEntries(
       Object.values(GameKqjCards).map((card) => [card, 0]),
@@ -440,10 +436,6 @@ export class TaskScheduler {
 
     console.log('specificCardBets ->', specificCardBets);
     console.log('totalBetAmount ->', totalBetAmount);
-
-    if (totalBetAmount === 0) {
-      throw new Error('Total bet amount is zero.');
-    }
 
     // Step 3: Try to select a card based on the defined ratios in a **single loop**
     const sortedCards = Object.entries(specificCardBets).sort(
