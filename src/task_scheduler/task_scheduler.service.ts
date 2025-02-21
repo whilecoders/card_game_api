@@ -347,25 +347,61 @@ export class TaskScheduler {
 
       for (const bet of Object.values(groupingSameBets)) {
         if (bet.choosen_card === resultOfSesion) {
-          //  ============== Creating game win result and adding money to there account ================
+          // ✅ Specific card match → 10x payout
+          await this.transactionService.updateWallet(bet.user.id, 1, {
+            token: bet.token * 10,
+            type: TransactionType.CREDIT,
+          });
+
+          await this.transactionSessionService.createTransactionSession({
+            token: bet.token * 10,
+            game_status: GameResultStatus.WIN,
+            recordSessionId: bet.id,
+          });
+        } else if (
+          [GameKqjCards.KING, GameKqjCards.QUEEN, GameKqjCards.JACK].includes(
+            resultOfSesion as GameKqjCards,
+          )
+        ) {
+          // ✅ King, Queen, Jack won → 3x payout
+          await this.transactionService.updateWallet(bet.user.id, 1, {
+            token: bet.token * 3,
+            type: TransactionType.CREDIT,
+          });
+
+          await this.transactionSessionService.createTransactionSession({
+            token: bet.token * 3,
+            game_status: GameResultStatus.WIN,
+            recordSessionId: bet.id,
+          });
+        } else if (
+          [
+            GameKqjCards.SPADES,
+            GameKqjCards.HEARTS,
+            GameKqjCards.DIAMONDS,
+            GameKqjCards.CLUBS,
+          ].includes(resultOfSesion as GameKqjCards)
+        ) {
+          // ✅ Suit (Spades, Hearts, Diamonds, Clubs) won → 2x payout
           await this.transactionService.updateWallet(bet.user.id, 1, {
             token: bet.token * 2,
             type: TransactionType.CREDIT,
           });
-          this.transactionSessionService.createTransactionSession({
+
+          await this.transactionSessionService.createTransactionSession({
             token: bet.token * 2,
             game_status: GameResultStatus.WIN,
             recordSessionId: bet.id,
           });
         } else {
-          //  ============== Creating game loss result ================
-          this.transactionSessionService.createTransactionSession({
+          await this.transactionSessionService.createTransactionSession({
             token: bet.token,
             game_status: GameResultStatus.LOSS,
             recordSessionId: bet.id,
           });
         }
       }
+
       return { result: resultOfSesion };
     } catch (error) {
       console.error(error);
@@ -376,13 +412,12 @@ export class TaskScheduler {
   }
 
   async generateResult(gameSessionId: number): Promise<GameKqjCards> {
-    console.log('one');
     // Step 1: Fetch all bets for this game session
     const bets = await this.recordSessionKqj.find({
       where: { game_session_id: { id: gameSessionId } },
       select: ['choosen_card', 'token'],
     });
-    console.log('two');
+
     if (!bets.length) {
       throw new Error('No bets found for this game session.');
     }
@@ -434,9 +469,9 @@ export class TaskScheduler {
     }
 
     // Step 4: If no exact match, pick the **least bet amount card** to minimize payout
-    const leastBetCard = Object.entries(specificCardBets).sort(
-      (a, b) => a[1] - b[1],
-    )[0][0] as GameKqjCards;
+    const leastBetCard = Object.entries(specificCardBets)
+      .filter(([_, amount]) => amount > 0) // Exclude zero amount cards
+      .sort((a, b) => a[1] - b[1])[0]?.[0] as GameKqjCards;
 
     console.log('Least bet card chosen:', leastBetCard);
     return leastBetCard;
