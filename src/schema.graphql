@@ -471,7 +471,7 @@ type Query {
   getLiveGameSessions: GameSession
   getPermissions(role: Role, userId: Float): [Permission!]!
   getPlayerStateByUserId(userId: Int!): GameSessionKqjStats!
-  getProfitAndLoss: ProfitAndLoss!
+  getProfitAndLoss(date: DateTime): ProfitAndLoss!
   getRecordSessionBy(id: Int!): RecordSessionKqj!
   getRecordsBy(UserId: Int!): [RecordSessionKqj!]!
   getRecordsByDate(filter: DateFilterDto): [RecordSessionKqj!]!

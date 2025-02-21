@@ -49,8 +49,11 @@ export class DashboardResolver {
   }
 
   @Query(() => ProfitAndLoss)
-  async getProfitAndLoss(): Promise<ProfitAndLoss> {
-    return this.dashboardService.getProfitAndLoss();
+  async getProfitAndLoss(
+    @Args('date', { type: () => Date, nullable: true })
+    date?: Date,
+  ): Promise<ProfitAndLoss> {
+    return this.dashboardService.getProfitAndLoss(date);
   }
 
   @Query(() => [GameSessionKqj])

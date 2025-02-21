@@ -4,13 +4,19 @@ import {
   Injectable,
   InternalServerErrorException,
 } from '@nestjs/common';
-import { GameSessionStatus } from 'src/common/constants';
+import {
+  GameResultStatus,
+  GameSessionStatus,
+  GameStatus,
+  TransactionType,
+} from 'src/common/constants';
 import { GameSessionKqj } from 'src/game_session_kqj/dbrepo/game_session.repository';
 import { RecordSessionKqj } from 'src/record_session_kqj/dbrepo/record_session_kqj.repository';
 import { Between, Repository } from 'typeorm';
 import { DailyWinnersAndLosers } from './dto/Daily-Winner-Looser.input';
 import { ProfitAndLoss } from './dto/profite-loss.input';
 import { DateFilterDto } from 'src/common/model/date-filter.dto';
+import { TransactionSession } from 'src/transaction_session/dbrepo/transaction_session.repository';
 
 @Injectable()
 export class DashboardService {
@@ -19,6 +25,8 @@ export class DashboardService {
     private readonly gameSessionKqjRepository: Repository<GameSessionKqj>,
     @Inject('RECORD_SESSION_KQJ_REPOSITORY')
     private readonly recordSessionKqjRepository: Repository<RecordSessionKqj>,
+    @Inject('TRANSACTION_SESSION_REPOSITORY')
+    private readonly transactionSessionRepository: Repository<TransactionSession>,
   ) {}
 
   async getTotalSessionsDateOrToday(filter?: DateFilterDto): Promise<number> {
@@ -196,31 +204,37 @@ export class DashboardService {
     }
   }
 
-  async getProfitAndLoss(): Promise<ProfitAndLoss> {
+  async getProfitAndLoss(date?: Date): Promise<ProfitAndLoss> {
     try {
-      // const creditTransactions = await this.transactionSessionRepository.find({
-      //   where: { type: TransactionType.CREDIT },
-      // });
+      const targetDate = date ? new Date(date) : new Date();
+      const startOfDay = new Date(targetDate.setHours(0, 0, 0, 0));
+      const endOfDay = new Date(targetDate.setHours(23, 59, 59, 999));
 
-      // const debitTransactions = await this.transactionSessionRepository.find({
-      //   where: { type: TransactionType.DEBIT },
-      // });
+      const whereClause = { createdAt: Between(startOfDay, endOfDay) };
 
-      // const profit = creditTransactions.reduce(
-      //   (sum, transaction) => sum + transaction.token,
-      //   0,
-      // );
-      // const loss = debitTransactions.reduce(
-      //   (sum, transaction) => sum + transaction.token,
-      //   0,
-      // );
+      const WinTransactions = await this.transactionSessionRepository.find({
+        where: { game_status: GameResultStatus.WIN, ...whereClause },
+      });
 
-      // const net = profit - loss;
+      const LossTransactions = await this.transactionSessionRepository.find({
+        where: { game_status: GameResultStatus.LOSS, ...whereClause },
+      });
+
+      const profit = WinTransactions.reduce(
+        (sum, transaction) => sum + transaction.token,
+        0,
+      );
+      const loss = LossTransactions.reduce(
+        (sum, transaction) => sum + transaction.token,
+        0,
+      );
+
+      const net = profit - loss;
 
       return {
-        profit: 0,
-        loss: 0,
-        net: 0,
+        profit,
+        loss,
+        net,
       };
     } catch (error) {
       console.error('Error calculating profit and loss:', error);

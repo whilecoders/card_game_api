@@ -609,7 +609,7 @@ export interface IQuery {
     getLiveGameSessions(): Nullable<GameSession> | Promise<Nullable<GameSession>>;
     getPermissions(role?: Nullable<Role>, userId?: Nullable<number>): Permission[] | Promise<Permission[]>;
     getPlayerStateByUserId(userId: number): GameSessionKqjStats | Promise<GameSessionKqjStats>;
-    getProfitAndLoss(): ProfitAndLoss | Promise<ProfitAndLoss>;
+    getProfitAndLoss(date?: Nullable<DateTime>): ProfitAndLoss | Promise<ProfitAndLoss>;
     getRecordSessionBy(id: number): RecordSessionKqj | Promise<RecordSessionKqj>;
     getRecordsBy(UserId: number): RecordSessionKqj[] | Promise<RecordSessionKqj[]>;
     getRecordsByDate(filter?: Nullable<DateFilterDto>): RecordSessionKqj[] | Promise<RecordSessionKqj[]>;
