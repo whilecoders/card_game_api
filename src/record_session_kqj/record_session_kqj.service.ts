@@ -10,7 +10,7 @@ import { RecordSessionKqj } from './dbrepo/record_session_kqj.repository';
 import { CreateRecordSessionKqjDto } from './dto/create-record_session_kqj.input';
 import { User } from 'src/user/dbrepo/user.repository';
 import { GameSessionKqj } from 'src/game_session_kqj/dbrepo/game_session.repository';
-import { RecordSessionStatus } from 'src/common/constants';
+import { GameSessionStatus, RecordSessionStatus } from 'src/common/constants';
 import { DateFilterDto } from 'src/common/model/date-filter.dto';
 import { TransactionSession } from 'src/transaction_session/dbrepo/transaction_session.repository';
 import { PaginationMetadataDto } from 'src/common/model';
@@ -65,7 +65,8 @@ export class RecordSessionKqjService {
     }
 
     try {
-      const savedSession = await this.recordSessionKqjRepository.save(recordSession);
+      const savedSession =
+        await this.recordSessionKqjRepository.save(recordSession);
       await this.userRepository.save(user);
       const findCreatedSession = await this.recordSessionKqjRepository.findOne({
         where: { id: savedSession.id },

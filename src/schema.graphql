@@ -136,18 +136,25 @@ A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date
 scalar DateTime
 
 enum GameKqjCards {
+  CLUBS
+  DIAMONDS
+  HEARTS
+  JACK
   JACK_OF_CLUBS
   JACK_OF_DIAMONDS
   JACK_OF_HEARTS
   JACK_OF_SPADES
+  KING
   KING_OF_CLUBS
   KING_OF_DIAMONDS
   KING_OF_HEARTS
   KING_OF_SPADES
+  QUEEN
   QUEEN_OF_CLUBS
   QUEEN_OF_DIAMONDS
   QUEEN_OF_HEARTS
   QUEEN_OF_SPADES
+  SPADES
 }
 
 type GameResultRoulette {
@@ -583,6 +590,7 @@ type Token {
 enum TokenValues {
   TOKEN_11
   TOKEN_55
+  TOKEN_100
   TOKEN_110
   TOKEN_550
   TOKEN_1100

@@ -23,18 +23,25 @@ export enum AuditEntityType {
 }
 
 export enum GameKqjCards {
+    CLUBS = "CLUBS",
+    DIAMONDS = "DIAMONDS",
+    HEARTS = "HEARTS",
+    JACK = "JACK",
     JACK_OF_CLUBS = "JACK_OF_CLUBS",
     JACK_OF_DIAMONDS = "JACK_OF_DIAMONDS",
     JACK_OF_HEARTS = "JACK_OF_HEARTS",
     JACK_OF_SPADES = "JACK_OF_SPADES",
+    KING = "KING",
     KING_OF_CLUBS = "KING_OF_CLUBS",
     KING_OF_DIAMONDS = "KING_OF_DIAMONDS",
     KING_OF_HEARTS = "KING_OF_HEARTS",
     KING_OF_SPADES = "KING_OF_SPADES",
+    QUEEN = "QUEEN",
     QUEEN_OF_CLUBS = "QUEEN_OF_CLUBS",
     QUEEN_OF_DIAMONDS = "QUEEN_OF_DIAMONDS",
     QUEEN_OF_HEARTS = "QUEEN_OF_HEARTS",
-    QUEEN_OF_SPADES = "QUEEN_OF_SPADES"
+    QUEEN_OF_SPADES = "QUEEN_OF_SPADES",
+    SPADES = "SPADES"
 }
 
 export enum GameRouletteNumbers {
@@ -108,6 +115,7 @@ export enum Role {
 export enum TokenValues {
     TOKEN_11 = "TOKEN_11",
     TOKEN_55 = "TOKEN_55",
+    TOKEN_100 = "TOKEN_100",
     TOKEN_110 = "TOKEN_110",
     TOKEN_550 = "TOKEN_550",
     TOKEN_1100 = "TOKEN_1100",
