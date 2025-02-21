@@ -105,6 +105,7 @@ export enum RecordSessionStatus {
 
 export enum Role {
     ADMIN = "ADMIN",
+    ANNOUNCER = "ANNOUNCER",
     GUEST = "GUEST",
     MASTER = "MASTER",
     SUPERADMIN = "SUPERADMIN",

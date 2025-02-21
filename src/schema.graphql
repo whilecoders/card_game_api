@@ -543,6 +543,7 @@ input ResetPasswordDto {
 
 enum Role {
   ADMIN
+  ANNOUNCER
   GUEST
   MASTER
   SUPERADMIN
