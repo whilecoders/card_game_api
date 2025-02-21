@@ -3,6 +3,7 @@ export enum Role {
   SUPERADMIN = 'SUPERADMIN',
   ADMIN = 'ADMIN',
   MASTER = 'MASTER',
+  ANNOUNCER = 'ANNOUNCER',
   USER = 'USER',
   GUEST = 'GUEST',
 }

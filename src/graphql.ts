@@ -105,6 +105,7 @@ export enum RecordSessionStatus {
 
 export enum Role {
     ADMIN = "ADMIN",
+    ANNOUNCER = "ANNOUNCER",
     GUEST = "GUEST",
     MASTER = "MASTER",
     SUPERADMIN = "SUPERADMIN",
@@ -145,6 +146,13 @@ export interface AddUserDto {
     phone_number: string;
     role: Role;
     username: string;
+}
+
+export interface AuditLogFiltersInput {
+    action?: Nullable<string>;
+    entity?: Nullable<string>;
+    skip: number;
+    take: number;
 }
 
 export interface CreateGameRouletteDto {
@@ -576,6 +584,7 @@ export interface ProfitAndLoss {
 
 export interface IQuery {
     GuestSignIn(): GuestToken | Promise<GuestToken>;
+    getAllAuditLog(AuditLogFiltersInput: AuditLogFiltersInput): PaginatedAuditLogDto | Promise<PaginatedAuditLogDto>;
     getAllGameSessions(skip: number, take: number): PaginatedGameSessionRouletteDto | Promise<PaginatedGameSessionRouletteDto>;
     getAllGamesRoulette(skip: number, take: number): PaginatedGameRouletteDto | Promise<PaginatedGameRouletteDto>;
     getAllGameses(skip: number, take: number): PaginatedGamesDto | Promise<PaginatedGamesDto>;
