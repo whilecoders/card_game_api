@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
+// /* eslint-disable @typescript-eslint/no-unused-vars */
 import {
   ConflictException,
   Inject,
@@ -9,7 +11,6 @@ import { Games } from 'src/games/dbrepo/games.repository';
 import {
   Between,
   LessThanOrEqual,
-  MoreThan,
   MoreThanOrEqual,
   Repository,
   Transaction,
@@ -53,7 +54,7 @@ export class TaskScheduler {
     private gamesocketGateway: GamesocketGateway,
   ) {}
 
-  @Cron('9 23 * * *', { name: 'createDailyGame' })
+  @Cron('30 15 * * *', { name: 'createDailyGame' })
   async creaeDailyGame(): Promise<void> {
     // .............testing code ...........
     // const session = await this.gameSessionKqjRepository.findOne({ where: { id: 407 } });
@@ -115,6 +116,7 @@ export class TaskScheduler {
     }
 
     const { games } = dailyGame;
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { start_time, game_duration, game_in_day, start_date, end_date, id } =
       games;
 
@@ -275,7 +277,7 @@ export class TaskScheduler {
         const resultJob: CronJob = new CronJob(
           `${toMinmiumDigit(end.getMinutes())} ${toMinmiumDigit(end.getHours())} ${toMinmiumDigit(end.getDate())} ${toMinmiumDigit(end.getMonth() + 1)} *`,
           async () => {
-            let game_result = await this.drawResult(session.id);
+            const game_result = await this.drawResult(session.id);
             console.log('game ka result -> ', {
               id: session.id,
               game_result,
@@ -313,13 +315,13 @@ export class TaskScheduler {
     }
   }
 
-  async drawResult(session_id: number): Promise<Object> {
+  async drawResult(session_id: number): Promise<object> {
     try {
       //  =========== handling result of game ====================
       const latestSessionData = await this.gameSessionKqjRepository.findOne({
         where: { id: session_id },
       });
-      let resultOfSesion: GameKqjCards = latestSessionData.game_result_card
+      const resultOfSesion: GameKqjCards = latestSessionData.game_result_card
         ? latestSessionData.game_result_card
         : await this.generateResult(session_id);
       latestSessionData.game_result_card = resultOfSesion;
@@ -332,7 +334,9 @@ export class TaskScheduler {
       });
 
       //  ============== grouping the bet which have made by same user on same card ================
-      let groupingSameBets = userBets.reduce<Record<string, RecordSessionKqj>>(
+      const groupingSameBets = userBets.reduce<
+        Record<string, RecordSessionKqj>
+      >(
         (acc, record) => {
           const uniqueKey: string = `${record.user.id}_${record.choosen_card}`;
           if (!acc[uniqueKey]) {
@@ -418,10 +422,6 @@ export class TaskScheduler {
       select: ['choosen_card', 'token'],
     });
 
-    if (!bets.length) {
-      throw new Error('No bets found for this game session.');
-    }
-
     // Step 2: Sum up the total bet amount for each specific card
     const specificCardBets: Record<GameKqjCards, number> = Object.fromEntries(
       Object.values(GameKqjCards).map((card) => [card, 0]),
@@ -441,18 +441,6 @@ export class TaskScheduler {
     console.log('specificCardBets ->', specificCardBets);
     console.log('totalBetAmount ->', totalBetAmount);
 
-    if (totalBetAmount === 0) {
-      throw new Error('Total bet amount is zero.');
-    }
-
-    // Step 3: Try to select a card based on the defined ratios in a **single loop**
-    const sortedCards = Object.entries(specificCardBets).sort(
-      (a, b) => b[1] - a[1],
-    );
-
-    console.log('sortedCard', sortedCards);
-
-    // Step 4: Find a card that meets the ratio criteria
     // Step 3: Check for strict ratio match (30%, 40%, 50%)
     const ratioChecks = [30, 40, 50]; // The strict ratios to check
 
@@ -469,16 +457,42 @@ export class TaskScheduler {
     }
 
     // Step 4: If no exact match, pick the **least bet amount card** to minimize payout
-    const leastBetCard = Object.entries(specificCardBets)
+    const filteredBets = Object.entries(specificCardBets)
       .filter(([_, amount]) => amount > 0) // Exclude zero amount cards
-      .sort((a, b) => a[1] - b[1])[0]?.[0] as GameKqjCards;
+      .sort((a, b) => a[1] - b[1]);
 
-    console.log('Least bet card chosen:', leastBetCard);
+    let leastBetCard: GameKqjCards | undefined =
+      filteredBets[0]?.[0] as GameKqjCards;
+
+    if (!leastBetCard) {
+      // If no least amount is found in specific cards with bets, pick a random card from specific ones
+      // Get all specific cards from the GameKqjCards enum that are not general categories
+      const allSpecificCards: GameKqjCards[] = [
+        GameKqjCards.JACK_OF_SPADES,
+        GameKqjCards.QUEEN_OF_SPADES,
+        GameKqjCards.KING_OF_SPADES,
+        GameKqjCards.JACK_OF_HEARTS,
+        GameKqjCards.QUEEN_OF_HEARTS,
+        GameKqjCards.KING_OF_HEARTS,
+        GameKqjCards.JACK_OF_DIAMONDS,
+        GameKqjCards.QUEEN_OF_DIAMONDS,
+        GameKqjCards.KING_OF_DIAMONDS,
+        GameKqjCards.JACK_OF_CLUBS,
+        GameKqjCards.QUEEN_OF_CLUBS,
+        GameKqjCards.KING_OF_CLUBS,
+      ];
+
+      if (allSpecificCards.length > 0) {
+        // Pick a random card from all specific cards (even those with 0 bets)
+        leastBetCard =
+          allSpecificCards[Math.floor(Math.random() * allSpecificCards.length)];
+      }
+    }
     return leastBetCard;
   }
 
   // Helper function: Convert TokenValues to actual numeric bet amount
-  private getTokenValue(token: TokenValues): number {
+  getTokenValue(token: TokenValues): number {
     // Define token-to-amount mapping based on your system
     const tokenMap: Record<TokenValues, number> = {
       [TokenValues.TOKEN_11]: 11,
@@ -493,7 +507,7 @@ export class TaskScheduler {
   }
 
   // Helper function: Check if a card is a "specific card"
-  private isSpecificCard(card: GameKqjCards): boolean {
+  isSpecificCard(card: GameKqjCards): boolean {
     return ![
       'JACK',
       'QUEEN',

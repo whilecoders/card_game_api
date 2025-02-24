@@ -4,11 +4,9 @@ import { GameSessionKqj } from './dbrepo/game_session.repository';
 import { GameSessionKqjService } from './game_session.service';
 import { PaginatedGameSessionKqjDto } from './dto/paginated-game-session-kqj.dto';
 import { DateFilterDto } from 'src/common/model/date-filter.dto';
-import { UseGuards } from '@nestjs/common';
-import { AuthGuard } from 'src/auth/auth.guard';
 import { GameSessionKqjStats } from './dto/game_session_stats.dto';
 
-@UseGuards(AuthGuard)
+// @UseGuards(AuthGuard)
 @Resolver(() => GameSessionKqj)
 export class GameSessionKqjResolver {
   constructor(private readonly gameSessionKqjService: GameSessionKqjService) {}
@@ -39,7 +37,7 @@ export class GameSessionKqjResolver {
     return this.gameSessionKqjService.getAllGameSessions(skip, take);
   }
 
-  @Query(() => GameSessionKqj, { name: 'getLiveGameSessions', nullable: true })
+  @Query(() => GameSessionKqj, { name: 'getLiveGameSessions' })
   async getLiveGameSessions(): Promise<GameSessionKqj> {
     return await this.gameSessionKqjService.getLiveGameSessions();
   }
@@ -55,7 +53,7 @@ export class GameSessionKqjResolver {
   @Query(() => GameSessionKqjStats, { name: 'getPlayerStateByUserId' })
   async getPlayerStateByUserId(
     @Args('userId', { type: () => Int }) userId: number,
-    filter?: DateFilterDto,
+    // filter?: DateFilterDto,
   ): Promise<GameSessionKqjStats> {
     return this.gameSessionKqjService.getPlayerStats(userId);
   }

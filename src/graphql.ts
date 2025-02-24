@@ -105,6 +105,7 @@ export enum RecordSessionStatus {
 
 export enum Role {
     ADMIN = "ADMIN",
+    ANNOUNCER = "ANNOUNCER",
     GUEST = "GUEST",
     MASTER = "MASTER",
     SUPERADMIN = "SUPERADMIN",
@@ -145,6 +146,13 @@ export interface AddUserDto {
     phone_number: string;
     role: Role;
     username: string;
+}
+
+export interface AuditLogFiltersInput {
+    action?: Nullable<string>;
+    entity?: Nullable<string>;
+    skip: number;
+    take: number;
 }
 
 export interface CreateGameRouletteDto {
@@ -576,11 +584,12 @@ export interface ProfitAndLoss {
 
 export interface IQuery {
     GuestSignIn(): GuestToken | Promise<GuestToken>;
+    getAllAuditLog(AuditLogFiltersInput: AuditLogFiltersInput): PaginatedAuditLogDto | Promise<PaginatedAuditLogDto>;
     getAllGameSessions(skip: number, take: number): PaginatedGameSessionRouletteDto | Promise<PaginatedGameSessionRouletteDto>;
     getAllGamesRoulette(skip: number, take: number): PaginatedGameRouletteDto | Promise<PaginatedGameRouletteDto>;
     getAllGameses(skip: number, take: number): PaginatedGamesDto | Promise<PaginatedGamesDto>;
     getAllRecordSessions(): RecordSessionKqj[] | Promise<RecordSessionKqj[]>;
-    getAllRecordsBySessionId(offset: PaginationMetadataDto, sessionId: number): RecordSessionKqjPagination | Promise<RecordSessionKqjPagination>;
+    getAllRecordsBySessionId(sessionId: number): RecordSessionKqjPagination | Promise<RecordSessionKqjPagination>;
     getAllTransactionSessions(): TransactionSession[] | Promise<TransactionSession[]>;
     getAllUsers(skip: number, take: number): PaginatedUserDto | Promise<PaginatedUserDto>;
     getCurrentRunningSessions(): GameSession[] | Promise<GameSession[]>;
@@ -597,10 +606,10 @@ export interface IQuery {
     getGamesByDate(filter?: Nullable<DateFilterDto>): Games[] | Promise<Games[]>;
     getGamesByDateOrToday(filter?: Nullable<DateFilterDto>): Games[] | Promise<Games[]>;
     getLiveGameSessionRoulette(): Nullable<GameSessionRoulette> | Promise<Nullable<GameSessionRoulette>>;
-    getLiveGameSessions(): Nullable<GameSession> | Promise<Nullable<GameSession>>;
+    getLiveGameSessions(): GameSession | Promise<GameSession>;
     getPermissions(role?: Nullable<Role>, userId?: Nullable<number>): Permission[] | Promise<Permission[]>;
     getPlayerStateByUserId(userId: number): GameSessionKqjStats | Promise<GameSessionKqjStats>;
-    getProfitAndLoss(): ProfitAndLoss | Promise<ProfitAndLoss>;
+    getProfitAndLoss(date?: Nullable<DateTime>): ProfitAndLoss | Promise<ProfitAndLoss>;
     getRecordSessionBy(id: number): RecordSessionKqj | Promise<RecordSessionKqj>;
     getRecordsBy(UserId: number): RecordSessionKqj[] | Promise<RecordSessionKqj[]>;
     getRecordsByDate(filter?: Nullable<DateFilterDto>): RecordSessionKqj[] | Promise<RecordSessionKqj[]>;

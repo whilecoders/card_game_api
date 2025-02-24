@@ -12,7 +12,6 @@ import { GameSessionStatus, GameResultStatus } from 'src/common/constants';
 import { PaginatedGameSessionKqjDto } from './dto/paginated-game-session-kqj.dto';
 import { DateFilterDto } from 'src/common/model/date-filter.dto';
 import { GameSessionKqjStats } from './dto/game_session_stats.dto';
-import { RecordSessionKqj } from 'src/record_session_kqj/dbrepo/record_session_kqj.repository';
 import { User } from 'src/user/dbrepo/user.repository';
 import { TransactionSession } from 'src/transaction_session/dbrepo/transaction_session.repository';
 
@@ -40,7 +39,7 @@ export class GameSessionKqjService {
       gameSession.game_result_card = updateGameSessionDto.game_result_card;
 
       return await this.gameSessionKqjRepository.save(gameSession);
-    } catch (error) {
+    } catch {
       throw new BadRequestException(
         'Failed to update game session. Please check input values and try again.',
       );

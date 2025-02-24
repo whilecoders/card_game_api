@@ -39,6 +39,13 @@ type AuditLog {
   user_id: User
 }
 
+input AuditLogFiltersInput {
+  action: String
+  entity: String
+  skip: Int!
+  take: Int!
+}
+
 input CreateGameRouletteDto {
   admin_id: Int!
   end_date: DateTime!
@@ -439,11 +446,12 @@ type ProfitAndLoss {
 
 type Query {
   GuestSignIn: GuestToken!
+  getAllAuditLog(AuditLogFiltersInput: AuditLogFiltersInput!): PaginatedAuditLogDto!
   getAllGameSessions(skip: Int!, take: Int!): PaginatedGameSessionRouletteDto!
   getAllGamesRoulette(skip: Int!, take: Int!): PaginatedGameRouletteDto!
   getAllGameses(skip: Int!, take: Int!): PaginatedGamesDto!
   getAllRecordSessions: [RecordSessionKqj!]!
-  getAllRecordsBySessionId(offset: PaginationMetadataDto!, sessionId: Int!): RecordSessionKqjPagination!
+  getAllRecordsBySessionId(sessionId: Int!): RecordSessionKqjPagination!
   getAllTransactionSessions: [TransactionSession!]!
   getAllUsers(skip: Int!, take: Int!): PaginatedUserDto!
   getCurrentRunningSessions: [GameSession!]!
@@ -460,10 +468,10 @@ type Query {
   getGamesByDate(filter: DateFilterDto): [Games!]!
   getGamesByDateOrToday(filter: DateFilterDto): [Games!]!
   getLiveGameSessionRoulette: GameSessionRoulette
-  getLiveGameSessions: GameSession
+  getLiveGameSessions: GameSession!
   getPermissions(role: Role, userId: Float): [Permission!]!
   getPlayerStateByUserId(userId: Int!): GameSessionKqjStats!
-  getProfitAndLoss: ProfitAndLoss!
+  getProfitAndLoss(date: DateTime): ProfitAndLoss!
   getRecordSessionBy(id: Int!): RecordSessionKqj!
   getRecordsBy(UserId: Int!): [RecordSessionKqj!]!
   getRecordsByDate(filter: DateFilterDto): [RecordSessionKqj!]!
@@ -535,6 +543,7 @@ input ResetPasswordDto {
 
 enum Role {
   ADMIN
+  ANNOUNCER
   GUEST
   MASTER
   SUPERADMIN

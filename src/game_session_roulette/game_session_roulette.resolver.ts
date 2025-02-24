@@ -48,7 +48,7 @@ export class GameSessionRouletteResolver {
     name: 'getLiveGameSessionRoulette',
     nullable: true,
   })
-  async getLiveGameSessions(): Promise<GameSessionRoulette> {
+  async getLiveGameSessionsRoulette(): Promise<GameSessionRoulette> {
     return await this.gameSessionRouletteService.getLiveGameSessionRoulette();
   }
 
