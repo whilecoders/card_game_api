@@ -141,25 +141,23 @@ export class UserService {
   }
 
   async suspendUser(suspendUserDto: SuspendUserDto): Promise<User> {
-    const { userId, suspend } = suspendUserDto;
+    const { userId } = suspendUserDto;
     try {
       const user = await this.userRepository.findOne({ where: { id: userId } });
+
       if (!user) {
         throw new NotFoundException(`User with ID ${userId} not found`);
       }
-      if (
-        user.status === (suspend ? UserStatus.SUSPENDED : UserStatus.ACTIVE)
-      ) {
-        throw new ConflictException(
-          `User is already ${suspend ? 'suspended' : 'active'}`,
-        );
+
+      if (user.status === UserStatus.SUSPENDED) {
+        throw new ConflictException(`User is already suspended`);
       }
-      user.status = suspend ? UserStatus.SUSPENDED : UserStatus.ACTIVE;
+
+      user.status = UserStatus.SUSPENDED;
       return await this.userRepository.save(user);
     } catch (error) {
-      throw new InternalServerErrorException(
-        'Failed to suspend or activate user',
-      );
+      console.error('Error in suspendUser:', error);
+      throw new InternalServerErrorException('Failed to suspend user');
     }
   }
 

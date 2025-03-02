@@ -12,7 +12,7 @@ export class SignInCredential {
   @Field(() => String)
   @IsNotEmpty({ message: 'Username cannot be empty' })
   @IsString()
-  @MinLength(6, { message: 'Username must be at least 8 characters long' })
+  @MinLength(3, { message: 'Username must be at least 3 characters long' })
   @MaxLength(30, { message: 'Username cannot be longer than 30 characters' })
   username: string;
 

@@ -1,17 +1,15 @@
 import { Resolver, Query, Mutation, Args, Int } from '@nestjs/graphql';
 import { UserService } from './user.service';
 import { User } from './dbrepo/user.repository';
-import { NotFoundException, UseGuards } from '@nestjs/common';
-import { PermissionAction, Role } from 'src/common/constants/enums';
+import { UseGuards } from '@nestjs/common';
+import { Role } from 'src/common/constants/enums';
 import { AddUserDto } from './dto/add_user.dto';
 import { UpdateUserDto } from './dto/update_user.dto';
 import { SuspendUserDto } from './dto/suspend_user.dto';
 import { PaginatedUserDto } from './dto/paginated-user.dto';
 import { UserFiltersInput } from './dto/user_filter.dto';
 import { AuthGuard } from 'src/auth/auth.guard';
-import { RoleGuard } from 'src/auth/role.guard';
-import { PermissionGuard } from 'src/permission/permission.guard';
-import { Permissions } from 'src/common/decorator/permission.decorator';
+
 @UseGuards(AuthGuard)
 @Resolver(() => User)
 export class UserResolver {
@@ -22,11 +20,7 @@ export class UserResolver {
     @Args('take', { type: () => Int }) take: number,
     @Args('skip', { type: () => Int }) skip: number,
   ): Promise<PaginatedUserDto> {
-    try {
-      return await this.userService.getAllUsers(skip, take);
-    } catch (error) {
-      throw new NotFoundException('Unable to fetch users');
-    }
+    return await this.userService.getAllUsers(skip, take);
   }
 
   // @UseGuards(PermissionGuard)
@@ -35,38 +29,22 @@ export class UserResolver {
   async getUserById(
     @Args('id', { type: () => Int }) id: number,
   ): Promise<User> {
-    try {
-      return await this.userService.getUserById(id);
-    } catch (error) {
-      throw new NotFoundException(error.message);
-    }
+    return await this.userService.getUserById(id);
   }
 
   @Query(() => [User])
   async getUserByRole(@Args('role') role: Role): Promise<User[]> {
-    try {
-      return await this.userService.getUserByRole(role);
-    } catch (error) {
-      throw new NotFoundException('Unable to fetch users by role');
-    }
+    return await this.userService.getUserByRole(role);
   }
 
   @Query(() => [User])
   async getUsersByCreatedAt(@Args('date') date: Date): Promise<User[]> {
-    try {
-      return await this.userService.getUsersByCreatedAt(date);
-    } catch (error) {
-      throw new NotFoundException('Unable to fetch users by creation date');
-    }
+    return await this.userService.getUsersByCreatedAt(date);
   }
 
   @Mutation(() => User)
   async addUser(@Args('addUserDto') addUserDto: AddUserDto): Promise<User> {
-    try {
-      return await this.userService.addUser(addUserDto);
-    } catch (error) {
-      throw new Error('Failed to create new user');
-    }
+    return await this.userService.addUser(addUserDto);
   }
 
   @Mutation(() => User)
@@ -74,22 +52,14 @@ export class UserResolver {
     @Args('id', { type: () => Int }) id: number,
     @Args('updateUserDto') updateUserDto: UpdateUserDto,
   ): Promise<User> {
-    try {
-      return await this.userService.updateUser(id, updateUserDto);
-    } catch (error) {
-      throw new NotFoundException(error.message);
-    }
+    return await this.userService.updateUser(id, updateUserDto);
   }
 
   @Mutation(() => User)
   async suspendUser(
     @Args('suspendUserDto') suspendUserDto: SuspendUserDto,
   ): Promise<User> {
-    try {
-      return await this.userService.suspendUser(suspendUserDto);
-    } catch (error) {
-      throw new NotFoundException(error.message);
-    }
+    return await this.userService.suspendUser(suspendUserDto);
   }
 
   @Mutation(() => Boolean, { name: 'deleteUser' })
@@ -105,15 +75,11 @@ export class UserResolver {
   async searchUser(
     @Args('UserFiltersInput') userFiltersInput: UserFiltersInput,
   ): Promise<PaginatedUserDto> {
-    try {
-      return await this.userService.searchUser(
-        userFiltersInput,
-        userFiltersInput.skip,
-        userFiltersInput.take,
-      );
-    } catch (error) {
-      throw new NotFoundException(error.message);
-    }
+    return await this.userService.searchUser(
+      userFiltersInput,
+      userFiltersInput.skip,
+      userFiltersInput.take,
+    );
   }
 
   @Mutation(() => User)
@@ -121,10 +87,6 @@ export class UserResolver {
     @Args('id', { type: () => Int }) id: number,
     @Args('updateUserDto') updateUserDto: UpdateUserDto,
   ): Promise<User> {
-    try {
-      return await this.userService.updateUserWallet(id, updateUserDto);
-    } catch (error) {
-      throw new NotFoundException(error.message);
-    }
+    return await this.userService.updateUserWallet(id, updateUserDto);
   }
 }

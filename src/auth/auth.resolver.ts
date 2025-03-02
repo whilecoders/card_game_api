@@ -37,6 +37,13 @@ export class AuthResolver {
     return this.authService.SignIn(signInCredential);
   }
 
+  @Query(() => UserTokenType)
+  async signInAdmin(
+    @Args('signInCredential') signInCredential: SignInCredential,
+  ): Promise<UserTokenType> {
+    return this.authService.SignInAdmin(signInCredential);
+  }
+
   @Mutation(() => TokenType)
   async refreshAccessToken(
     @Args('refreshToken') refreshToken: string,

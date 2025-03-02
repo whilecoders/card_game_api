@@ -16,7 +16,7 @@ import { SignInCredential } from './dto/signin.input';
 import { UserTokenType } from './entities/signin.entity';
 import { TokenType } from './entities/token.entity';
 import { ResetPasswordDto } from './dto/reset_password.dto';
-import { Role } from 'src/common/constants';
+import { Role, UserStatus } from 'src/common/constants';
 import axios from 'axios';
 import { GuestTokenType } from './entities/guest.entity';
 
@@ -92,7 +92,7 @@ export class AuthService {
       await this.userRepository.save(user);
       return user;
     } catch (error) {
-      console.error('Error creating user:', error); 
+      console.error('Error creating user:', error);
       throw new InternalServerErrorException(
         error.message || 'Error creating user',
       );
@@ -126,6 +126,10 @@ export class AuthService {
     );
     if (!isPasswordValid) throw new UnauthorizedException('Invalid password');
 
+    if (user.status === UserStatus.SUSPENDED) {
+      throw new UnauthorizedException('Your account has been blocked');
+    }
+
     const access_token = await this.jwtService.generateAccessToken(
       user.id,
       user.role,
@@ -134,6 +138,40 @@ export class AuthService {
       user.id,
       user.role,
     );
+    const data: UserTokenType = {
+      user: user,
+      access_token: access_token,
+      refresh_token: refresh_token,
+    };
+    return data;
+  }
+
+  async SignInAdmin(signInCredential: SignInCredential) {
+    const { username, password } = signInCredential;
+
+    const user = await this.userRepository.findOne({ where: { username } });
+    if (!user) throw new NotFoundException('User not found');
+
+    if (![Role.ADMIN, Role.MASTER, Role.SUPERADMIN].includes(user.role)) {
+      console.log(user.role);
+      throw new UnauthorizedException('Access denied');
+    }
+
+    const isPasswordValid: boolean = PasswordHashService.verifyPassword(
+      password,
+      user.password,
+    );
+    if (!isPasswordValid) throw new UnauthorizedException('Invalid password');
+
+    const access_token = await this.jwtService.generateAccessToken(
+      user.id,
+      user.role,
+    );
+    const refresh_token = await this.jwtService.generateRefreshToken(
+      user.id,
+      user.role,
+    );
+
     const data: UserTokenType = {
       user: user,
       access_token: access_token,
@@ -171,6 +209,10 @@ export class AuthService {
     });
     if (!user) {
       throw new UnauthorizedException('User not found. Please login again.');
+    }
+
+    if (user.status === UserStatus.SUSPENDED) {
+      throw new UnauthorizedException('Your account has been blocked');
     }
 
     const newAccessToken = await this.jwtService.generateAccessToken(

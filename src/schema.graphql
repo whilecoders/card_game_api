@@ -489,6 +489,7 @@ type Query {
   searchRecords(offset: PaginationMetadataDto!, searchTerm: String!, sessionId: Int!): RecordSessionKqjPagination!
   searchUser(UserFiltersInput: UserFiltersInput!): PaginatedUserDto!
   signIn(signInCredential: SignInCredential!): UserToken!
+  signInAdmin(signInCredential: SignInCredential!): UserToken!
 }
 
 type RecordSessionKqj {
@@ -579,7 +580,6 @@ input SignUpCredential {
 }
 
 input SuspendUserDto {
-  suspend: Boolean!
   userId: Int!
 }
 

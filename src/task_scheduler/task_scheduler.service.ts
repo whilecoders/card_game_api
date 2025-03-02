@@ -414,7 +414,11 @@ export class TaskScheduler {
   async generateResult(gameSessionId: number): Promise<GameKqjCards> {
     // Step 1: Fetch all bets for this game session
     const bets = await this.recordSessionKqj.find({
-      where: { game_session_id: { id: gameSessionId } },
+      where: {
+        game_session_id: { id: gameSessionId },
+        deletedAt: null,
+        deletedBy: null,
+      },
       select: ['choosen_card', 'token'],
     });
 
@@ -436,7 +440,6 @@ export class TaskScheduler {
 
     console.log('specificCardBets ->', specificCardBets);
     console.log('totalBetAmount ->', totalBetAmount);
-
 
     // Step 3: Check for strict ratio match (30%, 40%, 50%)
     const ratioChecks = [30, 40, 50]; // The strict ratios to check
@@ -461,30 +464,30 @@ export class TaskScheduler {
     let leastBetCard: GameKqjCards | undefined =
       filteredBets[0]?.[0] as GameKqjCards;
 
-      if (!leastBetCard) {
-        // If no least amount is found in specific cards with bets, pick a random card from specific ones
-        // Get all specific cards from the GameKqjCards enum that are not general categories
-        const allSpecificCards: GameKqjCards[] = [
-          GameKqjCards.JACK_OF_SPADES,
-          GameKqjCards.QUEEN_OF_SPADES,
-          GameKqjCards.KING_OF_SPADES,
-          GameKqjCards.JACK_OF_HEARTS,
-          GameKqjCards.QUEEN_OF_HEARTS,
-          GameKqjCards.KING_OF_HEARTS,
-          GameKqjCards.JACK_OF_DIAMONDS,
-          GameKqjCards.QUEEN_OF_DIAMONDS,
-          GameKqjCards.KING_OF_DIAMONDS,
-          GameKqjCards.JACK_OF_CLUBS,
-          GameKqjCards.QUEEN_OF_CLUBS,
-          GameKqjCards.KING_OF_CLUBS
-        ];
-        
-        if (allSpecificCards.length > 0) {
-          // Pick a random card from all specific cards (even those with 0 bets)
-          leastBetCard = allSpecificCards[Math.floor(Math.random() * allSpecificCards.length)];
-        }
+    if (!leastBetCard) {
+      // If no least amount is found in specific cards with bets, pick a random card from specific ones
+      // Get all specific cards from the GameKqjCards enum that are not general categories
+      const allSpecificCards: GameKqjCards[] = [
+        GameKqjCards.JACK_OF_SPADES,
+        GameKqjCards.QUEEN_OF_SPADES,
+        GameKqjCards.KING_OF_SPADES,
+        GameKqjCards.JACK_OF_HEARTS,
+        GameKqjCards.QUEEN_OF_HEARTS,
+        GameKqjCards.KING_OF_HEARTS,
+        GameKqjCards.JACK_OF_DIAMONDS,
+        GameKqjCards.QUEEN_OF_DIAMONDS,
+        GameKqjCards.KING_OF_DIAMONDS,
+        GameKqjCards.JACK_OF_CLUBS,
+        GameKqjCards.QUEEN_OF_CLUBS,
+        GameKqjCards.KING_OF_CLUBS,
+      ];
+
+      if (allSpecificCards.length > 0) {
+        // Pick a random card from all specific cards (even those with 0 bets)
+        leastBetCard =
+          allSpecificCards[Math.floor(Math.random() * allSpecificCards.length)];
       }
-      
+    }
 
     console.log('Least bet card chosen:', leastBetCard);
     return leastBetCard;
