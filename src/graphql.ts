@@ -240,7 +240,6 @@ export interface SignUpCredential {
 }
 
 export interface SuspendUserDto {
-    suspend: boolean;
     userId: number;
 }
 
@@ -627,6 +626,7 @@ export interface IQuery {
     searchRecords(offset: PaginationMetadataDto, searchTerm: string, sessionId: number): RecordSessionKqjPagination | Promise<RecordSessionKqjPagination>;
     searchUser(UserFiltersInput: UserFiltersInput): PaginatedUserDto | Promise<PaginatedUserDto>;
     signIn(signInCredential: SignInCredential): UserToken | Promise<UserToken>;
+    signInAdmin(signInCredential: SignInCredential): UserToken | Promise<UserToken>;
 }
 
 export interface RecordSessionKqj {

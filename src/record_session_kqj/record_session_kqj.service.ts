@@ -4,6 +4,7 @@ import {
   BadRequestException,
   Inject,
   InternalServerErrorException,
+  UnauthorizedException,
 } from '@nestjs/common';
 import { Between, ILike, Repository } from 'typeorm';
 import { RecordSessionKqj } from './dbrepo/record_session_kqj.repository';
@@ -15,6 +16,7 @@ import { DateFilterDto } from 'src/common/model/date-filter.dto';
 import { TransactionSession } from 'src/transaction_session/dbrepo/transaction_session.repository';
 import { PaginationMetadataDto } from 'src/common/model';
 import { RecordSessionKqjPagination } from './dto/paginated-record-session.dto';
+import { UserStatus } from 'src/graphql';
 
 @Injectable()
 export class RecordSessionKqjService {
@@ -44,6 +46,10 @@ export class RecordSessionKqjService {
       throw new NotFoundException(
         `GameSession with ID ${dto.gameSessionId} not found`,
       );
+    }
+    
+    if (user.status === UserStatus.SUSPENDED) {
+      throw new UnauthorizedException('Your account has been blocked');
     }
 
     const recordSession = this.recordSessionKqjRepository.create({

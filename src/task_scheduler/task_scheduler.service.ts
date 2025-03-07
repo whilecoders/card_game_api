@@ -54,7 +54,7 @@ export class TaskScheduler {
     private gamesocketGateway: GamesocketGateway,
   ) {}
 
-  @Cron('30 15 * * *', { name: 'createDailyGame' })
+  @Cron('48 22 * * *', { name: 'createDailyGame' })
   async creaeDailyGame(): Promise<void> {
     // .............testing code ...........
     // const session = await this.gameSessionKqjRepository.findOne({ where: { id: 407 } });
@@ -418,7 +418,11 @@ export class TaskScheduler {
   async generateResult(gameSessionId: number): Promise<GameKqjCards> {
     // Step 1: Fetch all bets for this game session
     const bets = await this.recordSessionKqj.find({
-      where: { game_session_id: { id: gameSessionId } },
+      where: {
+        game_session_id: { id: gameSessionId },
+        deletedAt: null,
+        deletedBy: null,
+      },
       select: ['choosen_card', 'token'],
     });
 
@@ -458,7 +462,7 @@ export class TaskScheduler {
 
     // Step 4: If no exact match, pick the **least bet amount card** to minimize payout
     const filteredBets = Object.entries(specificCardBets)
-      .filter(([_, amount]) => amount > 0) // Exclude zero amount cards
+      .filter(([_, amount]) => amount > 0) // Exclude zero asmount cards
       .sort((a, b) => a[1] - b[1]);
 
     let leastBetCard: GameKqjCards | undefined =
@@ -488,6 +492,34 @@ export class TaskScheduler {
           allSpecificCards[Math.floor(Math.random() * allSpecificCards.length)];
       }
     }
+
+    // let leastBetCard: GameKqjCards | undefined =
+    //   filteredBets[0]?.[0] as GameKqjCards;
+
+    // if (!leastBetCard) {
+    //   // If no least amount is found in specific cards with bets, pick a random card from specific ones
+    //   // Get all specific cards from the GameKqjCards enum that are not general categories
+    //   const allSpecificCards: GameKqjCards[] = [
+    //     GameKqjCards.JACK_OF_SPADES,
+    //     GameKqjCards.QUEEN_OF_SPADES,
+    //     GameKqjCards.KING_OF_SPADES,
+    //     GameKqjCards.JACK_OF_HEARTS,
+    //     GameKqjCards.QUEEN_OF_HEARTS,
+    //     GameKqjCards.KING_OF_HEARTS,
+    //     GameKqjCards.JACK_OF_DIAMONDS,
+    //     GameKqjCards.QUEEN_OF_DIAMONDS,
+    //     GameKqjCards.KING_OF_DIAMONDS,
+    //     GameKqjCards.JACK_OF_CLUBS,
+    //     GameKqjCards.QUEEN_OF_CLUBS,
+    //     GameKqjCards.KING_OF_CLUBS,
+    //   ];
+
+    //   if (allSpecificCards.length > 0) {
+    //     // Pick a random card from all specific cards (even those with 0 bets)
+    //     leastBetCard =
+    //       allSpecificCards[Math.floor(Math.random() * allSpecificCards.length)];
+    //   }
+    // }
     return leastBetCard;
   }
 
