@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 import { Resolver, Mutation, Args, Query } from '@nestjs/graphql';
 import { AuthService } from './auth.service';
 import { UnauthorizedException } from '@nestjs/common';
@@ -8,10 +9,14 @@ import { SignInCredential } from './dto/signin.input';
 import { TokenType } from './entities/token.entity';
 import { ResetPasswordDto } from './dto/reset_password.dto';
 import { GuestTokenType } from './entities/guest.entity';
+import { JWTService } from 'src/common/helper';
 
 @Resolver(() => User)
 export class AuthResolver {
-  constructor(private readonly authService: AuthService) {}
+  constructor(
+    private readonly authService: AuthService,
+    private jwtService: JWTService,
+  ) {}
 
   @Mutation(() => User)
   async adminSignUp(

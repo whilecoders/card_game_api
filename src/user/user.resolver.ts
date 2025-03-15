@@ -55,6 +55,28 @@ export class UserResolver {
     return await this.userService.updateUser(id, updateUserDto);
   }
 
+  @Mutation(() => Boolean)
+  async setTransactionPassword(
+    @Args('id', { type: () => Int }) id: number,
+    @Args('transactionPassword') transactionPassword: string,
+  ): Promise<boolean> {
+    return await this.userService.setTransactionPassword(
+      id,
+      transactionPassword,
+    );
+  }
+
+  @Mutation(() => Boolean)
+  async verifyTransactionPassword(
+    @Args('id', { type: () => Int }) id: number,
+    @Args('transactionPassword') transactionPassword: string,
+  ): Promise<boolean> {
+    return await this.userService.verifyTransactionPassword(
+      id,
+      transactionPassword,
+    );
+  }
+
   @Mutation(() => User)
   async suspendUser(
     @Args('suspendUserDto') suspendUserDto: SuspendUserDto,

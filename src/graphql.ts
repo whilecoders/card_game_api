@@ -490,6 +490,7 @@ export interface IMutation {
     restrictRoleAction(action: string, role: Role): string | Promise<string>;
     restrictUserAction(action: string, userId: number): string | Promise<string>;
     sendOtp(mobile: string): string | Promise<string>;
+    setTransactionPassword(id: number, transactionPassword: string): boolean | Promise<boolean>;
     suspendUser(suspendUserDto: SuspendUserDto): User | Promise<User>;
     unrestrictRoleAction(action: string, role: Role): string | Promise<string>;
     unrestrictUserAction(action: string, userId: number): string | Promise<string>;
@@ -503,6 +504,7 @@ export interface IMutation {
     updateWallet(adminId: number, userId: number, walletData: WalletDto): Transaction | Promise<Transaction>;
     userSignUp(signUpCredential: SignUpCredential): User | Promise<User>;
     verifyOtp(mobile: string, otp: string): string | Promise<string>;
+    verifyTransactionPassword(id: number, transactionPassword: string): boolean | Promise<boolean>;
 }
 
 export interface Notification {
@@ -719,6 +721,7 @@ export interface User {
     createdAt: DateTime;
     createdBy: string;
     createdGames: Games;
+    credit_referance: number;
     deletedAt: DateTime;
     deletedBy: string;
     email: string;
@@ -736,6 +739,7 @@ export interface User {
     role: Role;
     roomMember: Room;
     status: UserStatus;
+    transaction_password: string;
     updatedAt: DateTime;
     updatedBy: string;
     userTransactions: Transaction;

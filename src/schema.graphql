@@ -335,6 +335,7 @@ type Mutation {
   restrictRoleAction(action: String!, role: Role!): String!
   restrictUserAction(action: String!, userId: Float!): String!
   sendOtp(mobile: String!): String!
+  setTransactionPassword(id: Int!, transactionPassword: String!): Boolean!
   suspendUser(suspendUserDto: SuspendUserDto!): User!
   unrestrictRoleAction(action: String!, role: Role!): String!
   unrestrictUserAction(action: String!, userId: Float!): String!
@@ -348,6 +349,7 @@ type Mutation {
   updateWallet(adminId: Int!, userId: Int!, walletData: WalletDto!): Transaction!
   userSignUp(signUpCredential: SignUpCredential!): User!
   verifyOtp(mobile: String!, otp: String!): String!
+  verifyTransactionPassword(id: Int!, transactionPassword: String!): Boolean!
 }
 
 type Notification {
@@ -693,6 +695,7 @@ type User {
   createdAt: DateTime!
   createdBy: String!
   createdGames: Games!
+  credit_referance: Int!
   deletedAt: DateTime!
   deletedBy: String!
   email: String!
@@ -710,6 +713,7 @@ type User {
   role: Role!
   roomMember: Room!
   status: UserStatus!
+  transaction_password: String!
   updatedAt: DateTime!
   updatedBy: String!
   userTransactions: Transaction!

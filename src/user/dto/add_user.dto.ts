@@ -2,6 +2,7 @@ import { InputType, Field, Int } from '@nestjs/graphql';
 import {
   IsEmail,
   IsNotEmpty,
+  IsOptional,
   IsString,
   Matches,
   MaxLength,
@@ -36,9 +37,10 @@ export class AddUserDto {
   password: string;
 
   @Field(() => String)
-  @IsNotEmpty({ message: 'Email cannot be empty' })
+  // @IsNotEmpty({ message: 'Email cannot be empty' })
+  @IsOptional()
   @IsEmail()
-  email: string;
+  email?: string;
 
   @Field(() => String)
   @IsNotEmpty({ message: 'City cannot be empty' })

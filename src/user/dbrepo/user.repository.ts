@@ -1,4 +1,5 @@
 import { Field, Int, ObjectType, registerEnumType } from '@nestjs/graphql';
+import { truncate } from 'fs';
 import { AuditLog } from 'src/audit-log/dbrepo/audit_log.repository';
 import { Role, UserStatus } from 'src/common/constants/enums';
 import { BaseEntity } from 'src/common/repository/base.repository';
@@ -41,13 +42,21 @@ export class User extends BaseEntity {
   @Column({ unique: true, type: 'varchar', length: 60, nullable: false })
   username: string;
 
+  @Field(() => Int)
+  @Column({ type: 'int', nullable: true })
+  credit_referance: string;
+
   @Field(() => String)
-  @Column({ unique: true, type: 'varchar', length: 225, nullable: false })
+  @Column({ unique: true, type: 'varchar', length: 225, nullable: true })
   email: string;
 
   @Field(() => String)
   @Column({ type: 'varchar', length: 225, nullable: false })
   password: string;
+
+  @Field(() => String)
+  @Column({ type: 'varchar', length: 225, nullable: true })
+  transaction_password: string;
 
   @Field(() => String)
   @Column({ type: 'varchar', length: 40, nullable: false })

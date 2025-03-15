@@ -1,9 +1,12 @@
+/* eslint-disable no-unused-vars */
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import {
   Injectable,
   NotFoundException,
   InternalServerErrorException,
   Inject,
   ConflictException,
+  UnauthorizedException,
 } from '@nestjs/common';
 import { Repository } from 'typeorm';
 import { User } from './dbrepo/user.repository';
@@ -74,22 +77,17 @@ export class UserService {
     const hashedPassword = await PasswordHashService.hashPassword(password);
 
     const userByUsername = await this.userRepository.findOne({
-      where: { username },
+      where: [{ username }, { phone_number }],
     });
     if (userByUsername) {
-      throw new ConflictException('Username already exists');
-    }
-
-    const userByEmail = await this.userRepository.findOne({
-      where: { email },
-    });
-    if (userByEmail) {
-      throw new ConflictException('Email already exists');
+      throw new ConflictException(
+        'User already exists with the same username or phone number',
+      );
     }
 
     const user = this.userRepository.create({
       username,
-      email,
+      email: email ?? null,
       city,
       phone_number,
       password: hashedPassword,
@@ -118,6 +116,53 @@ export class UserService {
       return await this.userRepository.save(user);
     } catch (error) {
       throw new InternalServerErrorException('Failed to update user');
+    }
+  }
+
+  async setTransactionPassword(userId: number, transaction_password: string) {
+    try {
+      // Implement the logic to set the transaction password
+      const hashedPass = PasswordHashService.hashPassword(transaction_password);
+      const user = await this.userRepository.findOne({
+        where: { id: userId, deletedAt: null, deletedBy: null },
+      });
+      user.transaction_password = hashedPass;
+      await this.userRepository.save(user);
+      return true;
+    } catch (_) {
+      throw new InternalServerErrorException(
+        'Failed to set transaction password',
+      );
+    }
+  }
+
+  async verifyTransactionPassword(
+    userId: number,
+    transaction_password: string,
+  ): Promise<boolean> {
+    try {
+      const user = await this.userRepository.findOne({
+        where: { id: userId, deletedAt: null, deletedBy: null },
+      });
+
+      if (!user || !user.transaction_password) {
+        throw new NotFoundException(
+          'User not found or transaction password not set',
+        );
+      }
+      const isPasswordValid: boolean = PasswordHashService.verifyPassword(
+        transaction_password,
+        user.password,
+      );
+      if (!isPasswordValid)
+        throw new UnauthorizedException('Invalid transaction password');
+
+      return true;
+    } catch (error) {
+      console.error(error);
+      throw new InternalServerErrorException(
+        `Failed to verify transaction password: \n ${error}`,
+      );
     }
   }
 

@@ -30,7 +30,7 @@ export class AuthService {
   async AdminSignUp(signUpCredential: SignUpCredential) {
     const { username, email, password, role, city, phone_number } =
       signUpCredential;
-    const hashedPassword = await PasswordHashService.hashPassword(password);
+    const hashedPassword = PasswordHashService.hashPassword(password);
 
     const existingUser = await this.userRepository.findOne({
       where: [{ username }, { email }],
@@ -230,7 +230,7 @@ export class AuthService {
   }
 
   async resetPassword(resetPasswordDto: ResetPasswordDto): Promise<string> {
-    const { id, currentPassword, newPassword, confirmPassword } =  resetPasswordDto;
+    const { id, currentPassword, newPassword, confirmPassword } = resetPasswordDto;
     console.log(resetPasswordDto);
     if (newPassword !== confirmPassword) {
       throw new BadRequestException(
