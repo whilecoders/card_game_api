@@ -8,11 +8,13 @@ import { AuthGuard } from 'src/auth/auth.guard';
 import { Permissions } from 'src/common/decorator/permission.decorator';
 import { PermissionAction } from 'src/common/constants';
 import { PermissionGuard } from 'src/permission/permission.guard';
+import { PaginatedTranscationDto } from './dto/paginated-transaction-dto';
+import { TransactionFiltersInput } from './dto/transaction_filter.dto';
 
 @UseGuards(AuthGuard)
 @Resolver(() => Transaction)
 export class TransactionResolver {
-  constructor(private transactionService: TransactionService) {}
+  constructor(private transactionService: TransactionService) { }
 
   // @UseGuards(PermissionGuard)
   // @Permissions(PermissionAction.CREATETRANSACTION)
@@ -40,4 +42,16 @@ export class TransactionResolver {
   ): Promise<Transaction[]> {
     return this.transactionService.getTrasactionByUserId(userId);
   }
+
+  @Query(() => PaginatedTranscationDto, { name: 'searchTransaction' })
+  async searchTransaction(
+    @Args('transactionFiltersInput') transactionFiltersInput: TransactionFiltersInput,
+  ): Promise<PaginatedTranscationDto> {
+    return await this.transactionService.searchTransaction(
+      transactionFiltersInput,
+      transactionFiltersInput.skip,
+      transactionFiltersInput.take,
+    );
+  }
+
 }
