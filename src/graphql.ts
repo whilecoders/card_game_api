@@ -256,6 +256,10 @@ export interface UpdateGameRouletteDto {
     start_time: string;
 }
 
+export interface UpdateGameSessionDto {
+    game_result_card: GameKqjCards;
+}
+
 export interface UpdateGameSessionRouletteDto {
     game_result_roulette_number: GameRouletteNumbers;
 }
@@ -495,9 +499,10 @@ export interface IMutation {
     unrestrictRoleAction(action: string, role: Role): string | Promise<string>;
     unrestrictUserAction(action: string, userId: number): string | Promise<string>;
     updateGameRoulette(updateGameRouletteDto: UpdateGameRouletteDto): GameRoulette | Promise<GameRoulette>;
-    updateGameSession(id: number, updateGameSessionRouletteDto: UpdateGameSessionRouletteDto): GameSessionRoulette | Promise<GameSessionRoulette>;
+    updateGameSession(id: number, updateGameSessionDto: UpdateGameSessionDto): GameSession | Promise<GameSession>;
     updateGames(updateGamesDto: UpdateGamesDto): Games | Promise<Games>;
     updateNotification(updateNotificationInput: UpdateNotificationInput): Notification | Promise<Notification>;
+    updateRouletteGameSession(id: number, updateGameSessionRouletteDto: UpdateGameSessionRouletteDto): GameSessionRoulette | Promise<GameSessionRoulette>;
     updateUser(id: number, updateUserDto: UpdateUserDto): User | Promise<User>;
     updateUserRecordStatus(gameSessionId: number, recordStatus: RecordSessionStatus, userId: number): RecordSessionKqj | Promise<RecordSessionKqj>;
     updateUserWallet(id: number, updateUserDto: UpdateUserDto): User | Promise<User>;

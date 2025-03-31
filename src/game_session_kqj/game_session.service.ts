@@ -97,13 +97,16 @@ export class GameSessionKqjService {
           );
         }
       } else {
-        const today = new Date();
+        const today = new Date(
+          new Date().toLocaleString('en-US', { timeZone: 'Asia/kolkata' }),
+        );
         start = new Date(today.setHours(0, 0, 0, 0));
         end = new Date(today.setHours(23, 59, 59, 999));
+        console.log('===== Debuging wrong date ========');
+        console.log('startData: ', start);
+        console.log('endData: ', end);
       }
-      // start = new Date(start.toLocaleDateString("en-US", { timeZone: "Asia/Kolkata"}))
-      // end = new Date(end.toLocaleDateString("en-US", { timeZone: "Asia/Kolkata"}))
-      // console.log("fetch today's game session  ->", start, end, filter);
+
       const sessions = await this.gameSessionKqjRepository.find({
         where: { session_start_time: Between(start, end) },
         relations: ['game', 'record_session_kqj'],

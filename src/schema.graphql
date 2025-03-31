@@ -340,9 +340,10 @@ type Mutation {
   unrestrictRoleAction(action: String!, role: Role!): String!
   unrestrictUserAction(action: String!, userId: Float!): String!
   updateGameRoulette(updateGameRouletteDto: UpdateGameRouletteDto!): GameRoulette!
-  updateGameSession(id: Int!, updateGameSessionRouletteDto: UpdateGameSessionRouletteDto!): GameSessionRoulette!
+  updateGameSession(id: Int!, updateGameSessionDto: UpdateGameSessionDto!): GameSession!
   updateGames(updateGamesDto: UpdateGamesDto!): Games!
   updateNotification(updateNotificationInput: UpdateNotificationInput!): Notification!
+  updateRouletteGameSession(id: Int!, updateGameSessionRouletteDto: UpdateGameSessionRouletteDto!): GameSessionRoulette!
   updateUser(id: Int!, updateUserDto: UpdateUserDto!): User!
   updateUserRecordStatus(gameSessionId: Int!, recordStatus: RecordSessionStatus!, userId: Int!): RecordSessionKqj!
   updateUserWallet(id: Int!, updateUserDto: UpdateUserDto!): User!
@@ -644,6 +645,10 @@ input UpdateGameRouletteDto {
   game_type: GameType
   start_date: DateTime!
   start_time: String!
+}
+
+input UpdateGameSessionDto {
+  game_result_card: GameKqjCards!
 }
 
 input UpdateGameSessionRouletteDto {

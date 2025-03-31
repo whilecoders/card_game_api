@@ -15,7 +15,7 @@ export class GameSessionRouletteResolver {
   ) {}
 
   @Mutation(() => GameSessionRoulette)
-  async updateGameSession(
+  async updateRouletteGameSession(
     @Args({ name: 'id', type: () => Int }) id: number,
     @Args('updateGameSessionRouletteDto')
     updateGameSessionRouletteDto: UpdateGameSessionRouletteDto,

@@ -58,10 +58,7 @@ export class RecordSessionKqj extends BaseEntity {
   @OneToOne(
     () => TransactionSession,
     (transactionSession) => transactionSession.record_session_kqj,
-    {
-      nullable: true,
-      onDelete: 'CASCADE',
-    },
+    { nullable: true, onDelete: 'CASCADE' },
   )
   @JoinColumn({ name: 'transaction_session' })
   transaction_session: TransactionSession;
