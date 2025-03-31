@@ -23,10 +23,6 @@ export class TransactionService {
   ) {}
 
   async updateWallet(userId: number, adminId: number, walletDto: WalletDto) {
-<<<<<<< HEAD
-=======
-
->>>>>>> ab87ee737224d4e343b6b804417f700b4b481292
     const user = await this.userRepository.findOne({ where: { id: userId } });
     if (!user) throw new NotFoundException('User not found');
 
@@ -39,14 +35,8 @@ export class TransactionService {
       if (user.wallet < walletDto.token) {
         throw new BadRequestException('Insufficient funds');
       }
-<<<<<<< HEAD
       user.wallet = parseInt(user.wallet.toString()) - walletDto.token;
     }
-=======
-      user.wallet = parseInt(user.wallet.toString()) - walletDto.token
-    }
-
->>>>>>> ab87ee737224d4e343b6b804417f700b4b481292
 
     await this.userRepository.save(user);
     const transaction = this.transactionRepository.create({
