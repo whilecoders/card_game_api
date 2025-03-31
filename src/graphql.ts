@@ -243,6 +243,12 @@ export interface SuspendUserDto {
     userId: number;
 }
 
+export interface TransactionFiltersInput {
+    id?: Nullable<number>;
+    skip: number;
+    take: number;
+}
+
 export interface UpdateGameRouletteDto {
     admin_id: number;
     end_date: DateTime;
@@ -561,6 +567,13 @@ export interface PaginatedGamesDto {
     take: number;
 }
 
+export interface PaginatedTranscationDto {
+    count: number;
+    data: Transaction[];
+    skip: number;
+    take: number;
+}
+
 export interface PaginatedUserDto {
     count: number;
     data: User[];
@@ -631,6 +644,7 @@ export interface IQuery {
     getUserNotifications(userId: number): Notification[] | Promise<Notification[]>;
     getUsersByCreatedAt(date: DateTime): User[] | Promise<User[]>;
     searchRecords(offset: PaginationMetadataDto, searchTerm: string, sessionId: number): RecordSessionKqjPagination | Promise<RecordSessionKqjPagination>;
+    searchTransaction(transactionFiltersInput: TransactionFiltersInput): PaginatedTranscationDto | Promise<PaginatedTranscationDto>;
     searchUser(UserFiltersInput: UserFiltersInput): PaginatedUserDto | Promise<PaginatedUserDto>;
     signIn(signInCredential: SignInCredential): UserToken | Promise<UserToken>;
     signInAdmin(signInCredential: SignInCredential): UserToken | Promise<UserToken>;

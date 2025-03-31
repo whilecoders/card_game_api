@@ -26,7 +26,7 @@ export class AuthService {
     @Inject('USER_REPOSITORY')
     private readonly userRepository: Repository<User>,
     private jwtService: JWTService,
-  ) {}
+  ) { }
   async AdminSignUp(signUpCredential: SignUpCredential) {
     const { username, email, password, role, city, phone_number } =
       signUpCredential;

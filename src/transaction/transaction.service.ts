@@ -3,6 +3,7 @@ import {
   NotFoundException,
   BadRequestException,
   Inject,
+  InternalServerErrorException,
 } from '@nestjs/common';
 import { Between, Repository } from 'typeorm';
 import { User } from 'src/user/dbrepo/user.repository';
@@ -10,6 +11,7 @@ import { Transaction } from 'src/transaction/dbrepo/transaction.repository';
 import { TransactionType } from 'src/common/constants';
 import { WalletDto } from './dto/wallet.dto';
 import { DateFilterDto } from 'src/common/model/date-filter.dto';
+import { PaginatedTranscationDto } from './dto/paginated-transaction-dto';
 
 @Injectable()
 export class TransactionService {
@@ -21,6 +23,10 @@ export class TransactionService {
   ) {}
 
   async updateWallet(userId: number, adminId: number, walletDto: WalletDto) {
+<<<<<<< HEAD
+=======
+
+>>>>>>> ab87ee737224d4e343b6b804417f700b4b481292
     const user = await this.userRepository.findOne({ where: { id: userId } });
     if (!user) throw new NotFoundException('User not found');
 
@@ -33,8 +39,14 @@ export class TransactionService {
       if (user.wallet < walletDto.token) {
         throw new BadRequestException('Insufficient funds');
       }
+<<<<<<< HEAD
       user.wallet = parseInt(user.wallet.toString()) - walletDto.token;
     }
+=======
+      user.wallet = parseInt(user.wallet.toString()) - walletDto.token
+    }
+
+>>>>>>> ab87ee737224d4e343b6b804417f700b4b481292
 
     await this.userRepository.save(user);
     const transaction = this.transactionRepository.create({
@@ -89,5 +101,47 @@ export class TransactionService {
       },
       relations: ['user', 'admin'],
     });
+  }
+
+
+  async searchTransaction(
+    filters: Partial<Transaction>,
+    skip: number,
+    take: number,
+  ): Promise<PaginatedTranscationDto> {
+    try {
+      const queryBuilder = this.transactionRepository.createQueryBuilder('transaction');
+
+      // Apply LIKE for string fields
+      // if (filters.id != null) {
+      //   queryBuilder.andWhere('user.id = :id', { id: filters.id });
+      // }
+
+
+      // Apply pagination
+      queryBuilder.skip(skip).take(take);
+
+      // Execute the query and get the results
+      const [data, count] = await queryBuilder.getManyAndCount();
+
+      // Handle no results case
+      if (!data.length) {
+        throw new NotFoundException(
+          'No users found with the provided criteria.',
+        );
+      }
+
+      // Return paginated data
+      return {
+        count,
+        take,
+        skip,
+        data,
+      };
+    } catch (error) {
+      throw new InternalServerErrorException(
+        'Failed to fetch users with the provided criteria.',
+      );
+    }
   }
 }

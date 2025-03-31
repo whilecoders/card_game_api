@@ -414,6 +414,13 @@ type PaginatedGamesDto {
   take: Int!
 }
 
+type PaginatedTranscationDto {
+  count: Int!
+  data: [Transaction!]!
+  skip: Int!
+  take: Int!
+}
+
 type PaginatedUserDto {
   count: Int!
   data: [User!]!
@@ -490,6 +497,7 @@ type Query {
   getUserNotifications(userId: Float!): [Notification!]!
   getUsersByCreatedAt(date: DateTime!): [User!]!
   searchRecords(offset: PaginationMetadataDto!, searchTerm: String!, sessionId: Int!): RecordSessionKqjPagination!
+  searchTransaction(transactionFiltersInput: TransactionFiltersInput!): PaginatedTranscationDto!
   searchUser(UserFiltersInput: UserFiltersInput!): PaginatedUserDto!
   signIn(signInCredential: SignInCredential!): UserToken!
   signInAdmin(signInCredential: SignInCredential!): UserToken!
@@ -614,6 +622,12 @@ type Transaction {
   updatedAt: DateTime!
   updatedBy: String!
   user: User!
+}
+
+input TransactionFiltersInput {
+  id: Int
+  skip: Int!
+  take: Int!
 }
 
 type TransactionSession {
