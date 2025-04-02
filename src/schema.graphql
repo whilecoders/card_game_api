@@ -732,7 +732,7 @@ type User {
   role: Role!
   roomMember: Room!
   status: UserStatus!
-  transaction_password: String!
+  transaction_password: String
   updatedAt: DateTime!
   updatedBy: String!
   userTransactions: Transaction!

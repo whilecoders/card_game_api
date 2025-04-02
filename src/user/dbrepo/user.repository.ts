@@ -54,7 +54,7 @@ export class User extends BaseEntity {
   @Column({ type: 'varchar', length: 225, nullable: false })
   password: string;
 
-  @Field(() => String)
+  @Field(() => String, { nullable: true })
   @Column({ type: 'varchar', length: 225, nullable: true })
   transaction_password: string;
 

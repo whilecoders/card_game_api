@@ -126,6 +126,9 @@ export class UserService {
       const user = await this.userRepository.findOne({
         where: { id: userId, deletedAt: null, deletedBy: null },
       });
+      if (!user) {
+        throw new NotFoundException(`User with ID ${userId} not found`);
+      }
       user.transaction_password = hashedPass;
       await this.userRepository.save(user);
       return true;
@@ -145,10 +148,10 @@ export class UserService {
         where: { id: userId, deletedAt: null, deletedBy: null },
       });
 
-      if (!user || !user.transaction_password) {
-        throw new NotFoundException(
-          'User not found or transaction password not set',
-        );
+      if (!user) {
+        throw new NotFoundException('User not found');
+      } else if (!user.transaction_password) {
+        throw new ConflictException('Transaction password is not set');
       }
       const isPasswordValid: boolean = PasswordHashService.verifyPassword(
         transaction_password,

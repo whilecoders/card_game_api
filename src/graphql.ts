@@ -758,7 +758,7 @@ export interface User {
     role: Role;
     roomMember: Room;
     status: UserStatus;
-    transaction_password: string;
+    transaction_password?: Nullable<string>;
     updatedAt: DateTime;
     updatedBy: string;
     userTransactions: Transaction;

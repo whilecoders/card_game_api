@@ -55,7 +55,7 @@ export class TaskScheduler {
     private gamesocketGateway: GamesocketGateway,
   ) {}
 
-  @Cron('46 10 * * *', { name: 'createDailyGame' })
+  @Cron('36 14 * * *', { name: 'createDailyGame' })
   async creaeDailyGame(): Promise<void> {
     // .............testing code ...........
     // const session = await this.gameSessionKqjRepository.findOne({ where: { id: 407 } });
@@ -203,8 +203,7 @@ export class TaskScheduler {
     );
 
     try {
-      const createdSession =
-        await this.gameSessionKqjRepository.save(gameSessions);
+      const createdSession = await this.gameSessionKqjRepository.save(gameSessions);
 
       for (const session of gameSessions) {
         let start = new Date(session.session_start_time);
