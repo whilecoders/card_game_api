@@ -155,6 +155,12 @@ export interface AuditLogFiltersInput {
     take: number;
 }
 
+export interface ChangePasswordDto {
+    confirmPassword: string;
+    id: number;
+    newPassword: string;
+}
+
 export interface CreateGameRouletteDto {
     admin_id: number;
     end_date: DateTime;
@@ -292,6 +298,7 @@ export interface UpdateNotificationInput {
 export interface UpdateUserDto {
     address?: Nullable<string>;
     city?: Nullable<string>;
+    credit?: Nullable<number>;
     email?: Nullable<string>;
     first_time_password_reset?: Nullable<boolean>;
     name?: Nullable<string>;
@@ -480,6 +487,7 @@ export interface IMutation {
     DeleteGames(id: number): boolean | Promise<boolean>;
     addUser(addUserDto: AddUserDto): User | Promise<User>;
     adminSignUp(signUpCredential: SignUpCredential): User | Promise<User>;
+    changePassword(changePassword: ChangePasswordDto): string | Promise<string>;
     createGameRoulette(createGameRouletteDto: CreateGameRouletteDto): GameRoulette | Promise<GameRoulette>;
     createGames(createGamesDto: CreateGamesDto): Games | Promise<Games>;
     createNotification(createNotificationInput: CreateNotificationInput): Notification | Promise<Notification>;
@@ -733,6 +741,7 @@ export interface User {
     createdAt: DateTime;
     createdBy: string;
     createdGames: Games;
+    credit: number;
     deletedAt: DateTime;
     deletedBy: string;
     email: string;
